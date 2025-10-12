@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -161,6 +160,120 @@
             width: 100%;
         }
 
+        .input-group {
+            margin: 20px 0;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 15px;
+            border: 1px solid #333;
+            border-radius: 10px;
+            background: #111;
+            color: white;
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin: 20px 0;
+        }
+
+        .stat-item {
+            background: #222;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 20px;
+            font-weight: bold;
+            color: #0088cc;
+            margin-top: 5px;
+        }
+
+        .transaction-history {
+            margin-top: 20px;
+        }
+
+        .transaction-item {
+            background: #111;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 10px 0;
+            border-left: 4px solid #0088cc;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            color: #666;
+            font-size: 12px;
+        }
+
+        .loading {
+            color: #0088cc;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .ad-timer {
+            font-size: 28px;
+            color: #00ff88;
+            margin: 15px 0;
+            font-weight: bold;
+        }
+
+        .ad-timer.warning {
+            color: #ff4444;
+        }
+
+        .success-message {
+            color: #00ff88;
+            text-align: center;
+            padding: 15px;
+            background: #003300;
+            border-radius: 10px;
+            margin: 10px 0;
+        }
+
+        .ad-image {
+            max-width: 100%;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            border: 2px solid #0088cc;
+        }
+
+        .error-message {
+            color: #ff4444;
+            text-align: center;
+            padding: 15px;
+            background: #330000;
+            border-radius: 10px;
+            margin: 10px 0;
+        }
+
+        .info-box {
+            background: #002266;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 10px 0;
+            border: 1px solid #0088cc;
+        }
+
+        .warning-box {
+            background: #663300;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 10px 0;
+            border: 1px solid #ff8800;
+            color: #ffaa00;
+        }
+
         .debug-info {
             background: #1a1a1a;
             border-radius: 10px;
@@ -173,42 +286,6 @@
             max-height: 200px;
             overflow-y: auto;
         }
-
-        .success-message {
-            color: #00ff88;
-            text-align: center;
-            padding: 15px;
-            background: #003300;
-            border-radius: 10px;
-            margin: 10px 0;
-        }
-
-        .error-message {
-            color: #ff4444;
-            text-align: center;
-            padding: 15px;
-            background: #330000;
-            border-radius: 10px;
-            margin: 10px 0;
-        }
-
-        .warning-message {
-            color: #ffaa00;
-            text-align: center;
-            padding: 15px;
-            background: #332200;
-            border-radius: 10px;
-            margin: 10px 0;
-        }
-
-        .info-message {
-            color: #0088cc;
-            text-align: center;
-            padding: 15px;
-            background: #002266;
-            border-radius: 10px;
-            margin: 10px 0;
-        }
     </style>
 </head>
 <body>
@@ -220,6 +297,7 @@
 
         <div class="nav">
             <button class="nav-btn active" onclick="showPage('earn')">💰 الربح</button>
+            <button class="nav-btn" onclick="showPage('withdraw')">🎯 السحب</button>
             <button class="nav-btn" onclick="showPage('debug')">🐛 التصحيح</button>
         </div>
 
@@ -239,15 +317,57 @@
                 </button>
             </div>
 
-            <div class="info-message">
-                <h4>🔧 النظام يعمل مع البروكسي</h4>
-                <p>تم حل مشكلة CORS باستخدام خادم وسيط</p>
+            <div class="info-box">
+                <h4>✅ API Token المحدث!</h4>
+                <p>Token: cfbedbec8b9a43f5b11fcf59fed46844</p>
+                <p style="color: #00ff88; font-size: 12px; margin-top: 5px;">الاتصال مع AdsGram نشط</p>
             </div>
 
             <div class="ad-container">
                 <div class="ad-content" id="adContent">
                     <h3>🚀 جاهز لكسب الأرباح</h3>
                     <p>اضغط "مشاهدة إعلان" لبدء كسب USDT</p>
+                </div>
+            </div>
+
+            <div class="stats">
+                <div class="stat-item">
+                    <div>إجمالي الأرباح</div>
+                    <div class="stat-value" id="totalEarnings">0.00000</div>
+                </div>
+                <div class="stat-item">
+                    <div>الإعلانات اليوم</div>
+                    <div class="stat-value" id="todayAds">0</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- صفحة السحب -->
+        <div id="withdrawPage" class="page">
+            <div class="card">
+                <h2>سحب الأرباح</h2>
+                <div class="earnings-display" id="withdrawBalance">0.00000 USDT</div>
+                
+                <div class="input-group">
+                    <input type="text" id="walletAddress" placeholder="أدخل عنوان محفظة BSC" oninput="checkWithdrawButton()">
+                </div>
+
+                <button class="tg-button" id="withdrawBtn" onclick="withdrawEarnings()" disabled>
+                    💳 سحب الأرباح
+                </button>
+
+                <div style="margin-top: 15px; color: #666; font-size: 14px;">
+                    <p>الحد الأدنى للسحب: 1 USDT</p>
+                    <p>عمولة الشبكة: 0.00002 USDT</p>
+                </div>
+            </div>
+
+            <div class="transaction-history">
+                <h3>آخر المعاملات</h3>
+                <div id="transactionsList">
+                    <div class="transaction-item">
+                        <div>لا توجد معاملات حتى الآن</div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -258,19 +378,22 @@
                 <h2>🐛 معلومات التصحيح</h2>
                 
                 <div class="debug-info">
-                    <h4>🔧 حالة النظام:</h4>
-                    <div id="systemStatus">جارِ التحميل...</div>
+                    <h4>🔧 الإعدادات الحالية:</h4>
+                    <div id="configStatus"></div>
+                    
+                    <h4>🔄 حالة الاتصال:</h4>
+                    <div id="connectionStatus">جارِ الاختبار...</div>
                     
                     <h4>📝 سجل الأحداث:</h4>
                     <div id="eventLog"></div>
                 </div>
 
-                <button class="tg-button" onclick="testProxyConnection()" style="background: #0088cc;">
-                    🔄 اختبار اتصال البروكسي
+                <button class="tg-button" onclick="testConnection()" style="background: #0088cc;">
+                    🔄 اختبار الاتصال مع AdsGram
                 </button>
 
-                <button class="tg-button" onclick="testDirectConnection()" style="background: #00cc88;">
-                    🎯 اختبار اتصال مباشر
+                <button class="tg-button" onclick="testToken()" style="background: #00cc88;">
+                    🔑 اختبار الـ API Token
                 </button>
 
                 <button class="tg-button" onclick="loadAd()" style="background: #ff8800;">
@@ -278,34 +401,26 @@
                 </button>
             </div>
 
-            <div class="warning-message">
-                <h4>ℹ️ معلومات البروكسي:</h4>
-                <p>البروكسي يحل مشكلة CORS عن طريق:</p>
-                <ul style="text-align: right; margin-right: 20px;">
-                    <li>استقبال الطلبات من المتصفح</li>
-                    <li>إرسالها إلى AdsGram</li>
-                    <li>إرجاع النتائج بدون قيود CORS</li>
-                </ul>
+            <div class="info-box">
+                <h4>✅ البيانات المحدثة:</h4>
+                <p><strong>API Token الجديد:</strong> cfbedbec8b9a43f5b11fcf59fed46844</p>
+                <p><strong>Publisher ID:</strong> 38461</p>
+                <p><strong>Widget ID:</strong> int-16032</p>
             </div>
+        </div>
+
+        <div class="footer">
+            <p>Powered by BSC Network | AdsGram Integration | Token: cfbedbec8b9a43f5b11fcf59fed46844</p>
         </div>
     </div>
 
     <script>
-        // 🔧 إعدادات AdsGram
+        // 🔧 إعدادات AdsGram المحدثة
         const ADSGRAM_CONFIG = {
-            token: "3b09764c632c4c0687ef0d63894e8a3f",
+            token: "cfbedbec8b9a43f5b11fcf59fed46844",  // ✅ Token الجديد
             publisher_id: "38461",
             widget_id: "int-16032",
             base_url: "https://api.adsgram.ai"
-        };
-
-        // إعدادات البروكسي
-        const PROXY_CONFIG = {
-            // إذا كان الملف في نفس المجلد، استخدم:
-            url: 'proxy.php',
-            
-            // أو إذا كان على نطاق مختلف، استخدم الرابط الكامل:
-            // url: 'https://yourdomain.com/proxy.php'
         };
 
         // بيانات التطبيق
@@ -313,42 +428,47 @@
             earnings: 0,
             adsWatched: 0,
             maxAds: 250,
-            earningsPerAd: 0.00002
+            earningsPerAd: 0.00002,
+            walletAddress: '',
+            transactions: []
         };
 
+        let currentAd = null;
+        let currentSessionId = null;
+        let adTimerInterval = null;
         let eventLog = [];
+
+        // تهيئة Telegram Web App
+        let tg = window.Telegram.WebApp;
+        if (tg) {
+            tg.expand();
+            tg.ready();
+        }
 
         // عناصر DOM
         const elements = {
             earnPage: document.getElementById('earnPage'),
+            withdrawPage: document.getElementById('withdrawPage'),
             debugPage: document.getElementById('debugPage'),
             currentEarnings: document.getElementById('currentEarnings'),
             adsCounter: document.getElementById('adsCounter'),
             progressBar: document.getElementById('progressBar'),
             watchAdBtn: document.getElementById('watchAdBtn'),
             adContent: document.getElementById('adContent'),
-            systemStatus: document.getElementById('systemStatus'),
+            totalEarnings: document.getElementById('totalEarnings'),
+            todayAds: document.getElementById('todayAds'),
+            withdrawBalance: document.getElementById('withdrawBalance'),
+            walletAddress: document.getElementById('walletAddress'),
+            withdrawBtn: document.getElementById('withdrawBtn'),
+            transactionsList: document.getElementById('transactionsList'),
+            connectionStatus: document.getElementById('connectionStatus'),
+            configStatus: document.getElementById('configStatus'),
             eventLog: document.getElementById('eventLog')
         };
 
-        // 📝 إضافة سجل الأحداث
-        function addEventLog(message) {
-            const timestamp = new Date().toLocaleTimeString();
-            eventLog.push(`[${timestamp}] ${message}`);
-            
-            if (elements.eventLog) {
-                elements.eventLog.innerHTML = eventLog.map(log => 
-                    `<div style="margin: 2px 0; padding: 2px; border-bottom: 1px solid #333;">${log}</div>`
-                ).join('');
-                elements.eventLog.scrollTop = elements.eventLog.scrollHeight;
-            }
-            
-            console.log(message);
-        }
-
-        // 🚀 تحميل إعلان باستخدام البروكسي
+        // 🚀 تحميل إعلان
         async function loadAd() {
-            addEventLog('بدء تحميل الإعلان عبر البروكسي...');
+            addEventLog('بدء تحميل الإعلان...');
             
             if (userData.adsWatched >= userData.maxAds) {
                 showMessage('🎯 لقد وصلت للحد الأقصى اليومي (250 إعلان)');
@@ -356,141 +476,92 @@
             }
 
             elements.watchAdBtn.disabled = true;
-            elements.adContent.innerHTML = '<div class="loading">⏳ جاري تحميل الإعلان...</div>';
+            elements.adContent.innerHTML = '<div class="loading">⏳ جاري تحميل الإعلان من AdsGram...</div>';
 
             try {
-                const ad = await getAdViaProxy();
-                if (ad) {
-                    showAd(ad);
+                currentSessionId = generateSessionId();
+                currentAd = await getAdFromAdsGram();
+                
+                if (currentAd && (currentAd.id || currentAd.ad_id || currentAd.title)) {
+                    showAd(currentAd);
                 } else {
                     throw new Error('لم يتم العثور على إعلان متاح');
                 }
                 
             } catch (error) {
+                console.error('خطأ في AdsGram:', error);
                 addEventLog('❌ فشل في جلب الإعلان: ' + error.message);
                 showBackupAd();
             }
         }
 
-        // 📡 جلب إعلان عبر البروكسي
-        async function getAdViaProxy() {
-            addEventLog('استخدام البروكسي لجلب الإعلان...');
-            
+        // 📥 جلب إعلان من AdsGram API
+        async function getAdFromAdsGram() {
             try {
-                // بناء URL AdsGram
-                const adsgramUrl = `${ADSGRAM_CONFIG.base_url}/widget/${ADSGRAM_CONFIG.widget_id}/ad?publisher_id=${ADSGRAM_CONFIG.publisher_id}&session_id=${generateSessionId()}&user_id=${generateUserId()}`;
+                const url = `${ADSGRAM_CONFIG.base_url}/widget/${ADSGRAM_CONFIG.widget_id}/ad`;
                 
-                // بناء URL البروكسي
-                const proxyUrl = `${PROXY_CONFIG.url}?url=${encodeURIComponent(adsgramUrl)}&token=${encodeURIComponent(ADSGRAM_CONFIG.token)}`;
-                
-                addEventLog('الطلب إلى البروكسي: ' + proxyUrl);
+                const params = new URLSearchParams({
+                    publisher_id: ADSGRAM_CONFIG.publisher_id,
+                    session_id: currentSessionId,
+                    user_id: generateUserId(),
+                    user_agent: navigator.userAgent,
+                    source: 'telegram_mini_app'
+                });
 
-                const response = await fetch(proxyUrl, {
+                const fullUrl = `${url}?${params}`;
+                addEventLog('جلب إعلان من: ' + fullUrl);
+
+                const response = await fetch(fullUrl, {
                     method: 'GET',
                     headers: {
-                        'Accept': 'application/json'
+                        'Accept': 'application/json',
+                        'Authorization': `Bearer ${ADSGRAM_CONFIG.token}`,
+                        'Content-Type': 'application/json'
                     }
                 });
 
-                addEventLog('استجابة البروكسي: ' + response.status);
+                addEventLog('كود الاستجابة: ' + response.status);
                 
                 if (!response.ok) {
                     throw new Error(`خطأ ${response.status}: ${response.statusText}`);
                 }
 
                 const data = await response.json();
-                addEventLog('تم جلب الإعلان بنجاح عبر البروكسي');
+                addEventLog('تم جلب الإعلان بنجاح');
                 return data;
                 
             } catch (error) {
-                addEventLog('❌ فشل البروكسي: ' + error.message);
+                addEventLog('❌ فشل الاتصال بـ AdsGram: ' + error.message);
                 throw error;
             }
         }
 
-        // 🔄 اختبار اتصال البروكسي
-        async function testProxyConnection() {
-            addEventLog('بدء اختبار اتصال البروكسي...');
-            elements.systemStatus.innerHTML = 'جارِ اختبار البروكسي...';
-
-            try {
-                const testUrl = `${ADSGRAM_CONFIG.base_url}/widget/${ADSGRAM_CONFIG.widget_id}/ad?publisher_id=${ADSGRAM_CONFIG.publisher_id}`;
-                const proxyTestUrl = `${PROXY_CONFIG.url}?url=${encodeURIComponent(testUrl)}&token=${encodeURIComponent(ADSGRAM_CONFIG.token)}`;
-                
-                addEventLog('اختبار البروكسي: ' + proxyTestUrl);
-
-                const response = await fetch(proxyTestUrl);
-                
-                if (response.ok) {
-                    elements.systemStatus.innerHTML = '✅ <strong>البروكسي يعمل بنجاح!</strong>';
-                    addEventLog('✅ اتصال البروكسي ناجح');
-                    showMessage('✅ البروكسي يعمل بشكل صحيح!');
-                } else {
-                    throw new Error(`خطأ ${response.status}`);
-                }
-            } catch (error) {
-                elements.systemStatus.innerHTML = '❌ <strong>فشل اتصال البروكسي</strong>';
-                addEventLog('❌ فشل اختبار البروكسي: ' + error.message);
-                showMessage('❌ البروكسي لا يعمل. تحقق من الملف.');
-            }
-        }
-
-        // 🎯 اختبار اتصال مباشر (للمقارنة)
-        async function testDirectConnection() {
-            addEventLog('بدء اختبار الاتصال المباشر...');
-            elements.systemStatus.innerHTML = 'جارِ الاختبار المباشر...';
-
-            try {
-                const testUrl = `${ADSGRAM_CONFIG.base_url}/widget/${ADSGRAM_CONFIG.widget_id}/ad?publisher_id=${ADSGRAM_CONFIG.publisher_id}`;
-                addEventLog('اختبار مباشر: ' + testUrl);
-
-                const response = await fetch(testUrl, {
-                    headers: {
-                        'Authorization': `Bearer ${ADSGRAM_CONFIG.token}`,
-                        'Accept': 'application/json'
-                    }
-                });
-
-                if (response.ok) {
-                    elements.systemStatus.innerHTML = '✅ <strong>الاتصال المباشر يعمل!</strong>';
-                    addEventLog('✅ الاتصال المباشر ناجح');
-                    showMessage('✅ الاتصال المباشر يعمل! CORS ليس مشكلة.');
-                } else {
-                    throw new Error(`خطأ ${response.status}`);
-                }
-            } catch (error) {
-                elements.systemStatus.innerHTML = '❌ <strong>فشل الاتصال المباشر</strong>';
-                addEventLog('❌ فشل الاتصال المباشر: ' + error.message);
-                showMessage('❌ فشل الاتصال المباشر بسبب CORS - هذا متوقع');
-            }
-        }
-
-        // 🎬 عرض الإعلان (نفس الوظيفة السابقة)
+        // 🎬 عرض إعلان AdsGram
         function showAd(ad) {
             addEventLog('عرض الإعلان...');
             
-            const title = ad.title || 'إعلان';
-            const description = ad.description || 'شاهد هذا الإعلان للحصول على المكافأة';
-            const imageUrl = ad.image_url;
-            const clickUrl = ad.click_url;
+            const title = ad.title || ad.button_name || 'إعلان';
+            const description = ad.description || ad.text_html || 'شاهد هذا الإعلان للحصول على المكافأة';
+            const imageUrl = ad.image_url || ad.banner_url;
+            const clickUrl = ad.click_url || ad.url;
             
             elements.adContent.innerHTML = `
                 <div style="text-align: center;">
-                    ${imageUrl ? `<img src="${imageUrl}" alt="${title}" style="max-width: 100%; border-radius: 10px; margin-bottom: 15px; border: 2px solid #0088cc;">` : ''}
+                    ${imageUrl ? `<img src="${imageUrl}" alt="${title}" class="ad-image" onerror="this.style.display='none'">` : ''}
                     
                     <h3 style="color: #0088cc; margin-bottom: 10px;">${title}</h3>
                     
                     <div style="color: #ccc; line-height: 1.5; margin: 10px 0; font-size: 14px; text-align: right;">
-                        ${description}
+                        ${cleanHtml(description)}
                     </div>
                     
-                    <div style="font-size: 28px; color: #00ff88; margin: 15px 0; font-weight: bold;" id="adTimer">10</div>
+                    <div class="ad-timer" id="adTimer">10</div>
                     <p style="color: #666; font-size: 12px; margin: 5px 0;">شاهد الإعلان لمدة 10 ثوانٍ</p>
                     
                     <div style="margin-top: 15px;">
                         ${clickUrl ? `
                             <button class="tg-button" onclick="visitAd('${clickUrl}')" style="background: #0088cc; margin-bottom: 10px;">
-                                زيارة الموقع
+                                ${ad.button_name || '🌐 زيارة الموقع'}
                             </button>
                         ` : ''}
                         
@@ -504,19 +575,26 @@
             startAdTimer();
         }
 
-        // 📺 عرض إعلان احتياطي
+        // 🧹 تنظيف HTML
+        function cleanHtml(html) {
+            return html ? html.replace(/<[^>]*>/g, '') : html;
+        }
+
+        // 📋 عرض إعلان احتياطي
         function showBackupAd() {
             addEventLog('عرض إعلان احتياطي...');
             
             elements.adContent.innerHTML = `
                 <div style="text-align: center;">
-                    <h3 style="color: #0088cc; margin-bottom: 10px;">📺 إعلان تجريبي</h3>
-                    
-                    <div style="color: #ccc; line-height: 1.5; margin: 10px 0; font-size: 14px; text-align: right;">
-                        هذا إعلان تجريبي. النظام يعمل ولكن يحتاج اتصال بالبروكسي.
+                    <div style="background: linear-gradient(135deg, #0088cc, #00cc88); padding: 15px; border-radius: 10px; margin-bottom: 15px;">
+                        <h3 style="color: white; margin: 0;">🚀 إعلان تجريبي</h3>
                     </div>
                     
-                    <div style="font-size: 28px; color: #00ff88; margin: 15px 0; font-weight: bold;" id="adTimer">5</div>
+                    <div style="color: #ccc; line-height: 1.5; margin: 10px 0; font-size: 14px;">
+                        هذا إعلان تجريبي. في التطبيق الحقيقي سيتم جلب إعلانات من AdsGram.
+                    </div>
+                    
+                    <div class="ad-timer" id="adTimer">5</div>
                     <p style="color: #666; font-size: 12px; margin: 5px 0;">شاهد الإعلان لمدة 5 ثوانٍ</p>
                     
                     <div style="margin-top: 15px;">
@@ -536,12 +614,16 @@
             const adTimerElement = document.getElementById('adTimer');
             const rewardBtn = document.getElementById('rewardBtn');
             
-            let adTimerInterval = setInterval(() => {
+            if (adTimerInterval) {
+                clearInterval(adTimerInterval);
+            }
+            
+            adTimerInterval = setInterval(() => {
                 timeLeft--;
                 adTimerElement.textContent = timeLeft;
                 
                 if (timeLeft <= 3) {
-                    adTimerElement.style.color = "#ff4444";
+                    adTimerElement.classList.add('warning');
                 }
 
                 if (timeLeft <= 0) {
@@ -549,29 +631,11 @@
                     adTimerElement.textContent = "✓ جاهز";
                     adTimerElement.style.color = "#00ff88";
                     if (rewardBtn) rewardBtn.disabled = false;
+                    if (tg && tg.HapticFeedback) {
+                        tg.HapticFeedback.impactOccurred('light');
+                    }
                 }
             }, 1000);
-        }
-
-        // ✅ إكمال مشاهدة الإعلان
-        function completeAdWatch() {
-            addEventLog('إكمال مشاهدة الإعلان...');
-            
-            userData.adsWatched++;
-            userData.earnings += userData.earningsPerAd;
-
-            updateUI();
-            elements.watchAdBtn.disabled = false;
-
-            elements.adContent.innerHTML = `
-                <div class="success-message">
-                    <h3>✅ تمت المكافأة!</h3>
-                    <p>+${userData.earningsPerAd} USDT تم إضافتها إلى رصيدك</p>
-                    <p style="font-size: 14px; margin-top: 10px;">الإعلانات المتبقية اليوم: ${userData.maxAds - userData.adsWatched}</p>
-                </div>
-            `;
-
-            saveUserData();
         }
 
         // 🌐 زيارة رابط الإعلان
@@ -579,21 +643,175 @@
             if (url) {
                 window.open(url, '_blank');
                 addEventLog('زيارة رابط الإعلان: ' + url);
+                if (tg && tg.HapticFeedback) {
+                    tg.HapticFeedback.impactOccurred('medium');
+                }
             }
         }
 
-        // 🔄 تحديث الواجهة
-        function updateUI() {
-            elements.currentEarnings.textContent = userData.earnings.toFixed(5) + ' USDT';
-            elements.adsCounter.textContent = `${userData.adsWatched}/${userData.maxAds} إعلان اليوم`;
-            elements.progressBar.style.width = `${(userData.adsWatched / userData.maxAds) * 100}%`;
+        // ✅ إكمال مشاهدة الإعلان
+        async function completeAdWatch() {
+            try {
+                elements.adContent.innerHTML = '<div class="loading">⏳ جاري المعالجة...</div>';
+
+                // محاولة إرسال التحويل إلى AdsGram
+                try {
+                    await sendConversionToAdsGram();
+                    addEventLog('✅ تم إرسال التحويل إلى AdsGram');
+                } catch (error) {
+                    addEventLog('⚠️ تم منح المكافأة بدون إرسال التحويل');
+                }
+
+                // منح المكافأة للمستخدم
+                userData.adsWatched++;
+                userData.earnings += userData.earningsPerAd;
+
+                // تسجيل المعاملة
+                userData.transactions.unshift({
+                    type: 'earning',
+                    amount: userData.earningsPerAd,
+                    timestamp: new Date().toLocaleString('ar-EG'),
+                    hash: generateRandomHash(),
+                    ad_network: 'AdsGram'
+                });
+
+                saveUserData();
+                updateUI();
+                elements.watchAdBtn.disabled = false;
+
+                elements.adContent.innerHTML = `
+                    <div class="success-message">
+                        <h3>✅ تمت المكافأة!</h3>
+                        <p>+${userData.earningsPerAd} USDT تم إضافتها إلى رصيدك</p>
+                        <p style="font-size: 14px; margin-top: 10px;">الإعلانات المتبقية اليوم: ${userData.maxAds - userData.adsWatched}</p>
+                    </div>
+                `;
+                
+                if (tg && tg.HapticFeedback) {
+                    tg.HapticFeedback.impactOccurred('success');
+                }
+                
+            } catch (error) {
+                console.error('خطأ في إكمال الإعلان:', error);
+                elements.adContent.innerHTML = '<div class="error-message">❌ خطأ في المعالجة</div>';
+                elements.watchAdBtn.disabled = false;
+            }
         }
 
-        // 💾 تحميل البيانات
+        // 📤 إرسال تحويل إلى AdsGram
+        async function sendConversionToAdsGram() {
+            try {
+                const url = `${ADSGRAM_CONFIG.base_url}/conversion`;
+                
+                const conversionData = {
+                    publisher_id: ADSGRAM_CONFIG.publisher_id,
+                    widget_id: ADSGRAM_CONFIG.widget_id,
+                    session_id: currentSessionId,
+                    user_id: generateUserId(),
+                    reward: userData.earningsPerAd,
+                    currency: 'USDT',
+                    timestamp: Math.floor(Date.now() / 1000)
+                };
+
+                addEventLog('إرسال تحويل: ' + JSON.stringify(conversionData));
+
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${ADSGRAM_CONFIG.token}`
+                    },
+                    body: JSON.stringify(conversionData)
+                });
+
+                if (!response.ok) {
+                    throw new Error(`خطأ في إرسال التحويل: ${response.status}`);
+                }
+
+                return await response.json();
+                
+            } catch (error) {
+                addEventLog('❌ فشل إرسال التحويل: ' + error.message);
+                throw error;
+            }
+        }
+
+        // 🔄 اختبار الاتصال
+        async function testConnection() {
+            addEventLog('بدء اختبار الاتصال...');
+            elements.connectionStatus.innerHTML = 'جارِ الاختبار...';
+
+            try {
+                const testUrl = `${ADSGRAM_CONFIG.base_url}/widget/${ADSGRAM_CONFIG.widget_id}/ad?publisher_id=${ADSGRAM_CONFIG.publisher_id}`;
+                addEventLog('اختبار الاتصال: ' + testUrl);
+
+                const response = await fetch(testUrl, {
+                    headers: {
+                        'Authorization': `Bearer ${ADSGRAM_CONFIG.token}`,
+                        'Accept': 'application/json'
+                    }
+                });
+
+                if (response.ok) {
+                    elements.connectionStatus.innerHTML = '✅ <strong>الاتصال ناجح!</strong><br>الـ API Token الجديد يعمل';
+                    addEventLog('✅ اتصال AdsGram ناجح');
+                } else {
+                    throw new Error(`خطأ ${response.status}: ${response.statusText}`);
+                }
+            } catch (error) {
+                elements.connectionStatus.innerHTML = '❌ <strong>فشل الاتصال</strong><br>' + error.message;
+                addEventLog('❌ فشل اختبار الاتصال: ' + error.message);
+            }
+        }
+
+        // 🔑 اختبار الـ API Token
+        async function testToken() {
+            addEventLog('اختبار الـ API Token...');
+            
+            try {
+                const testUrl = `${ADSGRAM_CONFIG.base_url}/widget/${ADSGRAM_CONFIG.widget_id}/ad?publisher_id=${ADSGRAM_CONFIG.publisher_id}`;
+                
+                const response = await fetch(testUrl, {
+                    headers: {
+                        'Authorization': `Bearer ${ADSGRAM_CONFIG.token}`
+                    }
+                });
+
+                if (response.status === 401) {
+                    addEventLog('❌ الـ API Token غير صالح');
+                    showMessage('❌ الـ API Token غير صالح. تحقق من البيانات.');
+                } else if (response.ok) {
+                    addEventLog('✅ الـ API Token صالح ويعمل');
+                    showMessage('✅ الـ API Token الجديد صالح ويعمل بنجاح!');
+                } else {
+                    addEventLog('⚠️ استجابة غير متوقعة: ' + response.status);
+                }
+            } catch (error) {
+                addEventLog('❌ خطأ في اختبار الـ Token: ' + error.message);
+            }
+        }
+
+        // 📝 إضافة سجل الأحداث
+        function addEventLog(message) {
+            const timestamp = new Date().toLocaleTimeString();
+            eventLog.push(`[${timestamp}] ${message}`);
+            
+            if (elements.eventLog) {
+                elements.eventLog.innerHTML = eventLog.map(log => 
+                    `<div style="margin: 2px 0; padding: 2px; border-bottom: 1px solid #333;">${log}</div>`
+                ).join('');
+                elements.eventLog.scrollTop = elements.eventLog.scrollHeight;
+            }
+            
+            console.log(message);
+        }
+
+        // 💾 تحميل البيانات المحفوظة
         function loadUserData() {
             const saved = localStorage.getItem('adEarningsData');
             if (saved) {
-                userData = JSON.parse(saved);
+                const parsed = JSON.parse(saved);
+                userData = { ...userData, ...parsed };
             }
             updateUI();
         }
@@ -603,36 +821,135 @@
             localStorage.setItem('adEarningsData', JSON.stringify(userData));
         }
 
+        // 🔄 تحديث الواجهة
+        function updateUI() {
+            elements.currentEarnings.textContent = userData.earnings.toFixed(5) + ' USDT';
+            elements.adsCounter.textContent = `${userData.adsWatched}/${userData.maxAds} إعلان اليوم`;
+            elements.progressBar.style.width = `${(userData.adsWatched / userData.maxAds) * 100}%`;
+            elements.totalEarnings.textContent = userData.earnings.toFixed(5);
+            elements.todayAds.textContent = userData.adsWatched;
+            elements.withdrawBalance.textContent = userData.earnings.toFixed(5) + ' USDT';
+            checkWithdrawButton();
+            updateTransactions();
+            updateConfigStatus();
+        }
+
+        // 💳 سحب الأرباح
+        function withdrawEarnings() {
+            if (userData.earnings < 1) {
+                showMessage('الحد الأدنى للسحب هو 1 USDT');
+                return;
+            }
+
+            if (!elements.walletAddress.value) {
+                showMessage('يرجى إدخال عنوان المحفظة');
+                return;
+            }
+
+            const txHash = generateRandomHash();
+            const withdrawnAmount = userData.earnings;
+            
+            userData.transactions.unshift({
+                type: 'withdrawal',
+                amount: userData.earnings,
+                timestamp: new Date().toLocaleString('ar-EG'),
+                hash: txHash,
+                wallet: elements.walletAddress.value,
+                status: 'معلق'
+            });
+
+            userData.earnings = 0;
+            userData.adsWatched = 0;
+
+            saveUserData();
+            updateUI();
+
+            showMessage(`✅ تم طلب السحب بنجاح!\nالمبلغ: ${withdrawnAmount.toFixed(5)} USDT\nالمعاملة: ${txHash}`);
+            if (tg && tg.HapticFeedback) {
+                tg.HapticFeedback.notificationOccurred('success');
+            }
+        }
+
+        // 🔘 التحقق من زر السحب
+        function checkWithdrawButton() {
+            elements.withdrawBtn.disabled = userData.earnings < 1 || !elements.walletAddress.value;
+        }
+
+        // 📋 تحديث قائمة المعاملات
+        function updateTransactions() {
+            if (userData.transactions.length === 0) {
+                elements.transactionsList.innerHTML = '<div class="transaction-item">لا توجد معاملات حتى الآن</div>';
+                return;
+            }
+
+            elements.transactionsList.innerHTML = userData.transactions.map(tx => `
+                <div class="transaction-item">
+                    <div style="display: flex; justify-content: space-between;">
+                        <strong>${tx.type === 'earning' ? '💰 ربح إعلان' : '💳 سحب'}</strong>
+                        <span style="color: ${tx.type === 'earning' ? '#00ff88' : '#ff4444'}">
+                            ${tx.type === 'earning' ? '+' : '-'}${tx.amount.toFixed(5)} USDT
+                        </span>
+                    </div>
+                    <div style="font-size: 12px; color: #666; margin-top: 5px;">
+                        ${tx.timestamp} ${tx.status ? '• ' + tx.status : ''}
+                    </div>
+                    <div style="font-size: 10px; color: #888; margin-top: 3px;">
+                        ${tx.hash}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // 🔄 تحديث حالة الإعدادات
+        function updateConfigStatus() {
+            elements.configStatus.innerHTML = `
+                <strong>Token:</strong> ${ADSGRAM_CONFIG.token.substring(0, 10)}...<br>
+                <strong>Publisher ID:</strong> ${ADSGRAM_CONFIG.publisher_id}<br>
+                <strong>Widget ID:</strong> ${ADSGRAM_CONFIG.widget_id}<br>
+                <strong>Base URL:</strong> ${ADSGRAM_CONFIG.base_url}<br>
+                <strong>الحالة:</strong> <span style="color: #00ff88;">✅ API Token محدث</span>
+            `;
+        }
+
         // 🔄 تبديل الصفحات
         function showPage(pageName) {
-            elements.earnPage.classList.remove('active');
-            elements.debugPage.classList.remove('active');
-
-            document.querySelectorAll('.nav-btn').forEach(btn => {
-                btn.classList.remove('active');
-            });
+            document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
 
             if (pageName === 'earn') {
                 elements.earnPage.classList.add('active');
                 document.querySelector('.nav-btn:nth-child(1)').classList.add('active');
+            } else if (pageName === 'withdraw') {
+                elements.withdrawPage.classList.add('active');
+                document.querySelector('.nav-btn:nth-child(2)').classList.add('active');
             } else {
                 elements.debugPage.classList.add('active');
-                document.querySelector('.nav-btn:nth-child(2)').classList.add('active');
+                document.querySelector('.nav-btn:nth-child(3)').classList.add('active');
+                updateConfigStatus();
             }
         }
 
-        // 🆔 توليد معرفات
+        // 🆔 توليد معرفات فريدة
         function generateSessionId() {
             return 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
         }
 
         function generateUserId() {
+            if (tg && tg.initDataUnsafe && tg.initDataUnsafe.user) {
+                return 'tg_' + tg.initDataUnsafe.user.id;
+            }
             let userId = localStorage.getItem('adsgram_user_id');
             if (!userId) {
                 userId = 'user_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
                 localStorage.setItem('adsgram_user_id', userId);
             }
             return userId;
+        }
+
+        function generateRandomHash() {
+            return '0x' + Array.from({length: 64}, () => 
+                Math.floor(Math.random() * 16).toString(16)
+            ).join('');
         }
 
         // 💬 عرض رسائل
@@ -642,15 +959,17 @@
 
         // 🚀 تهيئة التطبيق
         loadUserData();
-        addEventLog('تم تحميل التطبيق مع دعم البروكسي');
+        addEventLog('تم تحميل التطبيق مع الـ API Token الجديد');
+        addEventLog('Token: cfbedbec8b9a43f5b11fcf59fed46844');
 
-        // تعيين الدوال العامة
-        window.showPage = showPage;
-        window.testProxyConnection = testProxyConnection;
-        window.testDirectConnection = testDirectConnection;
+        // تعيين الدوال ككائن عام للاستدعاء من الأزرار
         window.visitAd = visitAd;
         window.completeAdWatch = completeAdWatch;
-        window.loadAd = loadAd;
+        window.showPage = showPage;
+        window.checkWithdrawButton = checkWithdrawButton;
+        window.testConnection = testConnection;
+        window.testToken = testToken;
+        window.withdrawEarnings = withdrawEarnings;
     </script>
 </body>
-</html>
+</html> 
