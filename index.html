@@ -5,10 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ربح من الإعلانات</title>
     
-    <!-- الخطوة 1: Telegram Web App SDK -->
-    <script src="https://telegram.org/js/telegram-web-app.js?56"></script>
+    <!-- Telegram Web App SDK -->
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
     
-    <!-- الخطوة 2: Adexium Ads Script -->
+    <!-- Adexium Ads Script -->
     <script type="text/javascript" src="https://cdn.tgads.space/assets/js/adexium-widget.min.js"></script>
     
     <style>
@@ -254,7 +254,7 @@
         }
         
         .ad-status {
-            margin-top: 10px;
+            margin: 10px 0;
             padding: 10px;
             border-radius: 5px;
             text-align: center;
@@ -274,6 +274,17 @@
         .status-error {
             background-color: #ff4757;
             color: #fff;
+        }
+        
+        .ad-test-btn {
+            background-color: #ffa500;
+            color: black;
+            border: none;
+            border-radius: 8px;
+            padding: 10px 15px;
+            margin: 10px 0;
+            cursor: pointer;
+            width: 100%;
         }
         
         footer {
@@ -340,6 +351,7 @@
                 </div>
                 
                 <button class="watch-btn" id="watch-ad-btn" disabled>جاري التحميل...</button>
+                <button class="ad-test-btn" id="test-ad-btn">تجربة إعلان اختباري</button>
                 
                 <div class="progress-container">
                     <div class="progress-label">
@@ -418,12 +430,14 @@
         const progressText = document.getElementById('progress-text');
         const progressFill = document.getElementById('progress-fill');
         const watchAdBtn = document.getElementById('watch-ad-btn');
+        const testAdBtn = document.getElementById('test-ad-btn');
         const walletAddressInput = document.getElementById('wallet-address');
         const withdrawBtn = document.getElementById('withdraw-btn');
         const adStatus = document.getElementById('ad-status');
         
         // Adexium Widget
         let adexiumWidget = null;
+        let isAdexiumReady = false;
         
         // التبويبات
         const tabs = document.querySelectorAll('.tab');
@@ -470,66 +484,119 @@
         // تهيئة Adexium
         function initAdexium() {
             try {
+                console.log('جاري تهيئة Adexium...');
+                
+                // التحقق من وجود AdexiumWidget في النطاق العالمي
+                if (typeof AdexiumWidget === 'undefined') {
+                    throw new Error('AdexiumWidget غير معروف - تحقق من تحميل السكريبت');
+                }
+                
                 adexiumWidget = new AdexiumWidget({
                     wid: 'a7f6955f-037f-43af-a0b7-f144c36abea5', 
                     adFormat: 'interstitial'
                 });
                 
-                // تفعيل وضع التلقائي
+                console.log('AdexiumWidget تم إنشاؤه:', adexiumWidget);
+                
+                // تفعيل وضع التلقائي مع معالجات الأحداث
                 adexiumWidget.autoMode();
                 
-                // تحديث حالة الإعلانات
-                adStatus.className = 'ad-status status-ready';
-                adStatus.textContent = 'الإعلانات جاهزة للمشاهدة';
-                watchAdBtn.disabled = false;
-                watchAdBtn.textContent = 'شاهد الإعلان الآن';
-                
-                console.log('Adexium Widget initialized successfully');
+                // إضافة معالجات الأحداث إذا كانت متاحة
+                if (adexiumWidget.on) {
+                    adexiumWidget.on('ad-loaded', function() {
+                        console.log('الإعلان تم تحميله');
+                        adStatus.className = 'ad-status status-ready';
+                        adStatus.textContent = 'الإعلانات جاهزة للمشاهدة';
+                        watchAdBtn.disabled = false;
+                        watchAdBtn.textContent = 'شاهد الإعلان الآن';
+                        isAdexiumReady = true;
+                    });
+                    
+                    adexiumWidget.on('ad-failed', function(error) {
+                        console.error('فشل تحميل الإعلان:', error);
+                        adStatus.className = 'ad-status status-error';
+                        adStatus.textContent = 'فشل تحميل الإعلان: ' + error;
+                        isAdexiumReady = false;
+                    });
+                    
+                    adexiumWidget.on('ad-viewed', function() {
+                        console.log('الإعلان تم مشاهدته');
+                        handleAdCompleted();
+                    });
+                } else {
+                    // إذا لم تكن معالجات الأحداث متاحة، نستخدم الوقت
+                    setTimeout(() => {
+                        adStatus.className = 'ad-status status-ready';
+                        adStatus.textContent = 'الإعلانات جاهزة للمشاهدة';
+                        watchAdBtn.disabled = false;
+                        watchAdBtn.textContent = 'شاهد الإعلان الآن';
+                        isAdexiumReady = true;
+                    }, 2000);
+                }
                 
             } catch (error) {
-                console.error('Error initializing Adexium:', error);
+                console.error('خطأ في تهيئة Adexium:', error);
                 adStatus.className = 'ad-status status-error';
-                adStatus.textContent = 'خطأ في تحميل الإعلانات. يرجى المحاولة لاحقاً.';
+                adStatus.textContent = 'خطأ في تحميل الإعلانات: ' + error.message;
                 watchAdBtn.disabled = true;
                 watchAdBtn.textContent = 'تعذر تحميل الإعلانات';
+                isAdexiumReady = false;
             }
+        }
+        
+        // معالجة انتهاء الإعلان
+        function handleAdCompleted() {
+            userData.balance += 0.00002;
+            userData.adsWatched++;
+            userData.lastAdWatch = new Date();
+            
+            updateUI();
+            saveUserData();
+            
+            watchAdBtn.disabled = false;
+            watchAdBtn.textContent = 'شاهد الإعلان الآن';
+            
+            showNotification('تهانينا! لقد ربحت 0.00002 USDT من مشاهدة الإعلان');
         }
         
         // مشاهدة إعلان
         watchAdBtn.addEventListener('click', () => {
-            if (userData.adsWatched < userData.adsLimit && adexiumWidget) {
-                watchAdBtn.disabled = true;
-                watchAdBtn.textContent = 'جاري تحميل الإعلان...';
-                
-                try {
-                    // Adexium سيعرض الإعلان تلقائياً في وضع autoMode
-                    // نحتاج لتتبع عندما ينتهي الإعلان
+            if (userData.adsWatched < userData.adsLimit) {
+                if (isAdexiumReady && adexiumWidget) {
+                    // استخدام Adexium الحقيقي
+                    watchAdBtn.disabled = true;
+                    watchAdBtn.textContent = 'جاري عرض الإعلان...';
                     
-                    // محاكاة انتظار انتهاء الإعلان (في الواقع، يجب استخدام callbacks)
-                    setTimeout(() => {
-                        // بعد انتهاء الإعلان
-                        userData.balance += 0.00002;
-                        userData.adsWatched++;
-                        userData.lastAdWatch = new Date();
+                    try {
+                        // في الوضع التلقائي، الإعلان يظهر تلقائياً
+                        // ننتظر فترة ثم نعتبر الإعلان مكتملاً
+                        setTimeout(() => {
+                            handleAdCompleted();
+                        }, 35000); // 35 ثانية للإعلان
                         
-                        updateUI();
-                        saveUserData();
-                        
+                    } catch (error) {
+                        console.error('خطأ في عرض الإعلان:', error);
+                        adStatus.className = 'ad-status status-error';
+                        adStatus.textContent = 'خطأ في عرض الإعلان';
                         watchAdBtn.disabled = false;
                         watchAdBtn.textContent = 'شاهد الإعلان الآن';
-                        
-                        // إشعار بنجاح مشاهدة الإعلان
-                        showNotification('تهانينا! لقد ربحت 0.00002 USDT من مشاهدة الإعلان');
-                        
-                    }, 30000); // افترض أن الإعلان استغرق 30 ثانية
-                    
-                } catch (error) {
-                    console.error('Error showing ad:', error);
-                    adStatus.className = 'ad-status status-error';
-                    adStatus.textContent = 'خطأ في عرض الإعلان';
-                    watchAdBtn.disabled = false;
-                    watchAdBtn.textContent = 'شاهد الإعلان الآن';
+                    }
+                } else {
+                    showNotification('الإعلانات غير جاهزة بعد. يرجى المحاولة لاحقاً.');
                 }
+            }
+        });
+        
+        // زر تجربة الإعلان الاختباري
+        testAdBtn.addEventListener('click', () => {
+            if (userData.adsWatched < userData.adsLimit) {
+                watchAdBtn.disabled = true;
+                watchAdBtn.textContent = 'جاري عرض الإعلان...';
+                
+                // محاكاة إعلان اختباري
+                setTimeout(() => {
+                    handleAdCompleted();
+                }, 5000); // 5 ثوانٍ للتجربة
             }
         });
         
@@ -537,7 +604,7 @@
         function showNotification(message) {
             if (window.Telegram && window.Telegram.WebApp) {
                 window.Telegram.WebApp.showPopup({
-                    title: 'نجاح',
+                    title: 'إشعار',
                     message: message,
                     buttons: [{ type: 'ok' }]
                 });
@@ -611,6 +678,7 @@
             if (window.Telegram && window.Telegram.WebApp) {
                 window.Telegram.WebApp.expand();
                 window.Telegram.WebApp.enableClosingConfirmation();
+                console.log('Telegram Web App initialized');
             }
             
             // تحميل البيانات
