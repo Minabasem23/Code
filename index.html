@@ -284,6 +284,19 @@
             margin: 10px 5px;
             font-size: 14px;
         }
+
+        .debug-info {
+            background: #1a1a1a;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 10px 0;
+            border: 1px solid #333;
+            font-size: 12px;
+            text-align: left;
+            direction: ltr;
+            max-height: 200px;
+            overflow-y: auto;
+        }
     </style>
 </head>
 <body>
@@ -296,7 +309,7 @@
         <div class="nav">
             <button class="nav-btn active" onclick="showPage('earn')">💰 الربح</button>
             <button class="nav-btn" onclick="showPage('withdraw')">🎯 السحب</button>
-            <button class="nav-btn" onclick="showPage('settings')">⚙️ الإعدادات</button>
+            <button class="nav-btn" onclick="showPage('debug')">🐛 التصحيح</button>
         </div>
 
         <!-- صفحة الربح -->
@@ -316,9 +329,9 @@
             </div>
 
             <div class="info-box" id="connectionStatus">
-                <h4>🔄 جاري الاتصال بـ AdsGram...</h4>
-                <p>Publisher ID: 38461 | Widget ID: int-16035</p>
-                <p style="color: #ffaa00; font-size: 12px; margin-top: 5px;">جاري اختبار الاتصال</p>
+                <h4>✅ AdsGram جاهز!</h4>
+                <p>Publisher ID: 38461 | Widget ID: int-16032</p>
+                <p style="color: #00ff88; font-size: 12px; margin-top: 5px;">Widget ID المحدث: int-16032</p>
             </div>
 
             <div class="ad-container">
@@ -370,44 +383,62 @@
             </div>
         </div>
 
-        <!-- صفحة الإعدادات -->
-        <div id="settingsPage" class="page">
+        <!-- صفحة التصحيح -->
+        <div id="debugPage" class="page">
             <div class="card">
-                <h2>⚙️ إعدادات النظام</h2>
+                <h2>🐛 معلومات التصحيح</h2>
                 
-                <div class="info-box">
-                    <h4>معلومات الاتصال</h4>
-                    <p>API Status: <span id="apiStatus">جارِ الاختبار...</span></p>
-                    <p>آخر تحديث: <span id="lastUpdate">-</span></p>
+                <div class="debug-info">
+                    <h4>🔄 حالة الاتصال:</h4>
+                    <div id="debugConnectionStatus">جارِ الاختبار...</div>
+                    
+                    <h4>📊 الإعدادات الحالية:</h4>
+                    <div id="configStatus"></div>
+                    
+                    <h4>📝 سجل الأخطاء:</h4>
+                    <div id="errorLog"></div>
                 </div>
 
-                <div class="warning-box">
-                    <h4>استكشاف الأخطاء</h4>
-                    <p>إذا كانت الإعلانات لا تعمل، جرب:</p>
-                    <button class="retry-button" onclick="testAdsGramConnection()">اختبار الاتصال</button>
-                    <button class="retry-button" onclick="resetAppData()">إعادة تعيين البيانات</button>
-                    <button class="retry-button" onclick="useBackupAds()">استخدام الإعلانات الاحتياطية</button>
-                </div>
+                <button class="tg-button" onclick="testAdsGramConnection()" style="background: #0088cc;">
+                    🔄 اختبار الاتصال مع AdsGram
+                </button>
 
-                <div style="margin-top: 20px;">
-                    <button class="tg-button" onclick="showDebugInfo()" style="background: #666;">
-                        🔍 معلومات التصحيح
-                    </button>
-                </div>
+                <button class="tg-button" onclick="forceBackupAd()" style="background: #ff8800;">
+                    🎯 تجربة إعلان تجريبي
+                </button>
+
+                <button class="tg-button" onclick="showApiTest()" style="background: #00cc88;">
+                    🔍 اختبار API مباشر
+                </button>
+
+                <button class="tg-button" onclick="resetAppData()" style="background: #ff4444;">
+                    🗑️ إعادة تعيين التطبيق
+                </button>
+            </div>
+
+            <div class="warning-box">
+                <h4>ℹ️ معلومات مهمة:</h4>
+                <p>Widget ID المحدث: <strong>int-16032</strong></p>
+                <p>إذا كانت الإعلانات لا تعمل، جرب:</p>
+                <ul style="text-align: right; margin-right: 20px;">
+                    <li>اختبار الاتصال أولاً</li>
+                    <li>استخدام الإعلانات التجريبية</li>
+                    <li>التحقق من بيانات AdsGram</li>
+                </ul>
             </div>
         </div>
 
         <div class="footer">
-            <p>Powered by BSC Network | AdsGram Integration</p>
+            <p>Powered by BSC Network | AdsGram Integration | Widget: int-16032</p>
         </div>
     </div>
 
     <script>
-        // 🔧 إعدادات AdsGram الحقيقية
+        // 🔧 إعدادات AdsGram المحدثة
         const ADSGRAM_CONFIG = {
             token: "3b09764c632c4c0687ef0d63894e8a3f",
             publisher_id: "38461",
-            widget_id: "int-16035", 
+            widget_id: "int-16032",  // ✅ Widget ID المحدث
             base_url: "https://api.adsgram.ai"
         };
 
@@ -417,7 +448,7 @@
                 id: "backup_1",
                 title: "🔥 تطبيق تيك توك الشهير",
                 description: "انضم إلى ملايين المستخدمين وتابع أحدث الفيديوهات الرائجة من حول العالم!",
-                image_url: "https://via.placeholder.com/300x150/0088cc/ffffff?text=TikTok",
+                image_url: "https://via.placeholder.com/300x150/0088cc/ffffff?text=TikTok+Ad",
                 click_url: "https://www.tiktok.com",
                 button_name: "📱 حمل التطبيق"
             },
@@ -425,7 +456,7 @@
                 id: "backup_2", 
                 title: "🛒 متجر أمازون الإلكتروني",
                 description: "تسوق من آلاف المنتجات بأسعار مميزة وتوصيل سريع إلى باب منزلك!",
-                image_url: "https://via.placeholder.com/300x150/ff9900/ffffff?text=Amazon",
+                image_url: "https://via.placeholder.com/300x150/ff9900/ffffff?text=Amazon+Ad",
                 click_url: "https://www.amazon.com",
                 button_name: "🛍️ تسوق الآن"
             },
@@ -433,17 +464,9 @@
                 id: "backup_3",
                 title: "🎬 منصة نتفليكس للأفلام",
                 description: "استمتع بأفضل المسلسلات والأفلام الحصرية بدون إعلانات وبجودة عالية!",
-                image_url: "https://via.placeholder.com/300x150/e50914/ffffff?text=Netflix",
+                image_url: "https://via.placeholder.com/300x150/e50914/ffffff?text=Netflix+Ad",
                 click_url: "https://www.netflix.com",
                 button_name: "🎭 اشترك الآن"
-            },
-            {
-                id: "backup_4",
-                title: "🚗 تطبيق أوبر للتنقل",
-                description: "احصل على رحلات مريحة وآمنة بأسعار منافسة وسائقين محترفين!",
-                image_url: "https://via.placeholder.com/300x150/000000/ffffff?text=Uber",
-                click_url: "https://www.uber.com",
-                button_name: "🚖 اطلب سيارة"
             }
         ];
 
@@ -456,24 +479,27 @@
             walletAddress: '',
             transactions: [],
             useBackupAds: false,
-            lastAdIndex: 0
+            lastAdIndex: 0,
+            connectionTested: false
         };
 
         let currentAd = null;
         let currentSessionId = null;
         let adTimerInterval = null;
-        let connectionTested = false;
+        let debugLog = [];
 
         // تهيئة Telegram Web App
         let tg = window.Telegram.WebApp;
-        tg.expand();
-        tg.ready();
+        if (tg) {
+            tg.expand();
+            tg.ready();
+        }
 
         // عناصر DOM
         const elements = {
             earnPage: document.getElementById('earnPage'),
             withdrawPage: document.getElementById('withdrawPage'),
-            settingsPage: document.getElementById('settingsPage'),
+            debugPage: document.getElementById('debugPage'),
             currentEarnings: document.getElementById('currentEarnings'),
             adsCounter: document.getElementById('adsCounter'),
             progressBar: document.getElementById('progressBar'),
@@ -486,19 +512,22 @@
             withdrawBtn: document.getElementById('withdrawBtn'),
             transactionsList: document.getElementById('transactionsList'),
             connectionStatus: document.getElementById('connectionStatus'),
-            apiStatus: document.getElementById('apiStatus'),
-            lastUpdate: document.getElementById('lastUpdate')
+            debugConnectionStatus: document.getElementById('debugConnectionStatus'),
+            configStatus: document.getElementById('configStatus'),
+            errorLog: document.getElementById('errorLog')
         };
 
         // 🚀 تحميل إعلان
         async function loadAd() {
+            addDebugLog('بدء تحميل الإعلان...');
+            
             if (userData.adsWatched >= userData.maxAds) {
                 showMessage('🎯 لقد وصلت للحد الأقصى اليومي (250 إعلان)');
                 return;
             }
 
             elements.watchAdBtn.disabled = true;
-            elements.adContent.innerHTML = '<div class="loading">⏳ جاري تحميل الإعلان...</div>';
+            elements.adContent.innerHTML = '<div class="loading">⏳ جاري تحميل الإعلان من AdsGram...</div>';
 
             try {
                 currentSessionId = generateSessionId();
@@ -511,6 +540,7 @@
                 // إذا فشل أو تم تفعيل النظام الاحتياطي
                 if (!currentAd || userData.useBackupAds) {
                     currentAd = getBackupAd();
+                    addDebugLog('استخدام الإعلان الاحتياطي');
                 }
                 
                 if (currentAd) {
@@ -521,6 +551,8 @@
                 
             } catch (error) {
                 console.error('خطأ في تحميل الإعلان:', error);
+                addDebugLog('خطأ في تحميل الإعلان: ' + error.message);
+                
                 // استخدام الإعلانات الاحتياطية في حالة الخطأ
                 currentAd = getBackupAd();
                 if (currentAd) {
@@ -534,6 +566,8 @@
 
         // 📥 جلب إعلان من AdsGram API
         async function getAdFromAdsGram() {
+            addDebugLog('محاولة الاتصال بـ AdsGram API...');
+            
             try {
                 const url = `${ADSGRAM_CONFIG.base_url}/widget/${ADSGRAM_CONFIG.widget_id}/ad`;
                 
@@ -546,29 +580,31 @@
                 });
 
                 const fullUrl = `${url}?${params}`;
-                console.log('🔄 جلب إعلان من:', fullUrl);
+                addDebugLog('URL: ' + fullUrl);
 
                 const response = await fetch(fullUrl, {
                     method: 'GET',
                     headers: {
                         'Accept': 'application/json',
-                        'Authorization': `Bearer ${ADSGRAM_CONFIG.token}`
-                    },
-                    timeout: 10000 // 10 ثواني timeout
+                        'Authorization': `Bearer ${ADSGRAM_CONFIG.token}`,
+                        'Content-Type': 'application/json'
+                    }
                 });
 
+                addDebugLog('كود الاستجابة: ' + response.status);
+                
                 if (!response.ok) {
-                    throw new Error(`خطأ في الاستجابة: ${response.status}`);
+                    throw new Error(`خطأ في الاستجابة: ${response.status} ${response.statusText}`);
                 }
 
                 const data = await response.json();
-                console.log('✅ تم جلب الإعلان بنجاح:', data);
+                addDebugLog('تم جلب الإعلان بنجاح: ' + JSON.stringify(data).substring(0, 100));
                 return data;
                 
             } catch (error) {
-                console.error('❌ فشل الاتصال بـ AdsGram:', error);
+                addDebugLog('❌ فشل الاتصال بـ AdsGram: ' + error.message);
                 // في حالة الخطأ، نستخدم النظام الاحتياطي
-                if (!connectionTested) {
+                if (!userData.connectionTested) {
                     userData.useBackupAds = true;
                     updateConnectionStatus('⚠️ استخدام الإعلانات الاحتياطية', 'warning');
                 }
@@ -586,6 +622,8 @@
 
         // 🎬 عرض الإعلان
         function showAd(ad) {
+            addDebugLog('عرض الإعلان...');
+            
             const title = ad.title || 'إعلان';
             const description = ad.description || 'شاهد هذا الإعلان للحصول على المكافأة';
             const imageUrl = ad.image_url;
@@ -644,7 +682,9 @@
                     adTimerElement.textContent = "✓ جاهز";
                     adTimerElement.style.color = "#00ff88";
                     if (rewardBtn) rewardBtn.disabled = false;
-                    tg.HapticFeedback.impactOccurred('light');
+                    if (tg && tg.HapticFeedback) {
+                        tg.HapticFeedback.impactOccurred('light');
+                    }
                 }
             }, 1000);
         }
@@ -658,9 +698,9 @@
                 if (!userData.useBackupAds && currentAd && currentAd.id && !currentAd.id.startsWith('backup_')) {
                     try {
                         await sendConversionToAdsGram();
-                        console.log('✅ تم إرسال التحويل إلى AdsGram');
+                        addDebugLog('✅ تم إرسال التحويل إلى AdsGram');
                     } catch (error) {
-                        console.log('⚠️ تم منح المكافأة بدون إرسال التحويل');
+                        addDebugLog('⚠️ تم منح المكافأة بدون إرسال التحويل');
                     }
                 }
 
@@ -689,7 +729,9 @@
                     </div>
                 `;
                 
-                tg.HapticFeedback.impactOccurred('success');
+                if (tg && tg.HapticFeedback) {
+                    tg.HapticFeedback.impactOccurred('success');
+                }
                 
             } catch (error) {
                 console.error('خطأ في إكمال الإعلان:', error);
@@ -702,7 +744,10 @@
         function visitAd(url) {
             if (url) {
                 window.open(url, '_blank');
-                tg.HapticFeedback.impactOccurred('medium');
+                addDebugLog('زيارة رابط الإعلان: ' + url);
+                if (tg && tg.HapticFeedback) {
+                    tg.HapticFeedback.impactOccurred('medium');
+                }
             }
         }
 
@@ -721,7 +766,7 @@
                     timestamp: Math.floor(Date.now() / 1000)
                 };
 
-                console.log('📤 إرسال تحويل:', conversionData);
+                addDebugLog('إرسال تحويل: ' + JSON.stringify(conversionData));
 
                 const response = await fetch(url, {
                     method: 'POST',
@@ -739,42 +784,65 @@
                 return await response.json();
                 
             } catch (error) {
-                console.error('❌ فشل إرسال التحويل:', error);
+                addDebugLog('❌ فشل إرسال التحويل: ' + error.message);
                 throw error;
             }
         }
 
         // 🔧 اختبار اتصال AdsGram
         async function testAdsGramConnection() {
-            elements.apiStatus.textContent = 'جارِ الاختبار...';
-            elements.apiStatus.style.color = '#ffaa00';
+            elements.debugConnectionStatus.innerHTML = 'جارِ الاختبار...';
+            elements.debugConnectionStatus.style.color = '#ffaa00';
 
             try {
                 const testAd = await getAdFromAdsGram();
                 if (testAd) {
-                    elements.apiStatus.textContent = '✅ متصل';
-                    elements.apiStatus.style.color = '#00ff88';
+                    elements.debugConnectionStatus.innerHTML = '✅ <strong>الاتصال ناجح!</strong><br>تم جلب إعلان بنجاح من AdsGram';
+                    elements.debugConnectionStatus.style.color = '#00ff88';
                     updateConnectionStatus('✅ AdsGram متصل بنجاح', 'success');
                     userData.useBackupAds = false;
-                    connectionTested = true;
+                    userData.connectionTested = true;
+                    updateConfigStatus();
                 }
             } catch (error) {
-                elements.apiStatus.textContent = '❌ غير متصل';
-                elements.apiStatus.style.color = '#ff4444';
+                elements.debugConnectionStatus.innerHTML = '❌ <strong>فشل الاتصال!</strong><br>' + error.message;
+                elements.debugConnectionStatus.style.color = '#ff4444';
                 updateConnectionStatus('⚠️ استخدام الإعلانات الاحتياطية', 'warning');
                 userData.useBackupAds = true;
             }
 
-            elements.lastUpdate.textContent = new Date().toLocaleString('ar-EG');
             saveUserData();
         }
 
-        // 🔄 استخدام الإعلانات الاحتياطية
-        function useBackupAds() {
+        // 🎯 تجربة إعلان تجريبي
+        function forceBackupAd() {
             userData.useBackupAds = true;
-            updateConnectionStatus('🔄 استخدام الإعلانات الاحتياطية', 'info');
-            showMessage('✅ تم تفعيل النظام الاحتياطي للإعلانات');
-            saveUserData();
+            currentAd = getBackupAd();
+            if (currentAd) {
+                showAd(currentAd);
+                showPage('earn');
+                showMessage('✅ تم تفعيل الإعلانات التجريبية');
+            }
+        }
+
+        // 🔍 اختبار API مباشر
+        async function showApiTest() {
+            try {
+                const testUrl = `${ADSGRAM_CONFIG.base_url}/widget/${ADSGRAM_CONFIG.widget_id}/ad?publisher_id=${ADSGRAM_CONFIG.publisher_id}`;
+                addDebugLog('اختبار API مباشر: ' + testUrl);
+                
+                const response = await fetch(testUrl, {
+                    headers: {
+                        'Authorization': `Bearer ${ADSGRAM_CONFIG.token}`
+                    }
+                });
+                
+                addDebugLog('نتيجة الاختبار: ' + response.status + ' ' + response.statusText);
+                showMessage(`نتيجة اختبار API: ${response.status} ${response.statusText}`);
+            } catch (error) {
+                addDebugLog('خطأ في اختبار API: ' + error.message);
+                showMessage('❌ فشل اختبار API: ' + error.message);
+            }
         }
 
         // 🔄 تحديث حالة الاتصال
@@ -782,7 +850,7 @@
             const statusElement = elements.connectionStatus;
             statusElement.innerHTML = `
                 <h4>${type === 'success' ? '✅' : type === 'warning' ? '⚠️' : '🔄'} ${message}</h4>
-                <p>Publisher ID: 38461 | Widget ID: int-16035</p>
+                <p>Publisher ID: 38461 | Widget ID: ${ADSGRAM_CONFIG.widget_id}</p>
                 <p style="color: ${type === 'success' ? '#00ff88' : type === 'warning' ? '#ffaa00' : '#0088cc'}; font-size: 12px; margin-top: 5px;">
                     ${type === 'success' ? 'الاتصال مع AdsGram نشط' : type === 'warning' ? 'جارٍ استخدام النظام الاحتياطي' : 'جاري اختبار الاتصال'}
                 </p>
@@ -817,6 +885,7 @@
             elements.withdrawBalance.textContent = userData.earnings.toFixed(5) + ' USDT';
             checkWithdrawButton();
             updateTransactions();
+            updateConfigStatus();
         }
 
         // 💳 سحب الأرباح
@@ -850,7 +919,9 @@
             updateUI();
 
             showMessage(`✅ تم طلب السحب بنجاح!\nالمبلغ: ${withdrawnAmount.toFixed(5)} USDT\nالمعاملة: ${txHash}`);
-            tg.HapticFeedback.notificationOccurred('success');
+            if (tg && tg.HapticFeedback) {
+                tg.HapticFeedback.notificationOccurred('success');
+            }
         }
 
         // 🔘 التحقق من زر السحب
@@ -883,6 +954,32 @@
             `).join('');
         }
 
+        // 🔄 تحديث حالة الإعدادات
+        function updateConfigStatus() {
+            elements.configStatus.innerHTML = `
+                <strong>Token:</strong> ${ADSGRAM_CONFIG.token.substring(0, 10)}...<br>
+                <strong>Publisher ID:</strong> ${ADSGRAM_CONFIG.publisher_id}<br>
+                <strong>Widget ID:</strong> ${ADSGRAM_CONFIG.widget_id}<br>
+                <strong>Base URL:</strong> ${ADSGRAM_CONFIG.base_url}<br>
+                <strong>النظام الاحتياطي:</strong> ${userData.useBackupAds ? 'مفعل' : 'غير مفعل'}
+            `;
+        }
+
+        // 📝 إضافة سجل تصحيح
+        function addDebugLog(message) {
+            const timestamp = new Date().toLocaleTimeString();
+            debugLog.push(`[${timestamp}] ${message}`);
+            
+            if (elements.errorLog) {
+                elements.errorLog.innerHTML = debugLog.map(log => 
+                    `<div style="margin: 2px 0; padding: 2px; border-bottom: 1px solid #333;">${log}</div>`
+                ).join('');
+                elements.errorLog.scrollTop = elements.errorLog.scrollHeight;
+            }
+            
+            console.log(message);
+        }
+
         // 🔄 تبديل الصفحات
         function showPage(pageName) {
             document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
@@ -895,8 +992,32 @@
                 elements.withdrawPage.classList.add('active');
                 document.querySelector('.nav-btn:nth-child(2)').classList.add('active');
             } else {
-                elements.settingsPage.classList.add('active');
+                elements.debugPage.classList.add('active');
                 document.querySelector('.nav-btn:nth-child(3)').classList.add('active');
+                updateConfigStatus();
+            }
+        }
+
+        // 🗑️ إعادة تعيين البيانات
+        function resetAppData() {
+            if (confirm('هل أنت متأكد من إعادة تعيين جميع البيانات؟ سيتم فقدان جميع الأرباح والإحصائيات.')) {
+                localStorage.removeItem('adEarningsData');
+                localStorage.removeItem('adsgram_user_id');
+                userData = {
+                    earnings: 0,
+                    adsWatched: 0,
+                    maxAds: 250,
+                    earningsPerAd: 0.00002,
+                    walletAddress: '',
+                    transactions: [],
+                    useBackupAds: false,
+                    lastAdIndex: 0,
+                    connectionTested: false
+                };
+                debugLog = [];
+                updateUI();
+                updateConnectionStatus('🔄 جاري الاتصال بـ AdsGram...', 'info');
+                showMessage('✅ تم إعادة تعيين البيانات بنجاح');
             }
         }
 
@@ -906,7 +1027,7 @@
         }
 
         function generateUserId() {
-            if (tg.initDataUnsafe.user) {
+            if (tg && tg.initDataUnsafe && tg.initDataUnsafe.user) {
                 return 'tg_' + tg.initDataUnsafe.user.id;
             }
             let userId = localStorage.getItem('adsgram_user_id');
@@ -932,39 +1053,6 @@
             elements.adContent.innerHTML = `<div class="error-message">${message}</div>`;
         }
 
-        // 🔧 إعادة تعيين البيانات
-        function resetAppData() {
-            if (confirm('هل أنت متأكد من إعادة تعيين جميع البيانات؟ سيتم فقدان جميع الأرباح والإحصائيات.')) {
-                localStorage.removeItem('adEarningsData');
-                localStorage.removeItem('adsgram_user_id');
-                userData = {
-                    earnings: 0,
-                    adsWatched: 0,
-                    maxAds: 250,
-                    earningsPerAd: 0.00002,
-                    walletAddress: '',
-                    transactions: [],
-                    useBackupAds: false,
-                    lastAdIndex: 0
-                };
-                updateUI();
-                showMessage('✅ تم إعادة تعيين البيانات بنجاح');
-            }
-        }
-
-        // 🔍 عرض معلومات التصحيح
-        function showDebugInfo() {
-            const debugInfo = `
-الإعدادات الحالية:
-- الأرباح: ${userData.earnings}
-- الإعلانات المشاهدة: ${userData.adsWatched}
-- استخدام الإعلانات الاحتياطية: ${userData.useBackupAds}
-- معرف المستخدم: ${generateUserId()}
-- اتصال AdsGram: ${connectionTested ? 'تم الاختبار' : 'لم يتم الاختبار'}
-            `;
-            alert(debugInfo);
-        }
-
         // 🚀 تهيئة التطبيق
         loadUserData();
 
@@ -974,9 +1062,10 @@
         window.showPage = showPage;
         window.checkWithdrawButton = checkWithdrawButton;
         window.testAdsGramConnection = testAdsGramConnection;
-        window.useBackupAds = useBackupAds;
+        window.forceBackupAd = forceBackupAd;
+        window.showApiTest = showApiTest;
         window.resetAppData = resetAppData;
-        window.showDebugInfo = showDebugInfo;
+        window.withdrawEarnings = withdrawEarnings;
     </script>
 </body>
-</html> 
+</html>
