@@ -247,35 +247,6 @@
             margin-bottom: 15px;
             border: 2px solid #0088cc;
         }
-
-        .csv-section {
-            background: #002266;
-            border-radius: 10px;
-            padding: 15px;
-            margin: 15px 0;
-            border: 1px solid #0088cc;
-        }
-
-        .csv-button {
-            background: linear-gradient(135deg, #ff8800, #ffaa00);
-            color: white;
-            border: none;
-            padding: 12px 20px;
-            border-radius: 10px;
-            font-size: 16px;
-            font-weight: bold;
-            cursor: pointer;
-            width: 100%;
-            margin: 5px 0;
-            transition: all 0.3s ease;
-        }
-
-        .info-text {
-            color: #0088cc;
-            font-size: 14px;
-            margin: 10px 0;
-            text-align: center;
-        }
     </style>
 </head>
 <body>
@@ -288,7 +259,6 @@
         <div class="nav">
             <button class="nav-btn active" onclick="showPage('earn')">💰 الربح</button>
             <button class="nav-btn" onclick="showPage('withdraw')">🎯 السحب</button>
-            <button class="nav-btn" onclick="showPage('reports')">📊 التقارير</button>
         </div>
 
         <!-- صفحة الربح -->
@@ -302,7 +272,7 @@
                     <div class="progress" id="progressBar" style="width: 0%"></div>
                 </div>
 
-                <button class="tg-button" id="watchAdBtn" onclick="loadAd()">
+                <button class="tg-button" id="watchAdBtn" onclick="watchAd()">
                     👁️ مشاهدة إعلان (+0.00002 USDT)
                 </button>
             </div>
@@ -356,67 +326,12 @@
             </div>
         </div>
 
-        <!-- صفحة التقارير -->
-        <div id="reportsPage" class="page">
-            <div class="card">
-                <h2>📊 تقارير AdsGram</h2>
-                <p style="color: #666; margin-bottom: 20px;">تصدير تقارير CSV لتحويل الأرباح</p>
-                
-                <div class="csv-section">
-                    <h3>📈 تقرير الإحصائيات</h3>
-                    <p class="info-text">هذا التقرير مطلوب لتحويل الأرباح من AdsGram</p>
-                    
-                    <button class="csv-button" onclick="generateCSVReport()">
-                        📥 تصدير تقرير CSV
-                    </button>
-                    
-                    <button class="csv-button" onclick="viewCSVPreview()" style="background: linear-gradient(135deg, #0088cc, #00cc88);">
-                        👁️ معاينة التقرير
-                    </button>
-                </div>
-
-                <div class="stats">
-                    <div class="stat-item">
-                        <div>إجمالي المشاهدات</div>
-                        <div class="stat-value" id="totalImpressions">0</div>
-                    </div>
-                    <div class="stat-item">
-                        <div>إجمالي النقرات</div>
-                        <div class="stat-value" id="totalClicks">0</div>
-                    </div>
-                    <div class="stat-item">
-                        <div>معدل النقر</div>
-                        <div class="stat-value" id="ctrRate">0%</div>
-                    </div>
-                    <div class="stat-item">
-                        <div>متوسط CPM</div>
-                        <div class="stat-value" id="avgCPM">0.00</div>
-                    </div>
-                </div>
-
-                <div id="csvPreview" style="display: none; margin-top: 20px;">
-                    <h4>معاينة CSV:</h4>
-                    <div style="background: #222; padding: 15px; border-radius: 10px; font-family: monospace; font-size: 12px; overflow-x: auto;">
-                        <pre id="csvContent"></pre>
-                    </div>
-                </div>
-            </div>
-        </div>
-
         <div class="footer">
-            <p>Powered by BSC Network | AdsGram Integration</p>
+            <p>Powered by BSC Network</p>
         </div>
     </div>
 
     <script>
-        // 🔧 إعدادات AdsGram
-        const ADSGRAM_CONFIG = {
-            platform_id: "14378",
-            publisher_id: "9433d959669549219f6d319217fbd00d", 
-            block_id: "int-16035",
-            base_url: "https://api.adsgram.ai"
-        };
-
         // بيانات التطبيق
         let userData = {
             earnings: 0,
@@ -424,15 +339,47 @@
             maxAds: 250,
             earningsPerAd: 0.00002,
             walletAddress: '',
-            transactions: [],
-            stats: {
-                impressions: 0,
-                clicks: 0,
-                totalEarned: 0,
-                cpm: 20.00, // متوسط CPM افتراضي
-                ctr: 0
-            }
+            transactions: []
         };
+
+        // إعلانات محلية تعمل فوراً
+        const localAds = [
+            {
+                id: 1,
+                title: "🛒 متجر إلكتروني",
+                description: "خصم 20% على جميع المنتجات - عرض محدود",
+                image: "https://images.unsplash.com/photo-1563013544-824ae1b704d3?w=300&h=150&fit=crop",
+                duration: 5
+            },
+            {
+                id: 2,
+                title: "📱 تطبيق جديد", 
+                description: "حمل التطبيق واحصل على مكافأة مجانية",
+                image: "https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?w=300&h=150&fit=crop",
+                duration: 5
+            },
+            {
+                id: 3,
+                title: "🎮 لعبة جديدة",
+                description: "العب الآن وفوز بجوائز قيمة تصل إلى 1000$",
+                image: "https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=300&h=150&fit=crop",
+                duration: 5
+            },
+            {
+                id: 4,
+                title: "💳 خدمة دفع",
+                description: "خدمة دفع آمنة وسريعة مع عمولات منخفضة",
+                image: "https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=300&h=150&fit=crop",
+                duration: 5
+            },
+            {
+                id: 5,
+                title: "📊 منصة تداول",
+                description: "ابدأ التداول اليوم واحصل على مكافأة ترحيب",
+                image: "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=300&h=150&fit=crop",
+                duration: 5
+            }
+        ];
 
         let adTimerInterval = null;
 
@@ -445,7 +392,6 @@
         const elements = {
             earnPage: document.getElementById('earnPage'),
             withdrawPage: document.getElementById('withdrawPage'),
-            reportsPage: document.getElementById('reportsPage'),
             currentEarnings: document.getElementById('currentEarnings'),
             adsCounter: document.getElementById('adsCounter'),
             progressBar: document.getElementById('progressBar'),
@@ -456,171 +402,54 @@
             withdrawBalance: document.getElementById('withdrawBalance'),
             walletAddress: document.getElementById('walletAddress'),
             withdrawBtn: document.getElementById('withdrawBtn'),
-            transactionsList: document.getElementById('transactionsList'),
-            totalImpressions: document.getElementById('totalImpressions'),
-            totalClicks: document.getElementById('totalClicks'),
-            ctrRate: document.getElementById('ctrRate'),
-            avgCPM: document.getElementById('avgCPM'),
-            csvPreview: document.getElementById('csvPreview'),
-            csvContent: document.getElementById('csvContent')
+            transactionsList: document.getElementById('transactionsList')
         };
 
-        // 👁️ مشاهدة إعلان
-        async function loadAd() {
+        // 👁️ مشاهدة إعلان - تعمل فوراً
+        function watchAd() {
             if (userData.adsWatched >= userData.maxAds) {
                 alert('🎯 لقد وصلت للحد الأقصى اليومي (250 إعلان)');
                 return;
             }
 
             elements.watchAdBtn.disabled = true;
-            elements.adContent.innerHTML = '<div class="loading">⏳ جاري تحميل الإعلان...</div>';
-
-            try {
-                const ad = await loadAdsGramAd();
-                if (ad && ad.success) {
-                    showAdsGramAd(ad.data);
-                } else {
-                    throw new Error('فشل في جلب الإعلان');
-                }
-            } catch (error) {
-                console.error('خطأ في AdsGram:', error);
-                showLocalAd();
-            }
-        }
-
-        // 📥 محاولة جلب إعلان من AdsGram
-        async function loadAdsGramAd() {
-            try {
-                const url = `${ADSGRAM_CONFIG.base_url}/widget/${ADSGRAM_CONFIG.block_id}/ad`;
-                
-                const params = new URLSearchParams({
-                    platform_id: ADSGRAM_CONFIG.platform_id,
-                    publisher_id: ADSGRAM_CONFIG.publisher_id,
-                    user_id: generateUserId(),
-                    click_id: generateClickId()
-                });
-
-                const fullUrl = `${url}?${params}`;
-                console.log('🔄 جلب إعلان من:', fullUrl);
-
-                const response = await fetch(fullUrl, {
-                    method: 'GET',
-                    headers: {
-                        'Accept': 'application/json',
-                    }
-                });
-
-                if (!response.ok) {
-                    throw new Error(`خطأ ${response.status}`);
-                }
-
-                return await response.json();
-
-            } catch (error) {
-                throw error;
-            }
-        }
-
-        // 🎬 عرض إعلان AdsGram
-        function showAdsGramAd(ad) {
-            userData.stats.impressions++;
             
-            let cleanText = '';
-            if (ad.text_html) {
-                cleanText = ad.text_html.replace(/<[^>]*>/g, '');
-            } else if (ad.description) {
-                cleanText = ad.description;
-            }
-            
-            elements.adContent.innerHTML = `
-                <div style="text-align: center;">
-                    ${ad.image_url ? `<img src="${ad.image_url}" alt="الإعلان" class="ad-image" onerror="this.style.display='none'">` : ''}
-                    
-                    <h3 style="color: #0088cc; margin-bottom: 10px;">${ad.button_name || 'مهمة إعلانية'}</h3>
-                    
-                    <div style="color: #ccc; line-height: 1.5; margin: 10px 0; font-size: 14px; text-align: right;">
-                        ${cleanText || 'أكمل المهمة للحصول على المكافأة'}
-                    </div>
-                    
-                    <div class="ad-timer" id="adTimer">5</div>
-                    <p style="color: #666; font-size: 12px; margin: 5px 0;">شاهد الإعلان لمدة 5 ثوانٍ</p>
-                    
-                    <div style="margin-top: 15px;">
-                        ${ad.click_url ? `
-                            <button class="tg-button" onclick="handleAdClick('${ad.click_url}')" style="background: #0088cc; margin-bottom: 10px;">
-                                ${ad.button_name || '📝 ابدأ المهمة'}
-                            </button>
-                        ` : ''}
-                        
-                        <button class="tg-button" onclick="completeAdWatch()" id="rewardBtn" disabled style="background: #00cc88;">
-                            🎁 احصل على ${userData.earningsPerAd} USDT
-                        </button>
-                    </div>
-                </div>
-            `;
-
-            startAdTimer();
-        }
-
-        // 📋 عرض إعلان محلي
-        function showLocalAd() {
-            userData.stats.impressions++;
-            
-            const localAds = [
-                {
-                    title: "🛒 متجر إلكتروني",
-                    description: "خصم 20% على جميع المنتجات - عرض محدود"
-                },
-                {
-                    title: "📱 تطبيق جديد", 
-                    description: "حمل التطبيق واحصل على مكافأة مجانية"
-                },
-                {
-                    title: "🎮 لعبة جديدة",
-                    description: "العب الآن وفوز بجوائز قيمة تصل إلى 1000$"
-                }
-            ];
-
+            // اختيار إعلان عشوائي فوراً
             const randomAd = localAds[Math.floor(Math.random() * localAds.length)];
-            
+            showAd(randomAd);
+        }
+
+        // 🎬 عرض الإعلان
+        function showAd(ad) {
             elements.adContent.innerHTML = `
                 <div style="text-align: center;">
-                    <h3 style="color: #0088cc; margin-bottom: 10px;">${randomAd.title}</h3>
-                    
-                    <div style="color: #ccc; line-height: 1.5; margin: 10px 0; font-size: 14px;">
-                        ${randomAd.description}
+                    <div style="background: linear-gradient(135deg, #0088cc, #00cc88); padding: 10px; border-radius: 10px; margin-bottom: 15px;">
+                        <h3 style="color: white; margin: 0;">${ad.title}</h3>
                     </div>
                     
-                    <div class="ad-timer" id="adTimer">5</div>
-                    <p style="color: #666; font-size: 12px; margin: 5px 0;">شاهد الإعلان لمدة 5 ثوانٍ</p>
-                    
-                    <div style="margin-top: 15px;">
-                        <button class="tg-button" onclick="completeAdWatch()" id="rewardBtn" disabled style="background: #00cc88;">
-                            🎁 احصل على ${userData.earningsPerAd} USDT
-                        </button>
+                    <div style="color: #ccc; line-height: 1.5; margin: 10px 0; font-size: 14px; padding: 0 10px;">
+                        ${ad.description}
                     </div>
+                    
+                    <div class="ad-timer" id="adTimer">${ad.duration}</div>
+                    <p style="color: #666; font-size: 12px; margin: 5px 0;">شاهد الإعلان لمدة ${ad.duration} ثوانٍ</p>
+                    
+                    <button class="tg-button" onclick="completeAdWatch()" id="rewardBtn" disabled style="background: #00cc88; margin-top: 10px;">
+                        🎁 احصل على ${userData.earningsPerAd} USDT
+                    </button>
                 </div>
             `;
 
-            startAdTimer();
-        }
-
-        // 🖱️ التعامل مع نقرات الإعلان
-        function handleAdClick(clickUrl) {
-            userData.stats.clicks++;
-            updateStats();
-            if (clickUrl) {
-                window.open(clickUrl, '_blank');
-            }
-            tg.HapticFeedback.impactOccurred('medium');
+            startAdTimer(ad.duration);
         }
 
         // ⏱️ بدء مؤقت الإعلان
-        function startAdTimer() {
-            let timeLeft = 5;
+        function startAdTimer(duration) {
+            let timeLeft = duration;
             const adTimerElement = document.getElementById('adTimer');
             const rewardBtn = document.getElementById('rewardBtn');
             
+            // إعادة تعيين المؤقت السابق
             if (adTimerInterval) {
                 clearInterval(adTimerInterval);
             }
@@ -638,6 +467,8 @@
                     adTimerElement.textContent = "✓ جاهز";
                     adTimerElement.style.color = "#00ff88";
                     rewardBtn.disabled = false;
+                    
+                    // تأثير الاهتزاز
                     tg.HapticFeedback.impactOccurred('light');
                 }
             }, 1000);
@@ -645,10 +476,11 @@
 
         // ✅ إكمال مشاهدة الإعلان
         function completeAdWatch() {
+            // منح المكافأة للمستخدم
             userData.adsWatched++;
             userData.earnings += userData.earningsPerAd;
-            userData.stats.totalEarned += userData.earningsPerAd;
 
+            // تسجيل المعاملة
             userData.transactions.unshift({
                 type: 'earning',
                 amount: userData.earningsPerAd,
@@ -658,9 +490,9 @@
 
             saveUserData();
             updateUI();
-            updateStats();
             elements.watchAdBtn.disabled = false;
 
+            // عرض رسالة النجاح
             elements.adContent.innerHTML = `
                 <div class="success-message">
                     <h3>✅ تمت المكافأة!</h3>
@@ -669,75 +501,17 @@
                 </div>
             `;
             
+            // تأثير الاهتزاز
             tg.HapticFeedback.impactOccurred('success');
-        }
-
-        // 📊 إنشاء تقرير CSV
-        function generateCSVReport() {
-            const csvData = generateCSVData();
-            const blob = new Blob([csvData], { type: 'text/csv;charset=utf-8;' });
-            const link = document.createElement('a');
-            const url = URL.createObjectURL(blob);
-            
-            link.setAttribute('href', url);
-            link.setAttribute('download', `adsgram_report_${getCurrentDate()}.csv`);
-            link.style.visibility = 'hidden';
-            
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            
-            alert('✅ تم تصدير تقرير CSV بنجاح!');
-        }
-
-        // 👁️ معاينة تقرير CSV
-        function viewCSVPreview() {
-            const csvData = generateCSVData();
-            elements.csvContent.textContent = csvData;
-            elements.csvPreview.style.display = 'block';
-        }
-
-        // 📈 توليد بيانات CSV
-        function generateCSVData() {
-            const currentDate = new Date().toISOString().split('T')[0];
-            const impressions = userData.stats.impressions;
-            const clicks = userData.stats.clicks;
-            const ctr = impressions > 0 ? (clicks / impressions * 100).toFixed(2) : '0.00';
-            const earned = userData.stats.totalEarned.toFixed(5);
-            const cpm = userData.stats.cpm.toFixed(2);
-            const cpc = impressions > 0 ? (userData.stats.totalEarned / impressions * 1000).toFixed(4) : '0.0000';
-            const fillRate = '100.00'; // نسبة التعبئة الافتراضية
-
-            // رأس CSV حسب تنسيق AdsGram
-            const header = 'dateTime,Impressions,Clicks,CPM,CPC,CTR,Fill Rate,Earned';
-            
-            // بيانات الصف
-            const row = `${currentDate},${impressions},${clicks},${cpm},${cpc},${ctr},${fillRate},${earned}`;
-            
-            return `${header}\n${row}`;
-        }
-
-        // 🔄 تحديث الإحصائيات
-        function updateStats() {
-            const impressions = userData.stats.impressions;
-            const clicks = userData.stats.clicks;
-            const ctr = impressions > 0 ? (clicks / impressions * 100).toFixed(1) : 0;
-
-            elements.totalImpressions.textContent = impressions;
-            elements.totalClicks.textContent = clicks;
-            elements.ctrRate.textContent = `${ctr}%`;
-            elements.avgCPM.textContent = userData.stats.cpm.toFixed(2);
         }
 
         // 💾 تحميل البيانات المحفوظة
         function loadUserData() {
             const saved = localStorage.getItem('adEarningsData');
             if (saved) {
-                const data = JSON.parse(saved);
-                userData = { ...userData, ...data };
+                userData = JSON.parse(saved);
             }
             updateUI();
-            updateStats();
         }
 
         // 💾 حفظ البيانات
@@ -753,7 +527,11 @@
             elements.totalEarnings.textContent = userData.earnings.toFixed(5);
             elements.todayAds.textContent = userData.adsWatched;
             elements.withdrawBalance.textContent = userData.earnings.toFixed(5) + ' USDT';
+
+            // تفعيل/تعطيل زر السحب
             elements.withdrawBtn.disabled = userData.earnings < 1 || !elements.walletAddress.value;
+
+            // تحديث قائمة المعاملات
             updateTransactions();
         }
 
@@ -820,8 +598,6 @@
         function showPage(pageName) {
             elements.earnPage.classList.remove('active');
             elements.withdrawPage.classList.remove('active');
-            elements.reportsPage.classList.remove('active');
-            elements.csvPreview.style.display = 'none';
 
             document.querySelectorAll('.nav-btn').forEach(btn => {
                 btn.classList.remove('active');
@@ -830,32 +606,17 @@
             if (pageName === 'earn') {
                 elements.earnPage.classList.add('active');
                 document.querySelector('.nav-btn:nth-child(1)').classList.add('active');
-            } else if (pageName === 'withdraw') {
+            } else {
                 elements.withdrawPage.classList.add('active');
                 document.querySelector('.nav-btn:nth-child(2)').classList.add('active');
-            } else {
-                elements.reportsPage.classList.add('active');
-                document.querySelector('.nav-btn:nth-child(3)').classList.add('active');
             }
         }
 
-        // 🆔 توليد معرفات فريدة
-        function generateUserId() {
-            return 'user_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-        }
-
-        function generateClickId() {
-            return 'click_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-        }
-
+        // 🆔 توليد هاش عشوائي
         function generateRandomHash() {
             return '0x' + Array.from({length: 64}, () => 
                 Math.floor(Math.random() * 16).toString(16)
             ).join('');
-        }
-
-        function getCurrentDate() {
-            return new Date().toISOString().split('T')[0];
         }
 
         // 🎯 أحداث المستخدم
@@ -866,9 +627,6 @@
 
         // 🚀 تهيئة التطبيق
         loadUserData();
-
-        // تعيين الدوال ككائن عام للاستدعاء من الأزرار
-        window.handleAdClick = handleAdClick;
     </script>
 </body>
 </html>
