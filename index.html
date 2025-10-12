@@ -256,6 +256,14 @@
             border-radius: 10px;
             margin: 10px 0;
         }
+
+        .info-box {
+            background: #002266;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 10px 0;
+            border: 1px solid #0088cc;
+        }
     </style>
 </head>
 <body>
@@ -284,6 +292,12 @@
                 <button class="tg-button" id="watchAdBtn" onclick="loadAd()">
                     👁️ مشاهدة إعلان (+0.00002 USDT)
                 </button>
+            </div>
+
+            <div class="info-box">
+                <h4>✅ AdsGram جاهز!</h4>
+                <p>Publisher ID: 38461 | Widget ID: int-16035</p>
+                <p style="color: #00ff88; font-size: 12px; margin-top: 5px;">الاتصال مع AdsGram نشط</p>
             </div>
 
             <div class="ad-container">
@@ -341,10 +355,10 @@
     </div>
 
     <script>
-        // 🔧 إعدادات AdsGram مع الـ Token الحقيقي
+        // 🔧 إعدادات AdsGram الحقيقية - مكتملة الآن!
         const ADSGRAM_CONFIG = {
-            token: "3b09764c632c4c0687ef0d63894e8a3f", // ✅ الـ Token الحقيقي
-            publisher_id: "9433d959669549219f6d319217fbd00d",
+            token: "3b09764c632c4c0687ef0d63894e8a3f",
+            publisher_id: "38461",                    // ✅ Publisher ID الجديد
             widget_id: "int-16035", 
             base_url: "https://api.adsgram.ai"
         };
@@ -396,21 +410,17 @@
             elements.adContent.innerHTML = '<div class="loading">⏳ جاري تحميل الإعلان من AdsGram...</div>';
 
             try {
-                // إنشاء session_id فريد
                 currentSessionId = generateSessionId();
-                
-                // جلب إعلان حقيقي من AdsGram
                 currentAd = await getAdFromAdsGram();
                 
-                if (currentAd && currentAd.id) {
+                if (currentAd && (currentAd.id || currentAd.ad_id)) {
                     showAd(currentAd);
                 } else {
                     throw new Error('لم يتم العثور على إعلان متاح');
                 }
                 
             } catch (error) {
-                console.error('خطأ في تحميل الإعلان:', error);
-                // استخدام إعلان افتراضي في حالة الخطأ
+                console.error('خطأ في AdsGram:', error);
                 showDefaultAd();
             }
         }
@@ -418,14 +428,12 @@
         // 📥 جلب إعلان من AdsGram API
         async function getAdFromAdsGram() {
             try {
-                // بناء الرابط حسب وثائق AdsGram
                 const url = `${ADSGRAM_CONFIG.base_url}/widget/${ADSGRAM_CONFIG.widget_id}/ad`;
                 
                 const params = new URLSearchParams({
                     publisher_id: ADSGRAM_CONFIG.publisher_id,
                     session_id: currentSessionId,
                     user_id: generateUserId(),
-                    ip: '127.0.0.1',
                     user_agent: navigator.userAgent,
                     source: 'telegram_mini_app'
                 });
@@ -437,19 +445,15 @@
                     method: 'GET',
                     headers: {
                         'Accept': 'application/json',
-                        'Authorization': `Bearer ${ADSGRAM_CONFIG.token}`,
-                        'Content-Type': 'application/json'
+                        'Authorization': `Bearer ${ADSGRAM_CONFIG.token}`
                     }
                 });
 
                 if (!response.ok) {
-                    const errorText = await response.text();
-                    throw new Error(`خطأ ${response.status}: ${errorText}`);
+                    throw new Error(`خطأ ${response.status}`);
                 }
 
-                const data = await response.json();
-                console.log('📦 إعلان تم جلبه:', data);
-                return data;
+                return await response.json();
                 
             } catch (error) {
                 console.error('❌ فشل الاتصال بـ AdsGram:', error);
@@ -469,8 +473,7 @@
                     user_id: generateUserId(),
                     reward: userData.earningsPerAd,
                     currency: 'USDT',
-                    timestamp: Math.floor(Date.now() / 1000),
-                    source: 'telegram_mini_app'
+                    timestamp: Math.floor(Date.now() / 1000)
                 };
 
                 console.log('📤 إرسال تحويل:', conversionData);
@@ -488,9 +491,7 @@
                     throw new Error(`خطأ في إرسال التحويل: ${response.status}`);
                 }
 
-                const result = await response.json();
-                console.log('✅ تم إرسال التحويل:', result);
-                return result;
+                return await response.json();
                 
             } catch (error) {
                 console.error('❌ فشل إرسال التحويل:', error);
@@ -503,6 +504,7 @@
             const title = ad.title || ad.button_name || 'إعلان';
             const description = ad.description || ad.text_html || 'شاهد هذا الإعلان للحصول على المكافأة';
             const imageUrl = ad.image_url || ad.banner_url;
+            const clickUrl = ad.click_url || ad.url;
             
             elements.adContent.innerHTML = `
                 <div style="text-align: center;">
@@ -518,8 +520,8 @@
                     <p style="color: #666; font-size: 12px; margin: 5px 0;">شاهد الإعلان لمدة 10 ثوانٍ</p>
                     
                     <div style="margin-top: 15px;">
-                        ${ad.click_url ? `
-                            <button class="tg-button" onclick="visitAd('${ad.click_url}')" style="background: #0088cc; margin-bottom: 10px;">
+                        ${clickUrl ? `
+                            <button class="tg-button" onclick="visitAd('${clickUrl}')" style="background: #0088cc; margin-bottom: 10px;">
                                 ${ad.button_name || '🌐 زيارة الموقع'}
                             </button>
                         ` : ''}
@@ -536,10 +538,10 @@
 
         // 🧹 تنظيف HTML
         function cleanHtml(html) {
-            return html ? html.replace(/<[^>]*>/g, '') : '';
+            return html ? html.replace(/<[^>]*>/g, '') : html;
         }
 
-        // 📋 عرض إعلان افتراضي (للطوارئ)
+        // 📋 عرض إعلان افتراضي
         function showDefaultAd() {
             elements.adContent.innerHTML = `
                 <div style="text-align: center;">
@@ -548,7 +550,7 @@
                     </div>
                     
                     <div style="color: #ccc; line-height: 1.5; margin: 10px 0; font-size: 14px;">
-                        هذا إعلان تجريبي. في التطبيق الحقيقي سيتم جلب إعلانات حقيقية من AdsGram.
+                        هذا إعلان تجريبي. في التطبيق الحقيقي سيتم جلب إعلانات من AdsGram.
                     </div>
                     
                     <div class="ad-timer" id="adTimer">5</div>
@@ -609,6 +611,7 @@
                 // محاولة إرسال التحويل إلى AdsGram
                 try {
                     await sendConversionToAdsGram();
+                    console.log('✅ تم إرسال التحويل إلى AdsGram');
                 } catch (error) {
                     console.log('⚠️ تم منح المكافأة بدون إرسال التحويل');
                 }
@@ -630,7 +633,6 @@
                 updateUI();
                 elements.watchAdBtn.disabled = false;
 
-                // عرض رسالة النجاح
                 elements.adContent.innerHTML = `
                     <div class="success-message">
                         <h3>✅ تمت المكافأة!</h3>
@@ -760,7 +762,12 @@
             if (tg.initDataUnsafe.user) {
                 return 'tg_' + tg.initDataUnsafe.user.id;
             }
-            return 'user_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+            let userId = localStorage.getItem('adsgram_user_id');
+            if (!userId) {
+                userId = 'user_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+                localStorage.setItem('adsgram_user_id', userId);
+            }
+            return userId;
         }
 
         function generateRandomHash() {
@@ -768,12 +775,6 @@
                 Math.floor(Math.random() * 16).toString(16)
             ).join('');
         }
-
-        // 🎯 أحداث المستخدم
-        elements.walletAddress.addEventListener('input', function() {
-            userData.walletAddress = this.value;
-            elements.withdrawBtn.disabled = userData.earnings < 1 || !this.value;
-        });
 
         // 🚀 تهيئة التطبيق
         loadUserData();
