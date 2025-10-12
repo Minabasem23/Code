@@ -5,17 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ربح من الإعلانات</title>
     
-    <!-- Telegram Web App SDK -->
+    <!-- الخطوة 1: Telegram Web App SDK -->
     <script src="https://telegram.org/js/telegram-web-app.js?56"></script>
     
-    <!-- Adexium Ads Script -->
+    <!-- الخطوة 2: Adexium Ads Script -->
     <script type="text/javascript" src="https://cdn.tgads.space/assets/js/adexium-widget.min.js"></script>
-    <script type="text/javascript">
-        document.addEventListener('DOMContentLoaded', () => {
-            const adexiumWidget = new AdexiumWidget({wid: 'a7f6955f-037f-43af-a0b7-f144c36abea5', adFormat: 'interstitial'});
-            adexiumWidget.autoMode();
-        });
-    </script>
     
     <style>
         * {
@@ -259,6 +253,29 @@
             opacity: 0.8;
         }
         
+        .ad-status {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 5px;
+            text-align: center;
+            font-size: 14px;
+        }
+        
+        .status-loading {
+            background-color: #ffa500;
+            color: #000;
+        }
+        
+        .status-ready {
+            background-color: #4CAF50;
+            color: #fff;
+        }
+        
+        .status-error {
+            background-color: #ff4757;
+            color: #fff;
+        }
+        
         footer {
             text-align: center;
             margin-top: 30px;
@@ -317,7 +334,12 @@
                 <div class="ad-icon">📱</div>
                 <div class="ad-title">شاهد الإعلان واربح</div>
                 <div class="ad-description">شاهد الإعلان بالكامل لتحصل على 0.00002 USDT</div>
-                <button class="watch-btn" id="watch-ad-btn">شاهد الإعلان الآن</button>
+                
+                <div id="ad-status" class="ad-status status-loading">
+                    جاري تحميل الإعلانات...
+                </div>
+                
+                <button class="watch-btn" id="watch-ad-btn" disabled>جاري التحميل...</button>
                 
                 <div class="progress-container">
                     <div class="progress-label">
@@ -380,17 +402,13 @@
     </div>
 
     <script>
-        // تهيئة Telegram Web App
-        const tg = window.Telegram.WebApp;
-        tg.expand();
-        tg.enableClosingConfirmation();
-        
         // بيانات التطبيق
         let userData = {
             balance: 0,
             adsWatched: 0,
             adsLimit: 250,
-            walletAddress: ''
+            walletAddress: '',
+            lastAdWatch: null
         };
         
         // عناصر الواجهة
@@ -402,6 +420,10 @@
         const watchAdBtn = document.getElementById('watch-ad-btn');
         const walletAddressInput = document.getElementById('wallet-address');
         const withdrawBtn = document.getElementById('withdraw-btn');
+        const adStatus = document.getElementById('ad-status');
+        
+        // Adexium Widget
+        let adexiumWidget = null;
         
         // التبويبات
         const tabs = document.querySelectorAll('.tab');
@@ -433,6 +455,8 @@
             if (userData.adsWatched >= userData.adsLimit) {
                 watchAdBtn.disabled = true;
                 watchAdBtn.textContent = 'وصلت للحد الأقصى اليوم';
+                adStatus.className = 'ad-status status-error';
+                adStatus.textContent = 'وصلت للحد الأقصى اليوم من الإعلانات';
             }
             
             // تفعيل زر السحب إذا كان الرصيد كافياً والعنوان مملوء
@@ -443,50 +467,107 @@
             }
         }
         
+        // تهيئة Adexium
+        function initAdexium() {
+            try {
+                adexiumWidget = new AdexiumWidget({
+                    wid: 'a7f6955f-037f-43af-a0b7-f144c36abea5', 
+                    adFormat: 'interstitial'
+                });
+                
+                // تفعيل وضع التلقائي
+                adexiumWidget.autoMode();
+                
+                // تحديث حالة الإعلانات
+                adStatus.className = 'ad-status status-ready';
+                adStatus.textContent = 'الإعلانات جاهزة للمشاهدة';
+                watchAdBtn.disabled = false;
+                watchAdBtn.textContent = 'شاهد الإعلان الآن';
+                
+                console.log('Adexium Widget initialized successfully');
+                
+            } catch (error) {
+                console.error('Error initializing Adexium:', error);
+                adStatus.className = 'ad-status status-error';
+                adStatus.textContent = 'خطأ في تحميل الإعلانات. يرجى المحاولة لاحقاً.';
+                watchAdBtn.disabled = true;
+                watchAdBtn.textContent = 'تعذر تحميل الإعلانات';
+            }
+        }
+        
         // مشاهدة إعلان
         watchAdBtn.addEventListener('click', () => {
-            if (userData.adsWatched < userData.adsLimit) {
-                // محاكاة مشاهدة الإعلان
+            if (userData.adsWatched < userData.adsLimit && adexiumWidget) {
                 watchAdBtn.disabled = true;
                 watchAdBtn.textContent = 'جاري تحميل الإعلان...';
                 
-                setTimeout(() => {
-                    // بعد انتهاء الإعلان
-                    userData.balance += 0.00002;
-                    userData.adsWatched++;
+                try {
+                    // Adexium سيعرض الإعلان تلقائياً في وضع autoMode
+                    // نحتاج لتتبع عندما ينتهي الإعلان
                     
+                    // محاكاة انتظار انتهاء الإعلان (في الواقع، يجب استخدام callbacks)
+                    setTimeout(() => {
+                        // بعد انتهاء الإعلان
+                        userData.balance += 0.00002;
+                        userData.adsWatched++;
+                        userData.lastAdWatch = new Date();
+                        
+                        updateUI();
+                        saveUserData();
+                        
+                        watchAdBtn.disabled = false;
+                        watchAdBtn.textContent = 'شاهد الإعلان الآن';
+                        
+                        // إشعار بنجاح مشاهدة الإعلان
+                        showNotification('تهانينا! لقد ربحت 0.00002 USDT من مشاهدة الإعلان');
+                        
+                    }, 30000); // افترض أن الإعلان استغرق 30 ثانية
+                    
+                } catch (error) {
+                    console.error('Error showing ad:', error);
+                    adStatus.className = 'ad-status status-error';
+                    adStatus.textContent = 'خطأ في عرض الإعلان';
                     watchAdBtn.disabled = false;
                     watchAdBtn.textContent = 'شاهد الإعلان الآن';
-                    
-                    updateUI();
-                    
-                    // إشعار بنجاح مشاهدة الإعلان
-                    alert('تهانينا! لقد ربحت 0.00002 USDT من مشاهدة الإعلان');
-                }, 3000);
+                }
             }
         });
+        
+        // إشعار
+        function showNotification(message) {
+            if (window.Telegram && window.Telegram.WebApp) {
+                window.Telegram.WebApp.showPopup({
+                    title: 'نجاح',
+                    message: message,
+                    buttons: [{ type: 'ok' }]
+                });
+            } else {
+                alert(message);
+            }
+        }
         
         // تحديث عنوان المحفظة
         walletAddressInput.addEventListener('input', () => {
             userData.walletAddress = walletAddressInput.value;
             updateUI();
+            saveUserData();
         });
         
         // سحب الأرباح
         withdrawBtn.addEventListener('click', () => {
             if (userData.balance >= 0.1 && userData.walletAddress.trim() !== '') {
-                // محاكاة عملية السحب
                 withdrawBtn.disabled = true;
                 withdrawBtn.textContent = 'جاري المعالجة...';
                 
                 setTimeout(() => {
-                    alert(`تم طلب سحب ${userData.balance.toFixed(5)} USDT إلى العنوان: ${userData.walletAddress}\nسيتم تحويل المبلغ خلال 24 ساعة`);
+                    showNotification(`تم طلب سحب ${userData.balance.toFixed(5)} USDT إلى العنوان: ${userData.walletAddress}\nسيتم تحويل المبلغ خلال 24 ساعة`);
                     
                     // إعادة تعيين البيانات بعد السحب
                     userData.balance = 0;
                     userData.adsWatched = 0;
                     
                     updateUI();
+                    saveUserData();
                     
                     withdrawBtn.disabled = true;
                     withdrawBtn.textContent = 'سحب الأرباح';
@@ -494,9 +575,54 @@
             }
         });
         
-        // تهيئة الواجهة عند التحميل
-        document.addEventListener('DOMContentLoaded', () => {
+        // تحميل البيانات المحفوظة
+        function loadUserData() {
+            const savedData = localStorage.getItem('adRewardAppData');
+            if (savedData) {
+                const parsedData = JSON.parse(savedData);
+                const today = new Date().toDateString();
+                const lastWatchDate = parsedData.lastAdWatch ? new Date(parsedData.lastAdWatch).toDateString() : null;
+                
+                // إعادة تعيين العدادات إذا كان اليوم مختلف
+                if (lastWatchDate !== today) {
+                    userData.adsWatched = 0;
+                } else {
+                    userData.adsWatched = parsedData.adsWatched;
+                }
+                
+                userData.balance = parsedData.balance || 0;
+                userData.walletAddress = parsedData.walletAddress || '';
+                
+                if (userData.walletAddress) {
+                    walletAddressInput.value = userData.walletAddress;
+                }
+            }
             updateUI();
+        }
+        
+        // حفظ البيانات
+        function saveUserData() {
+            localStorage.setItem('adRewardAppData', JSON.stringify(userData));
+        }
+        
+        // تهيئة التطبيق
+        document.addEventListener('DOMContentLoaded', () => {
+            // تهيئة Telegram Web App
+            if (window.Telegram && window.Telegram.WebApp) {
+                window.Telegram.WebApp.expand();
+                window.Telegram.WebApp.enableClosingConfirmation();
+            }
+            
+            // تحميل البيانات
+            loadUserData();
+            
+            // تهيئة Adexium بعد تحميل الصفحة
+            setTimeout(() => {
+                initAdexium();
+            }, 1000);
+            
+            // حفظ البيانات تلقائياً
+            setInterval(saveUserData, 10000);
         });
     </script>
 </body>
