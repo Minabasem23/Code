@@ -247,14 +247,6 @@
             margin-bottom: 15px;
             border: 2px solid #0088cc;
         }
-
-        .info-box {
-            background: #003300;
-            border-radius: 10px;
-            padding: 15px;
-            margin: 10px 0;
-            border: 1px solid #00ff88;
-        }
     </style>
 </head>
 <body>
@@ -283,13 +275,6 @@
                 <button class="tg-button" id="watchAdBtn" onclick="loadAd()">
                     👁️ مشاهدة إعلان (+0.00002 USDT)
                 </button>
-            </div>
-
-            <div class="info-box">
-                <h4>✅ AdsGram جاهز!</h4>
-                <p>Platform ID: 14378</p>
-                <p>Publisher ID: 9433d959669549219f6d319217fbd00d</p>
-                <p>Block ID: int-16035</p>
             </div>
 
             <div class="ad-container">
@@ -342,16 +327,16 @@
         </div>
 
         <div class="footer">
-            <p>Powered by BSC Network | AdsGram Integration</p>
+            <p>Powered by BSC Network</p>
         </div>
     </div>
 
     <script>
-        // 🔧 إعدادات AdsGram - كاملة الآن!
+        // 🔧 إعدادات AdsGram - مخفية عن الواجهة
         const ADSGRAM_CONFIG = {
-            platformId: "14378",           // Platform ID الجديد
-            publisherId: "9433d959669549219f6d319217fbd00d", // Publisher ID
-            blockId: "int-16035",          // Block ID
+            platformId: "14378",
+            publisherId: "9433d959669549219f6d319217fbd00d",
+            blockId: "int-16035",
             baseUrl: "https://api.adsgram.ai"
         };
 
@@ -400,14 +385,12 @@
             }
 
             elements.watchAdBtn.disabled = true;
-            elements.adContent.innerHTML = '<div class="loading">⏳ جاري تحميل الإعلان من AdsGram...</div>';
+            elements.adContent.innerHTML = '<div class="loading">⏳ جاري تحميل الإعلان...</div>';
 
             try {
-                // إنشاء معرف فريد للمستخدم والنقرة
                 const userId = generateUserId();
                 currentClickId = generateClickId();
                 
-                // جلب إعلان حقيقي من AdsGram
                 currentAd = await loadAdsGramAd(userId, currentClickId);
                 
                 if (currentAd && (currentAd.image_url || currentAd.text_html)) {
@@ -418,43 +401,26 @@
                 
             } catch (error) {
                 console.error('خطأ في تحميل الإعلان:', error);
-                elements.adContent.innerHTML = `
-                    <div style="color: #ff4444; text-align: center;">
-                        <h3>❌ فشل تحميل الإعلان</h3>
-                        <p>${error.message}</p>
-                        <p style="color: #666; font-size: 12px; margin-top: 10px;">
-                            جاري استخدام إعلان تجريبي...
-                        </p>
-                    </div>
-                `;
-                // استخدام إعلان افتراضي في حالة الخطأ
-                setTimeout(() => {
-                    showDefaultAd();
-                }, 2000);
+                showDefaultAd();
             }
         }
 
         // 📥 جلب إعلان من AdsGram API
         async function loadAdsGramAd(userId, clickId) {
             try {
-                // بناء رابط API مع platform_id
                 const apiUrl = `${ADSGRAM_CONFIG.baseUrl}/widget/${ADSGRAM_CONFIG.blockId}/ad?` +
                     `user_id=${userId}&` +
                     `click_id=${clickId}&` +
                     `publisher_id=${ADSGRAM_CONFIG.publisherId}&` +
                     `platform_id=${ADSGRAM_CONFIG.platformId}`;
 
-                console.log('🔗 جلب إعلان من:', apiUrl);
-                
                 const response = await fetch(apiUrl);
                 
                 if (!response.ok) {
                     throw new Error(`خطأ في API: ${response.status}`);
                 }
                 
-                const adData = await response.json();
-                console.log('📦 إعلان تم جلبه:', adData);
-                return adData;
+                return await response.json();
                 
             } catch (error) {
                 console.error('❌ خطأ في جلب الإعلان:', error);
@@ -464,7 +430,6 @@
 
         // 🎬 عرض إعلان AdsGram
         async function showAdsGramAd(ad) {
-            // تنظيف HTML من التاغات إذا كان موجوداً
             let cleanText = '';
             if (ad.text_html) {
                 cleanText = ad.text_html
@@ -511,12 +476,12 @@
         function showDefaultAd() {
             elements.adContent.innerHTML = `
                 <div style="text-align: center;">
-                    <img src="https://via.placeholder.com/300x150/0088cc/ffffff?text=AdsGram+Ad" alt="إعلان تجريبي" class="ad-image">
+                    <img src="https://via.placeholder.com/300x150/0088cc/ffffff?text=Ad" alt="إعلان" class="ad-image">
                     
                     <h3 style="color: #0088cc; margin-bottom: 10px;">🚀 إعلان تجريبي</h3>
                     
                     <div style="color: #ccc; line-height: 1.5; margin: 10px 0; font-size: 14px;">
-                        هذا إعلان تجريبي. في التطبيق الحقيقي سيتم جلب إعلانات من AdsGram.
+                        هذا إعلان تجريبي. شاهد الإعلان لمدة 5 ثوانٍ للحصول على المكافأة.
                     </div>
                     
                     <div class="ad-timer" id="adTimer">5</div>
@@ -603,10 +568,10 @@
                     currency: "USDT"
                 };
 
-                console.log('📤 إرسال تحويل إلى AdsGram:', conversionData);
+                console.log('إرسال تحويل إلى AdsGram:', conversionData);
                 
             } catch (error) {
-                console.error('❌ خطأ في إرسال التحويل:', error);
+                console.error('خطأ في إرسال التحويل:', error);
             }
         }
 
