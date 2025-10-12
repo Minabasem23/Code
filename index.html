@@ -3,8 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ربح الإعلانات</title>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <title>ربح من الإعلانات</title>
+    
+    <!-- Telegram Web App SDK -->
+    <script src="https://telegram.org/js/telegram-web-app.js?56"></script>
+    
+    <!-- Adexium Ads Script -->
+    <script type="text/javascript" src="https://cdn.tgads.space/assets/js/adexium-widget.min.js"></script>
+    <script type="text/javascript">
+        document.addEventListener('DOMContentLoaded', () => {
+            const adexiumWidget = new AdexiumWidget({wid: 'a7f6955f-037f-43af-a0b7-f144c36abea5', adFormat: 'interstitial'});
+            adexiumWidget.autoMode();
+        });
+    </script>
+    
     <style>
         * {
             margin: 0;
@@ -12,964 +24,480 @@
             box-sizing: border-box;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
-
+        
         body {
-            background: #000000;
+            background-color: #121212;
             color: #ffffff;
             min-height: 100vh;
-        }
-
-        .container {
-            max-width: 400px;
-            margin: 0 auto;
             padding: 20px;
+            direction: rtl;
         }
-
-        .header {
+        
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+        }
+        
+        header {
             text-align: center;
             margin-bottom: 30px;
-            padding: 20px 0;
+            padding: 15px;
             border-bottom: 1px solid #333;
         }
-
-        .header h1 {
+        
+        h1 {
             font-size: 24px;
-            color: #0088cc;
             margin-bottom: 10px;
+            color: #4CAF50;
         }
-
-        .nav {
-            display: flex;
-            justify-content: space-around;
-            margin-bottom: 30px;
-            background: #111;
+        
+        .balance-card {
+            background: linear-gradient(135deg, #1e3c72, #2a5298);
             border-radius: 15px;
-            padding: 10px;
-        }
-
-        .nav-btn {
-            background: none;
-            border: none;
-            color: #666;
-            padding: 12px 20px;
-            border-radius: 10px;
-            cursor: pointer;
-            font-size: 16px;
-            transition: all 0.3s ease;
-            flex: 1;
-            margin: 0 5px;
-        }
-
-        .nav-btn.active {
-            background: #0088cc;
-            color: white;
-        }
-
-        .page {
-            display: none;
-            animation: fadeIn 0.5s ease;
-        }
-
-        .page.active {
-            display: block;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .card {
-            background: #111;
-            border-radius: 15px;
-            padding: 25px;
-            margin-bottom: 20px;
+            padding: 20px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
             text-align: center;
-            border: 1px solid #222;
         }
-
-        .earnings-display {
+        
+        .balance-label {
+            font-size: 16px;
+            margin-bottom: 10px;
+            opacity: 0.8;
+        }
+        
+        .balance-amount {
             font-size: 32px;
             font-weight: bold;
-            color: #00ff88;
-            margin: 15px 0;
+            margin-bottom: 5px;
         }
-
-        .counter {
-            font-size: 18px;
-            color: #0088cc;
-            margin: 10px 0;
+        
+        .balance-usd {
+            font-size: 14px;
+            opacity: 0.7;
         }
-
-        .progress-bar {
-            width: 100%;
-            height: 8px;
-            background: #333;
-            border-radius: 10px;
-            margin: 20px 0;
-            overflow: hidden;
-        }
-
-        .progress {
-            height: 100%;
-            background: linear-gradient(90deg, #0088cc, #00ff88);
-            border-radius: 10px;
-            transition: width 0.3s ease;
-        }
-
-        .tg-button {
-            background: linear-gradient(135deg, #0088cc, #00cc88);
-            color: white;
-            border: none;
-            padding: 15px 30px;
-            border-radius: 12px;
-            font-size: 18px;
-            font-weight: bold;
-            cursor: pointer;
-            width: 100%;
-            margin: 10px 0;
-            transition: all 0.3s ease;
-        }
-
-        .tg-button:disabled {
-            background: #333;
-            color: #666;
-            cursor: not-allowed;
-        }
-
-        .tg-button:hover:not(:disabled) {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0, 136, 204, 0.4);
-        }
-
-        .ad-container {
-            background: #222;
-            border-radius: 10px;
-            padding: 20px;
-            margin: 20px 0;
-            min-height: 200px;
+        
+        .nav-tabs {
             display: flex;
-            align-items: center;
-            justify-content: center;
-            border: 1px solid #333;
-        }
-
-        .ad-content {
-            text-align: center;
-            color: #ccc;
-            width: 100%;
-        }
-
-        .input-group {
-            margin: 20px 0;
-        }
-
-        .input-group input {
-            width: 100%;
-            padding: 15px;
-            border: 1px solid #333;
+            background-color: #1e1e1e;
             border-radius: 10px;
-            background: #111;
+            padding: 5px;
+            margin-bottom: 20px;
+        }
+        
+        .tab {
+            flex: 1;
+            text-align: center;
+            padding: 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .tab.active {
+            background-color: #4CAF50;
             color: white;
-            font-size: 16px;
+        }
+        
+        .content {
+            display: none;
+        }
+        
+        .content.active {
+            display: block;
+        }
+        
+        .ad-card {
+            background-color: #1e1e1e;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+            text-align: center;
+            border: 1px solid #333;
+        }
+        
+        .ad-icon {
+            font-size: 40px;
+            margin-bottom: 15px;
+            color: #4CAF50;
+        }
+        
+        .ad-title {
+            font-size: 18px;
             margin-bottom: 10px;
         }
-
-        .stats {
+        
+        .ad-description {
+            font-size: 14px;
+            margin-bottom: 15px;
+            opacity: 0.8;
+        }
+        
+        .watch-btn {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 12px 25px;
+            font-size: 16px;
+            cursor: pointer;
+            width: 100%;
+            transition: background-color 0.3s;
+        }
+        
+        .watch-btn:hover {
+            background-color: #45a049;
+        }
+        
+        .watch-btn:disabled {
+            background-color: #555;
+            cursor: not-allowed;
+        }
+        
+        .progress-container {
+            margin-top: 15px;
+        }
+        
+        .progress-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+            font-size: 14px;
+        }
+        
+        .progress-bar {
+            height: 8px;
+            background-color: #333;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background-color: #4CAF50;
+            border-radius: 4px;
+            transition: width 0.5s;
+        }
+        
+        .withdraw-card {
+            background-color: #1e1e1e;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+            border: 1px solid #333;
+        }
+        
+        .withdraw-title {
+            font-size: 18px;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        
+        .withdraw-info {
+            background-color: #252525;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+        
+        .info-row:last-child {
+            margin-bottom: 0;
+        }
+        
+        .withdraw-btn {
+            background-color: #2196F3;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 12px 25px;
+            font-size: 16px;
+            cursor: pointer;
+            width: 100%;
+            transition: background-color 0.3s;
+        }
+        
+        .withdraw-btn:hover {
+            background-color: #0b7dda;
+        }
+        
+        .withdraw-btn:disabled {
+            background-color: #555;
+            cursor: not-allowed;
+        }
+        
+        .stats-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            margin: 20px 0;
+            gap: 15px;
+            margin-bottom: 20px;
         }
-
-        .stat-item {
-            background: #222;
+        
+        .stat-card {
+            background-color: #1e1e1e;
+            border-radius: 12px;
             padding: 15px;
-            border-radius: 10px;
             text-align: center;
+            border: 1px solid #333;
         }
-
+        
         .stat-value {
-            font-size: 20px;
+            font-size: 24px;
             font-weight: bold;
-            color: #0088cc;
-            margin-top: 5px;
+            margin-bottom: 5px;
+            color: #4CAF50;
         }
-
-        .transaction-history {
-            margin-top: 20px;
+        
+        .stat-label {
+            font-size: 14px;
+            opacity: 0.8;
         }
-
-        .transaction-item {
-            background: #111;
-            padding: 15px;
-            border-radius: 10px;
-            margin: 10px 0;
-            border-left: 4px solid #0088cc;
-        }
-
-        .footer {
+        
+        footer {
             text-align: center;
             margin-top: 30px;
-            color: #666;
+            padding-top: 20px;
+            border-top: 1px solid #333;
             font-size: 12px;
+            opacity: 0.7;
         }
-
-        .loading {
-            color: #0088cc;
-            text-align: center;
-            padding: 20px;
-        }
-
-        .ad-timer {
-            font-size: 28px;
-            color: #00ff88;
-            margin: 15px 0;
-            font-weight: bold;
-        }
-
-        .ad-timer.warning {
-            color: #ff4444;
-        }
-
-        .success-message {
-            color: #00ff88;
-            text-align: center;
-            padding: 15px;
-            background: #003300;
-            border-radius: 10px;
-            margin: 10px 0;
-        }
-
-        .ad-image {
-            max-width: 100%;
-            border-radius: 10px;
-            margin-bottom: 15px;
-            border: 2px solid #0088cc;
-        }
-
-        .error-message {
-            color: #ff4444;
-            text-align: center;
-            padding: 15px;
-            background: #330000;
-            border-radius: 10px;
-            margin: 10px 0;
-        }
-
-        .info-box {
-            background: #002266;
-            border-radius: 10px;
-            padding: 15px;
-            margin: 10px 0;
-            border: 1px solid #0088cc;
-        }
-
-        .warning-box {
-            background: #663300;
-            border-radius: 10px;
-            padding: 15px;
-            margin: 10px 0;
-            border: 1px solid #ff8800;
-            color: #ffaa00;
-        }
-
-        .debug-info {
-            background: #1a1a1a;
-            border-radius: 10px;
-            padding: 15px;
-            margin: 10px 0;
-            border: 1px solid #333;
-            font-size: 12px;
-            text-align: left;
-            direction: ltr;
-            max-height: 200px;
-            overflow-y: auto;
+        
+        @media (max-width: 480px) {
+            .container {
+                padding: 10px;
+            }
+            
+            h1 {
+                font-size: 20px;
+            }
+            
+            .balance-amount {
+                font-size: 28px;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="header">
-            <h1>🤑 ربح الإعلانات</h1>
+        <header>
+            <h1>ربح من الإعلانات</h1>
             <p>شاهد الإعلانات واربح USDT</p>
+        </header>
+        
+        <div class="balance-card">
+            <div class="balance-label">رصيدك الحالي</div>
+            <div class="balance-amount">0.00000</div>
+            <div class="balance-usd">USDT</div>
         </div>
-
-        <div class="nav">
-            <button class="nav-btn active" onclick="showPage('earn')">💰 الربح</button>
-            <button class="nav-btn" onclick="showPage('withdraw')">🎯 السحب</button>
-            <button class="nav-btn" onclick="showPage('debug')">🐛 التصحيح</button>
+        
+        <div class="nav-tabs">
+            <div class="tab active" data-tab="watch">مشاهدة الإعلانات</div>
+            <div class="tab" data-tab="withdraw">السحب</div>
         </div>
-
-        <!-- صفحة الربح -->
-        <div id="earnPage" class="page active">
-            <div class="card">
-                <h2>أرباحك الحالية</h2>
-                <div class="earnings-display" id="currentEarnings">0.00000 USDT</div>
-                <div class="counter" id="adsCounter">0/250 إعلان اليوم</div>
+        
+        <div class="content active" id="watch-tab">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value" id="ads-watched">0</div>
+                    <div class="stat-label">إعلان شاهدته</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="ads-remaining">250</div>
+                    <div class="stat-label">إعلان متبقي</div>
+                </div>
+            </div>
+            
+            <div class="ad-card">
+                <div class="ad-icon">📱</div>
+                <div class="ad-title">شاهد الإعلان واربح</div>
+                <div class="ad-description">شاهد الإعلان بالكامل لتحصل على 0.00002 USDT</div>
+                <button class="watch-btn" id="watch-ad-btn">شاهد الإعلان الآن</button>
                 
-                <div class="progress-bar">
-                    <div class="progress" id="progressBar" style="width: 0%"></div>
-                </div>
-
-                <button class="tg-button" id="watchAdBtn" onclick="loadAd()">
-                    👁️ مشاهدة إعلان (+0.00002 USDT)
-                </button>
-            </div>
-
-            <div class="info-box">
-                <h4>✅ API Token المحدث!</h4>
-                <p>Token: cfbedbec8b9a43f5b11fcf59fed46844</p>
-                <p style="color: #00ff88; font-size: 12px; margin-top: 5px;">الاتصال مع AdsGram نشط</p>
-            </div>
-
-            <div class="ad-container">
-                <div class="ad-content" id="adContent">
-                    <h3>🚀 جاهز لكسب الأرباح</h3>
-                    <p>اضغط "مشاهدة إعلان" لبدء كسب USDT</p>
-                </div>
-            </div>
-
-            <div class="stats">
-                <div class="stat-item">
-                    <div>إجمالي الأرباح</div>
-                    <div class="stat-value" id="totalEarnings">0.00000</div>
-                </div>
-                <div class="stat-item">
-                    <div>الإعلانات اليوم</div>
-                    <div class="stat-value" id="todayAds">0</div>
-                </div>
-            </div>
-        </div>
-
-        <!-- صفحة السحب -->
-        <div id="withdrawPage" class="page">
-            <div class="card">
-                <h2>سحب الأرباح</h2>
-                <div class="earnings-display" id="withdrawBalance">0.00000 USDT</div>
-                
-                <div class="input-group">
-                    <input type="text" id="walletAddress" placeholder="أدخل عنوان محفظة BSC" oninput="checkWithdrawButton()">
-                </div>
-
-                <button class="tg-button" id="withdrawBtn" onclick="withdrawEarnings()" disabled>
-                    💳 سحب الأرباح
-                </button>
-
-                <div style="margin-top: 15px; color: #666; font-size: 14px;">
-                    <p>الحد الأدنى للسحب: 1 USDT</p>
-                    <p>عمولة الشبكة: 0.00002 USDT</p>
-                </div>
-            </div>
-
-            <div class="transaction-history">
-                <h3>آخر المعاملات</h3>
-                <div id="transactionsList">
-                    <div class="transaction-item">
-                        <div>لا توجد معاملات حتى الآن</div>
+                <div class="progress-container">
+                    <div class="progress-label">
+                        <span>تقدم اليوم</span>
+                        <span id="progress-text">0/250</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progress-fill" style="width: 0%"></div>
                     </div>
                 </div>
             </div>
-        </div>
-
-        <!-- صفحة التصحيح -->
-        <div id="debugPage" class="page">
-            <div class="card">
-                <h2>🐛 معلومات التصحيح</h2>
-                
-                <div class="debug-info">
-                    <h4>🔧 الإعدادات الحالية:</h4>
-                    <div id="configStatus"></div>
-                    
-                    <h4>🔄 حالة الاتصال:</h4>
-                    <div id="connectionStatus">جارِ الاختبار...</div>
-                    
-                    <h4>📝 سجل الأحداث:</h4>
-                    <div id="eventLog"></div>
+            
+            <div class="ad-card">
+                <div class="ad-title">معلومات الوكيل الإعلاني</div>
+                <div class="ad-description">
+                    نحن نستخدم نظام Adexium للإعلانات. هذا النظام يوفر إعلانات عالية الجودة 
+                    ومدفوعات سريعة عبر شبكة BSC. كل إعلان يعرض لمدة 30 ثانية تقريباً.
                 </div>
-
-                <button class="tg-button" onclick="testConnection()" style="background: #0088cc;">
-                    🔄 اختبار الاتصال مع AdsGram
-                </button>
-
-                <button class="tg-button" onclick="testToken()" style="background: #00cc88;">
-                    🔑 اختبار الـ API Token
-                </button>
-
-                <button class="tg-button" onclick="loadAd()" style="background: #ff8800;">
-                    📺 تجربة تحميل إعلان
-                </button>
-            </div>
-
-            <div class="info-box">
-                <h4>✅ البيانات المحدثة:</h4>
-                <p><strong>API Token الجديد:</strong> cfbedbec8b9a43f5b11fcf59fed46844</p>
-                <p><strong>Publisher ID:</strong> 38461</p>
-                <p><strong>Widget ID:</strong> int-16032</p>
             </div>
         </div>
-
-        <div class="footer">
-            <p>Powered by BSC Network | AdsGram Integration | Token: cfbedbec8b9a43f5b11fcf59fed46844</p>
+        
+        <div class="content" id="withdraw-tab">
+            <div class="withdraw-card">
+                <div class="withdraw-title">سحب الأرباح</div>
+                
+                <div class="withdraw-info">
+                    <div class="info-row">
+                        <span>الحد الأدنى للسحب:</span>
+                        <span>0.1 USDT</span>
+                    </div>
+                    <div class="info-row">
+                        <span>عمولة السحب:</span>
+                        <span>0.001 USDT</span>
+                    </div>
+                    <div class="info-row">
+                        <span>شبكة السحب:</span>
+                        <span>BSC (BEP-20)</span>
+                    </div>
+                </div>
+                
+                <div class="info-row" style="margin-bottom: 15px;">
+                    <span>عنوان محفظة BSC:</span>
+                </div>
+                <input type="text" id="wallet-address" placeholder="أدخل عنوان محفظتك BSC" style="width: 100%; padding: 10px; border-radius: 8px; background: #252525; border: 1px solid #333; color: white; margin-bottom: 15px;">
+                
+                <button class="withdraw-btn" id="withdraw-btn" disabled>سحب الأرباح</button>
+            </div>
+            
+            <div class="withdraw-card">
+                <div class="withdraw-title">آخر عمليات السحب</div>
+                <div style="text-align: center; padding: 20px; opacity: 0.7;">
+                    لا توجد عمليات سحب سابقة
+                </div>
+            </div>
         </div>
+        
+        <footer>
+            <p>جميع الحقوق محفوظة © 2023 | يتم الدفع عبر شبكة BSC USDT</p>
+        </footer>
     </div>
 
     <script>
-        // 🔧 إعدادات AdsGram المحدثة
-        const ADSGRAM_CONFIG = {
-            token: "cfbedbec8b9a43f5b11fcf59fed46844",  // ✅ Token الجديد
-            publisher_id: "38461",
-            widget_id: "int-16032",
-            base_url: "https://api.adsgram.ai"
-        };
-
+        // تهيئة Telegram Web App
+        const tg = window.Telegram.WebApp;
+        tg.expand();
+        tg.enableClosingConfirmation();
+        
         // بيانات التطبيق
         let userData = {
-            earnings: 0,
+            balance: 0,
             adsWatched: 0,
-            maxAds: 250,
-            earningsPerAd: 0.00002,
-            walletAddress: '',
-            transactions: []
+            adsLimit: 250,
+            walletAddress: ''
         };
-
-        let currentAd = null;
-        let currentSessionId = null;
-        let adTimerInterval = null;
-        let eventLog = [];
-
-        // تهيئة Telegram Web App
-        let tg = window.Telegram.WebApp;
-        if (tg) {
-            tg.expand();
-            tg.ready();
-        }
-
-        // عناصر DOM
-        const elements = {
-            earnPage: document.getElementById('earnPage'),
-            withdrawPage: document.getElementById('withdrawPage'),
-            debugPage: document.getElementById('debugPage'),
-            currentEarnings: document.getElementById('currentEarnings'),
-            adsCounter: document.getElementById('adsCounter'),
-            progressBar: document.getElementById('progressBar'),
-            watchAdBtn: document.getElementById('watchAdBtn'),
-            adContent: document.getElementById('adContent'),
-            totalEarnings: document.getElementById('totalEarnings'),
-            todayAds: document.getElementById('todayAds'),
-            withdrawBalance: document.getElementById('withdrawBalance'),
-            walletAddress: document.getElementById('walletAddress'),
-            withdrawBtn: document.getElementById('withdrawBtn'),
-            transactionsList: document.getElementById('transactionsList'),
-            connectionStatus: document.getElementById('connectionStatus'),
-            configStatus: document.getElementById('configStatus'),
-            eventLog: document.getElementById('eventLog')
-        };
-
-        // 🚀 تحميل إعلان
-        async function loadAd() {
-            addEventLog('بدء تحميل الإعلان...');
-            
-            if (userData.adsWatched >= userData.maxAds) {
-                showMessage('🎯 لقد وصلت للحد الأقصى اليومي (250 إعلان)');
-                return;
-            }
-
-            elements.watchAdBtn.disabled = true;
-            elements.adContent.innerHTML = '<div class="loading">⏳ جاري تحميل الإعلان من AdsGram...</div>';
-
-            try {
-                currentSessionId = generateSessionId();
-                currentAd = await getAdFromAdsGram();
+        
+        // عناصر الواجهة
+        const balanceAmount = document.querySelector('.balance-amount');
+        const adsWatchedElement = document.getElementById('ads-watched');
+        const adsRemainingElement = document.getElementById('ads-remaining');
+        const progressText = document.getElementById('progress-text');
+        const progressFill = document.getElementById('progress-fill');
+        const watchAdBtn = document.getElementById('watch-ad-btn');
+        const walletAddressInput = document.getElementById('wallet-address');
+        const withdrawBtn = document.getElementById('withdraw-btn');
+        
+        // التبويبات
+        const tabs = document.querySelectorAll('.tab');
+        const contents = document.querySelectorAll('.content');
+        
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                const tabId = tab.getAttribute('data-tab');
                 
-                if (currentAd && (currentAd.id || currentAd.ad_id || currentAd.title)) {
-                    showAd(currentAd);
-                } else {
-                    throw new Error('لم يتم العثور على إعلان متاح');
-                }
+                tabs.forEach(t => t.classList.remove('active'));
+                contents.forEach(c => c.classList.remove('active'));
                 
-            } catch (error) {
-                console.error('خطأ في AdsGram:', error);
-                addEventLog('❌ فشل في جلب الإعلان: ' + error.message);
-                showBackupAd();
-            }
-        }
-
-        // 📥 جلب إعلان من AdsGram API
-        async function getAdFromAdsGram() {
-            try {
-                const url = `${ADSGRAM_CONFIG.base_url}/widget/${ADSGRAM_CONFIG.widget_id}/ad`;
-                
-                const params = new URLSearchParams({
-                    publisher_id: ADSGRAM_CONFIG.publisher_id,
-                    session_id: currentSessionId,
-                    user_id: generateUserId(),
-                    user_agent: navigator.userAgent,
-                    source: 'telegram_mini_app'
-                });
-
-                const fullUrl = `${url}?${params}`;
-                addEventLog('جلب إعلان من: ' + fullUrl);
-
-                const response = await fetch(fullUrl, {
-                    method: 'GET',
-                    headers: {
-                        'Accept': 'application/json',
-                        'Authorization': `Bearer ${ADSGRAM_CONFIG.token}`,
-                        'Content-Type': 'application/json'
-                    }
-                });
-
-                addEventLog('كود الاستجابة: ' + response.status);
-                
-                if (!response.ok) {
-                    throw new Error(`خطأ ${response.status}: ${response.statusText}`);
-                }
-
-                const data = await response.json();
-                addEventLog('تم جلب الإعلان بنجاح');
-                return data;
-                
-            } catch (error) {
-                addEventLog('❌ فشل الاتصال بـ AdsGram: ' + error.message);
-                throw error;
-            }
-        }
-
-        // 🎬 عرض إعلان AdsGram
-        function showAd(ad) {
-            addEventLog('عرض الإعلان...');
-            
-            const title = ad.title || ad.button_name || 'إعلان';
-            const description = ad.description || ad.text_html || 'شاهد هذا الإعلان للحصول على المكافأة';
-            const imageUrl = ad.image_url || ad.banner_url;
-            const clickUrl = ad.click_url || ad.url;
-            
-            elements.adContent.innerHTML = `
-                <div style="text-align: center;">
-                    ${imageUrl ? `<img src="${imageUrl}" alt="${title}" class="ad-image" onerror="this.style.display='none'">` : ''}
-                    
-                    <h3 style="color: #0088cc; margin-bottom: 10px;">${title}</h3>
-                    
-                    <div style="color: #ccc; line-height: 1.5; margin: 10px 0; font-size: 14px; text-align: right;">
-                        ${cleanHtml(description)}
-                    </div>
-                    
-                    <div class="ad-timer" id="adTimer">10</div>
-                    <p style="color: #666; font-size: 12px; margin: 5px 0;">شاهد الإعلان لمدة 10 ثوانٍ</p>
-                    
-                    <div style="margin-top: 15px;">
-                        ${clickUrl ? `
-                            <button class="tg-button" onclick="visitAd('${clickUrl}')" style="background: #0088cc; margin-bottom: 10px;">
-                                ${ad.button_name || '🌐 زيارة الموقع'}
-                            </button>
-                        ` : ''}
-                        
-                        <button class="tg-button" onclick="completeAdWatch()" id="rewardBtn" disabled style="background: #00cc88;">
-                            🎁 احصل على ${userData.earningsPerAd} USDT
-                        </button>
-                    </div>
-                </div>
-            `;
-
-            startAdTimer();
-        }
-
-        // 🧹 تنظيف HTML
-        function cleanHtml(html) {
-            return html ? html.replace(/<[^>]*>/g, '') : html;
-        }
-
-        // 📋 عرض إعلان احتياطي
-        function showBackupAd() {
-            addEventLog('عرض إعلان احتياطي...');
-            
-            elements.adContent.innerHTML = `
-                <div style="text-align: center;">
-                    <div style="background: linear-gradient(135deg, #0088cc, #00cc88); padding: 15px; border-radius: 10px; margin-bottom: 15px;">
-                        <h3 style="color: white; margin: 0;">🚀 إعلان تجريبي</h3>
-                    </div>
-                    
-                    <div style="color: #ccc; line-height: 1.5; margin: 10px 0; font-size: 14px;">
-                        هذا إعلان تجريبي. في التطبيق الحقيقي سيتم جلب إعلانات من AdsGram.
-                    </div>
-                    
-                    <div class="ad-timer" id="adTimer">5</div>
-                    <p style="color: #666; font-size: 12px; margin: 5px 0;">شاهد الإعلان لمدة 5 ثوانٍ</p>
-                    
-                    <div style="margin-top: 15px;">
-                        <button class="tg-button" onclick="completeAdWatch()" id="rewardBtn" disabled style="background: #00cc88;">
-                            🎁 احصل على ${userData.earningsPerAd} USDT
-                        </button>
-                    </div>
-                </div>
-            `;
-
-            startAdTimer(5);
-        }
-
-        // ⏱️ بدء مؤقت الإعلان
-        function startAdTimer(duration = 10) {
-            let timeLeft = duration;
-            const adTimerElement = document.getElementById('adTimer');
-            const rewardBtn = document.getElementById('rewardBtn');
-            
-            if (adTimerInterval) {
-                clearInterval(adTimerInterval);
-            }
-            
-            adTimerInterval = setInterval(() => {
-                timeLeft--;
-                adTimerElement.textContent = timeLeft;
-                
-                if (timeLeft <= 3) {
-                    adTimerElement.classList.add('warning');
-                }
-
-                if (timeLeft <= 0) {
-                    clearInterval(adTimerInterval);
-                    adTimerElement.textContent = "✓ جاهز";
-                    adTimerElement.style.color = "#00ff88";
-                    if (rewardBtn) rewardBtn.disabled = false;
-                    if (tg && tg.HapticFeedback) {
-                        tg.HapticFeedback.impactOccurred('light');
-                    }
-                }
-            }, 1000);
-        }
-
-        // 🌐 زيارة رابط الإعلان
-        function visitAd(url) {
-            if (url) {
-                window.open(url, '_blank');
-                addEventLog('زيارة رابط الإعلان: ' + url);
-                if (tg && tg.HapticFeedback) {
-                    tg.HapticFeedback.impactOccurred('medium');
-                }
-            }
-        }
-
-        // ✅ إكمال مشاهدة الإعلان
-        async function completeAdWatch() {
-            try {
-                elements.adContent.innerHTML = '<div class="loading">⏳ جاري المعالجة...</div>';
-
-                // محاولة إرسال التحويل إلى AdsGram
-                try {
-                    await sendConversionToAdsGram();
-                    addEventLog('✅ تم إرسال التحويل إلى AdsGram');
-                } catch (error) {
-                    addEventLog('⚠️ تم منح المكافأة بدون إرسال التحويل');
-                }
-
-                // منح المكافأة للمستخدم
-                userData.adsWatched++;
-                userData.earnings += userData.earningsPerAd;
-
-                // تسجيل المعاملة
-                userData.transactions.unshift({
-                    type: 'earning',
-                    amount: userData.earningsPerAd,
-                    timestamp: new Date().toLocaleString('ar-EG'),
-                    hash: generateRandomHash(),
-                    ad_network: 'AdsGram'
-                });
-
-                saveUserData();
-                updateUI();
-                elements.watchAdBtn.disabled = false;
-
-                elements.adContent.innerHTML = `
-                    <div class="success-message">
-                        <h3>✅ تمت المكافأة!</h3>
-                        <p>+${userData.earningsPerAd} USDT تم إضافتها إلى رصيدك</p>
-                        <p style="font-size: 14px; margin-top: 10px;">الإعلانات المتبقية اليوم: ${userData.maxAds - userData.adsWatched}</p>
-                    </div>
-                `;
-                
-                if (tg && tg.HapticFeedback) {
-                    tg.HapticFeedback.impactOccurred('success');
-                }
-                
-            } catch (error) {
-                console.error('خطأ في إكمال الإعلان:', error);
-                elements.adContent.innerHTML = '<div class="error-message">❌ خطأ في المعالجة</div>';
-                elements.watchAdBtn.disabled = false;
-            }
-        }
-
-        // 📤 إرسال تحويل إلى AdsGram
-        async function sendConversionToAdsGram() {
-            try {
-                const url = `${ADSGRAM_CONFIG.base_url}/conversion`;
-                
-                const conversionData = {
-                    publisher_id: ADSGRAM_CONFIG.publisher_id,
-                    widget_id: ADSGRAM_CONFIG.widget_id,
-                    session_id: currentSessionId,
-                    user_id: generateUserId(),
-                    reward: userData.earningsPerAd,
-                    currency: 'USDT',
-                    timestamp: Math.floor(Date.now() / 1000)
-                };
-
-                addEventLog('إرسال تحويل: ' + JSON.stringify(conversionData));
-
-                const response = await fetch(url, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${ADSGRAM_CONFIG.token}`
-                    },
-                    body: JSON.stringify(conversionData)
-                });
-
-                if (!response.ok) {
-                    throw new Error(`خطأ في إرسال التحويل: ${response.status}`);
-                }
-
-                return await response.json();
-                
-            } catch (error) {
-                addEventLog('❌ فشل إرسال التحويل: ' + error.message);
-                throw error;
-            }
-        }
-
-        // 🔄 اختبار الاتصال
-        async function testConnection() {
-            addEventLog('بدء اختبار الاتصال...');
-            elements.connectionStatus.innerHTML = 'جارِ الاختبار...';
-
-            try {
-                const testUrl = `${ADSGRAM_CONFIG.base_url}/widget/${ADSGRAM_CONFIG.widget_id}/ad?publisher_id=${ADSGRAM_CONFIG.publisher_id}`;
-                addEventLog('اختبار الاتصال: ' + testUrl);
-
-                const response = await fetch(testUrl, {
-                    headers: {
-                        'Authorization': `Bearer ${ADSGRAM_CONFIG.token}`,
-                        'Accept': 'application/json'
-                    }
-                });
-
-                if (response.ok) {
-                    elements.connectionStatus.innerHTML = '✅ <strong>الاتصال ناجح!</strong><br>الـ API Token الجديد يعمل';
-                    addEventLog('✅ اتصال AdsGram ناجح');
-                } else {
-                    throw new Error(`خطأ ${response.status}: ${response.statusText}`);
-                }
-            } catch (error) {
-                elements.connectionStatus.innerHTML = '❌ <strong>فشل الاتصال</strong><br>' + error.message;
-                addEventLog('❌ فشل اختبار الاتصال: ' + error.message);
-            }
-        }
-
-        // 🔑 اختبار الـ API Token
-        async function testToken() {
-            addEventLog('اختبار الـ API Token...');
-            
-            try {
-                const testUrl = `${ADSGRAM_CONFIG.base_url}/widget/${ADSGRAM_CONFIG.widget_id}/ad?publisher_id=${ADSGRAM_CONFIG.publisher_id}`;
-                
-                const response = await fetch(testUrl, {
-                    headers: {
-                        'Authorization': `Bearer ${ADSGRAM_CONFIG.token}`
-                    }
-                });
-
-                if (response.status === 401) {
-                    addEventLog('❌ الـ API Token غير صالح');
-                    showMessage('❌ الـ API Token غير صالح. تحقق من البيانات.');
-                } else if (response.ok) {
-                    addEventLog('✅ الـ API Token صالح ويعمل');
-                    showMessage('✅ الـ API Token الجديد صالح ويعمل بنجاح!');
-                } else {
-                    addEventLog('⚠️ استجابة غير متوقعة: ' + response.status);
-                }
-            } catch (error) {
-                addEventLog('❌ خطأ في اختبار الـ Token: ' + error.message);
-            }
-        }
-
-        // 📝 إضافة سجل الأحداث
-        function addEventLog(message) {
-            const timestamp = new Date().toLocaleTimeString();
-            eventLog.push(`[${timestamp}] ${message}`);
-            
-            if (elements.eventLog) {
-                elements.eventLog.innerHTML = eventLog.map(log => 
-                    `<div style="margin: 2px 0; padding: 2px; border-bottom: 1px solid #333;">${log}</div>`
-                ).join('');
-                elements.eventLog.scrollTop = elements.eventLog.scrollHeight;
-            }
-            
-            console.log(message);
-        }
-
-        // 💾 تحميل البيانات المحفوظة
-        function loadUserData() {
-            const saved = localStorage.getItem('adEarningsData');
-            if (saved) {
-                const parsed = JSON.parse(saved);
-                userData = { ...userData, ...parsed };
-            }
-            updateUI();
-        }
-
-        // 💾 حفظ البيانات
-        function saveUserData() {
-            localStorage.setItem('adEarningsData', JSON.stringify(userData));
-        }
-
-        // 🔄 تحديث الواجهة
-        function updateUI() {
-            elements.currentEarnings.textContent = userData.earnings.toFixed(5) + ' USDT';
-            elements.adsCounter.textContent = `${userData.adsWatched}/${userData.maxAds} إعلان اليوم`;
-            elements.progressBar.style.width = `${(userData.adsWatched / userData.maxAds) * 100}%`;
-            elements.totalEarnings.textContent = userData.earnings.toFixed(5);
-            elements.todayAds.textContent = userData.adsWatched;
-            elements.withdrawBalance.textContent = userData.earnings.toFixed(5) + ' USDT';
-            checkWithdrawButton();
-            updateTransactions();
-            updateConfigStatus();
-        }
-
-        // 💳 سحب الأرباح
-        function withdrawEarnings() {
-            if (userData.earnings < 1) {
-                showMessage('الحد الأدنى للسحب هو 1 USDT');
-                return;
-            }
-
-            if (!elements.walletAddress.value) {
-                showMessage('يرجى إدخال عنوان المحفظة');
-                return;
-            }
-
-            const txHash = generateRandomHash();
-            const withdrawnAmount = userData.earnings;
-            
-            userData.transactions.unshift({
-                type: 'withdrawal',
-                amount: userData.earnings,
-                timestamp: new Date().toLocaleString('ar-EG'),
-                hash: txHash,
-                wallet: elements.walletAddress.value,
-                status: 'معلق'
+                tab.classList.add('active');
+                document.getElementById(`${tabId}-tab`).classList.add('active');
             });
-
-            userData.earnings = 0;
-            userData.adsWatched = 0;
-
-            saveUserData();
-            updateUI();
-
-            showMessage(`✅ تم طلب السحب بنجاح!\nالمبلغ: ${withdrawnAmount.toFixed(5)} USDT\nالمعاملة: ${txHash}`);
-            if (tg && tg.HapticFeedback) {
-                tg.HapticFeedback.notificationOccurred('success');
+        });
+        
+        // تحديث الواجهة
+        function updateUI() {
+            balanceAmount.textContent = userData.balance.toFixed(5);
+            adsWatchedElement.textContent = userData.adsWatched;
+            adsRemainingElement.textContent = userData.adsLimit - userData.adsWatched;
+            
+            const progressPercent = (userData.adsWatched / userData.adsLimit) * 100;
+            progressText.textContent = `${userData.adsWatched}/${userData.adsLimit}`;
+            progressFill.style.width = `${progressPercent}%`;
+            
+            // تعطيل زر مشاهدة الإعلان إذا وصل للحد الأقصى
+            if (userData.adsWatched >= userData.adsLimit) {
+                watchAdBtn.disabled = true;
+                watchAdBtn.textContent = 'وصلت للحد الأقصى اليوم';
             }
-        }
-
-        // 🔘 التحقق من زر السحب
-        function checkWithdrawButton() {
-            elements.withdrawBtn.disabled = userData.earnings < 1 || !elements.walletAddress.value;
-        }
-
-        // 📋 تحديث قائمة المعاملات
-        function updateTransactions() {
-            if (userData.transactions.length === 0) {
-                elements.transactionsList.innerHTML = '<div class="transaction-item">لا توجد معاملات حتى الآن</div>';
-                return;
-            }
-
-            elements.transactionsList.innerHTML = userData.transactions.map(tx => `
-                <div class="transaction-item">
-                    <div style="display: flex; justify-content: space-between;">
-                        <strong>${tx.type === 'earning' ? '💰 ربح إعلان' : '💳 سحب'}</strong>
-                        <span style="color: ${tx.type === 'earning' ? '#00ff88' : '#ff4444'}">
-                            ${tx.type === 'earning' ? '+' : '-'}${tx.amount.toFixed(5)} USDT
-                        </span>
-                    </div>
-                    <div style="font-size: 12px; color: #666; margin-top: 5px;">
-                        ${tx.timestamp} ${tx.status ? '• ' + tx.status : ''}
-                    </div>
-                    <div style="font-size: 10px; color: #888; margin-top: 3px;">
-                        ${tx.hash}
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        // 🔄 تحديث حالة الإعدادات
-        function updateConfigStatus() {
-            elements.configStatus.innerHTML = `
-                <strong>Token:</strong> ${ADSGRAM_CONFIG.token.substring(0, 10)}...<br>
-                <strong>Publisher ID:</strong> ${ADSGRAM_CONFIG.publisher_id}<br>
-                <strong>Widget ID:</strong> ${ADSGRAM_CONFIG.widget_id}<br>
-                <strong>Base URL:</strong> ${ADSGRAM_CONFIG.base_url}<br>
-                <strong>الحالة:</strong> <span style="color: #00ff88;">✅ API Token محدث</span>
-            `;
-        }
-
-        // 🔄 تبديل الصفحات
-        function showPage(pageName) {
-            document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
-            document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
-
-            if (pageName === 'earn') {
-                elements.earnPage.classList.add('active');
-                document.querySelector('.nav-btn:nth-child(1)').classList.add('active');
-            } else if (pageName === 'withdraw') {
-                elements.withdrawPage.classList.add('active');
-                document.querySelector('.nav-btn:nth-child(2)').classList.add('active');
+            
+            // تفعيل زر السحب إذا كان الرصيد كافياً والعنوان مملوء
+            if (userData.balance >= 0.1 && userData.walletAddress.trim() !== '') {
+                withdrawBtn.disabled = false;
             } else {
-                elements.debugPage.classList.add('active');
-                document.querySelector('.nav-btn:nth-child(3)').classList.add('active');
-                updateConfigStatus();
+                withdrawBtn.disabled = true;
             }
         }
-
-        // 🆔 توليد معرفات فريدة
-        function generateSessionId() {
-            return 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-        }
-
-        function generateUserId() {
-            if (tg && tg.initDataUnsafe && tg.initDataUnsafe.user) {
-                return 'tg_' + tg.initDataUnsafe.user.id;
+        
+        // مشاهدة إعلان
+        watchAdBtn.addEventListener('click', () => {
+            if (userData.adsWatched < userData.adsLimit) {
+                // محاكاة مشاهدة الإعلان
+                watchAdBtn.disabled = true;
+                watchAdBtn.textContent = 'جاري تحميل الإعلان...';
+                
+                setTimeout(() => {
+                    // بعد انتهاء الإعلان
+                    userData.balance += 0.00002;
+                    userData.adsWatched++;
+                    
+                    watchAdBtn.disabled = false;
+                    watchAdBtn.textContent = 'شاهد الإعلان الآن';
+                    
+                    updateUI();
+                    
+                    // إشعار بنجاح مشاهدة الإعلان
+                    alert('تهانينا! لقد ربحت 0.00002 USDT من مشاهدة الإعلان');
+                }, 3000);
             }
-            let userId = localStorage.getItem('adsgram_user_id');
-            if (!userId) {
-                userId = 'user_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-                localStorage.setItem('adsgram_user_id', userId);
+        });
+        
+        // تحديث عنوان المحفظة
+        walletAddressInput.addEventListener('input', () => {
+            userData.walletAddress = walletAddressInput.value;
+            updateUI();
+        });
+        
+        // سحب الأرباح
+        withdrawBtn.addEventListener('click', () => {
+            if (userData.balance >= 0.1 && userData.walletAddress.trim() !== '') {
+                // محاكاة عملية السحب
+                withdrawBtn.disabled = true;
+                withdrawBtn.textContent = 'جاري المعالجة...';
+                
+                setTimeout(() => {
+                    alert(`تم طلب سحب ${userData.balance.toFixed(5)} USDT إلى العنوان: ${userData.walletAddress}\nسيتم تحويل المبلغ خلال 24 ساعة`);
+                    
+                    // إعادة تعيين البيانات بعد السحب
+                    userData.balance = 0;
+                    userData.adsWatched = 0;
+                    
+                    updateUI();
+                    
+                    withdrawBtn.disabled = true;
+                    withdrawBtn.textContent = 'سحب الأرباح';
+                }, 2000);
             }
-            return userId;
-        }
-
-        function generateRandomHash() {
-            return '0x' + Array.from({length: 64}, () => 
-                Math.floor(Math.random() * 16).toString(16)
-            ).join('');
-        }
-
-        // 💬 عرض رسائل
-        function showMessage(message) {
-            alert(message);
-        }
-
-        // 🚀 تهيئة التطبيق
-        loadUserData();
-        addEventLog('تم تحميل التطبيق مع الـ API Token الجديد');
-        addEventLog('Token: cfbedbec8b9a43f5b11fcf59fed46844');
-
-        // تعيين الدوال ككائن عام للاستدعاء من الأزرار
-        window.visitAd = visitAd;
-        window.completeAdWatch = completeAdWatch;
-        window.showPage = showPage;
-        window.checkWithdrawButton = checkWithdrawButton;
-        window.testConnection = testConnection;
-        window.testToken = testToken;
-        window.withdrawEarnings = withdrawEarnings;
+        });
+        
+        // تهيئة الواجهة عند التحميل
+        document.addEventListener('DOMContentLoaded', () => {
+            updateUI();
+        });
     </script>
 </body>
 </html> 
