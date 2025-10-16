@@ -11,6 +11,9 @@
     <!-- الوكيل الإعلاني الجديد -->
     <script src="https://js.onclckvd.com/in-stream-ad-admanager/tma.js"></script>
     
+    <!-- ملف JavaScript المنفصل -->
+    <script src="ad-system.js"></script>
+    
     <style>
         * {
             margin: 0;
@@ -351,7 +354,7 @@
         
         <div class="balance-card">
             <div class="balance-label">رصيدك الحالي</div>
-            <div class="balance-amount">0.00000</div>
+            <div class="balance-amount" id="balance-amount">0.00000</div>
             <div class="balance-usd">USDT</div>
         </div>
         
@@ -457,18 +460,8 @@
     </div>
 
     <script>
-        // بيانات التطبيق
-        let userData = {
-            balance: 0,
-            adsWatched: 0,
-            adsLimit: 250,
-            walletAddress: '',
-            lastAdWatch: null,
-            spotId: '383135' // Your Spot ID
-        };
-        
         // عناصر الواجهة
-        const balanceAmount = document.querySelector('.balance-amount');
+        const balanceAmount = document.getElementById('balance-amount');
         const adsWatchedElement = document.getElementById('ads-watched');
         const adsRemainingElement = document.getElementById('ads-remaining');
         const progressText = document.getElementById('progress-text');
@@ -481,10 +474,6 @@
         const adTimer = document.getElementById('ad-timer');
         const adCloseBtn = document.getElementById('ad-close-btn');
         const adDisplay = document.getElementById('ad-display');
-        
-        // متغيرات نظام الإعلانات
-        let adShowFunction = null;
-        let isAdSystemReady = false;
         
         // التبويبات
         const tabs = document.querySelectorAll('.tab');
@@ -504,16 +493,17 @@
         
         // تحديث الواجهة
         function updateUI() {
-            balanceAmount.textContent = userData.balance.toFixed(5);
-            adsWatchedElement.textContent = userData.adsWatched;
-            adsRemainingElement.textContent = userData.adsLimit - userData.adsWatched;
+            const stats = window.adSystem.getUserStats();
             
-            const progressPercent = (userData.adsWatched / userData.adsLimit) * 100;
-            progressText.textContent = `${userData.adsWatched}/${userData.adsLimit}`;
-            progressFill.style.width = `${progressPercent}%`;
+            balanceAmount.textContent = stats.balance.toFixed(5);
+            adsWatchedElement.textContent = stats.adsWatched;
+            adsRemainingElement.textContent = stats.adsRemaining;
+            
+            progressText.textContent = `${stats.adsWatched}/${window.adSystem.userData.adsLimit}`;
+            progressFill.style.width = `${stats.progressPercent}%`;
             
             // تعطيل زر مشاهدة الإعلان إذا وصل للحد الأقصى
-            if (userData.adsWatched >= userData.adsLimit) {
+            if (stats.adsWatched >= window.adSystem.userData.adsLimit) {
                 watchAdBtn.disabled = true;
                 watchAdBtn.textContent = 'وصلت للحد الأقصى اليوم';
                 adStatus.className = 'ad-status status-error';
@@ -521,58 +511,15 @@
             }
             
             // تفعيل زر السحب إذا كان الرصيد كافياً والعنوان مملوء
-            if (userData.balance >= 0.1 && userData.walletAddress.trim() !== '') {
+            if (stats.balance >= 0.1 && window.adSystem.userData.walletAddress.trim() !== '') {
                 withdrawBtn.disabled = false;
             } else {
                 withdrawBtn.disabled = true;
             }
         }
         
-        // تهيئة نظام الإعلانات
-        function initAdSystem() {
-            try {
-                console.log('جاري تهيئة نظام الإعلانات...');
-                
-                // Initialize the ad engine
-                window.initCdTma?.({ 
-                    id: userData.spotId 
-                }).then(show => {
-                    console.log('نظام الإعلانات جاهز');
-                    adShowFunction = show;
-                    isAdSystemReady = true;
-                    
-                    adStatus.className = 'ad-status status-ready';
-                    adStatus.textContent = 'نظام الإعلانات جاهز للمشاهدة';
-                    watchAdBtn.disabled = false;
-                    watchAdBtn.textContent = 'شاهد الإعلان الآن';
-                    
-                }).catch(e => {
-                    console.error('خطأ في تهيئة الإعلانات:', e);
-                    adStatus.className = 'ad-status status-error';
-                    adStatus.textContent = 'خطأ في تحميل الإعلانات';
-                    watchAdBtn.disabled = true;
-                    watchAdBtn.textContent = 'تعذر تحميل الإعلانات';
-                });
-                
-            } catch (error) {
-                console.error('خطأ في تهيئة نظام الإعلانات:', error);
-                adStatus.className = 'ad-status status-error';
-                adStatus.textContent = 'خطأ في نظام الإعلانات';
-            }
-        }
-        
         // عرض إعلان
         async function showAd() {
-            if (userData.adsWatched >= userData.adsLimit) {
-                showNotification('وصلت للحد الأقصى اليوم من الإعلانات');
-                return;
-            }
-            
-            if (!isAdSystemReady || !adShowFunction) {
-                showNotification('نظام الإعلانات غير جاهز بعد');
-                return;
-            }
-            
             watchAdBtn.disabled = true;
             watchAdBtn.textContent = 'جاري تحميل الإعلان...';
             adStatus.className = 'ad-status status-loading';
@@ -581,22 +528,12 @@
             // عرض نافذة الانتظار
             adDisplay.innerHTML = '<p>جاري تحميل الإعلان، يرجى الانتظار...</p>';
             adModal.style.display = 'flex';
-            adTimer.textContent = '--';
             
             try {
-                // تشغيل الإعلان باستخدام الدالة من النظام
-                await adShowFunction();
+                await window.adSystem.showAd();
                 
-                // الإعلان تم تشغيله بنجاح
-                console.log('تم تشغيل الإعلان بنجاح');
-                
-                // تحديث بيانات المستخدم
-                userData.balance += 0.00002;
-                userData.adsWatched++;
-                userData.lastAdWatch = new Date();
-                
+                // تحديث الواجهة
                 updateUI();
-                saveUserData();
                 
                 // إغلاق نافذة الإعلان
                 adModal.style.display = 'none';
@@ -607,14 +544,14 @@
             } catch (error) {
                 console.error('خطأ في تشغيل الإعلان:', error);
                 adStatus.className = 'ad-status status-error';
-                adStatus.textContent = 'فشل في تشغيل الإعلان';
-                showNotification('فشل في تحميل الإعلان. يرجى المحاولة مرة أخرى.');
+                adStatus.textContent = error.message;
+                showNotification(error.message);
             } finally {
                 watchAdBtn.disabled = false;
                 watchAdBtn.textContent = 'شاهد الإعلان الآن';
                 adModal.style.display = 'none';
                 
-                if (userData.adsWatched < userData.adsLimit) {
+                if (window.adSystem.userData.adsWatched < window.adSystem.userData.adsLimit) {
                     adStatus.className = 'ad-status status-ready';
                     adStatus.textContent = 'جاهز لمشاهدة الإعلانات';
                 }
@@ -636,65 +573,23 @@
         
         // تحديث عنوان المحفظة
         walletAddressInput.addEventListener('input', () => {
-            userData.walletAddress = walletAddressInput.value;
+            window.adSystem.updateWalletAddress(walletAddressInput.value);
             updateUI();
-            saveUserData();
         });
         
         // سحب الأرباح
         withdrawBtn.addEventListener('click', async () => {
-            if (userData.balance >= 0.1 && userData.walletAddress.trim() !== '') {
-                withdrawBtn.disabled = true;
-                withdrawBtn.textContent = 'جاري المعالجة...';
-                
-                setTimeout(() => {
-                    showNotification(`تم طلب سحب ${userData.balance.toFixed(5)} USDT إلى العنوان: ${userData.walletAddress}\nسيتم تحويل المبلغ خلال 24 ساعة`);
-                    
-                    // إعادة تعيين البيانات بعد السحب
-                    userData.balance = 0;
-                    userData.adsWatched = 0;
-                    
-                    updateUI();
-                    saveUserData();
-                    
-                    withdrawBtn.disabled = true;
-                    withdrawBtn.textContent = 'سحب الأرباح';
-                }, 2000);
+            try {
+                const amount = window.adSystem.withdrawEarnings();
+                showNotification(`تم طلب سحب ${amount.toFixed(5)} USDT إلى العنوان: ${window.adSystem.userData.walletAddress}\nسيتم تحويل المبلغ خلال 24 ساعة`);
+                updateUI();
+            } catch (error) {
+                showNotification(error.message);
             }
         });
         
-        // تحميل البيانات المحفوظة
-        function loadUserData() {
-            const savedData = localStorage.getItem('adRewardAppData');
-            if (savedData) {
-                const parsedData = JSON.parse(savedData);
-                const today = new Date().toDateString();
-                const lastWatchDate = parsedData.lastAdWatch ? new Date(parsedData.lastAdWatch).toDateString() : null;
-                
-                // إعادة تعيين العدادات إذا كان اليوم مختلف
-                if (lastWatchDate !== today) {
-                    userData.adsWatched = 0;
-                } else {
-                    userData.adsWatched = parsedData.adsWatched;
-                }
-                
-                userData.balance = parsedData.balance || 0;
-                userData.walletAddress = parsedData.walletAddress || '';
-                
-                if (userData.walletAddress) {
-                    walletAddressInput.value = userData.walletAddress;
-                }
-            }
-            updateUI();
-        }
-        
-        // حفظ البيانات
-        function saveUserData() {
-            localStorage.setItem('adRewardAppData', JSON.stringify(userData));
-        }
-        
         // تهيئة التطبيق
-        document.addEventListener('DOMContentLoaded', () => {
+        document.addEventListener('DOMContentLoaded', async () => {
             // تهيئة Telegram Web App
             if (window.Telegram && window.Telegram.WebApp) {
                 window.Telegram.WebApp.expand();
@@ -702,20 +597,35 @@
                 console.log('Telegram Web App initialized');
             }
             
-            // تحميل البيانات
-            loadUserData();
+            // تحميل بيانات المستخدم
+            window.adSystem.loadUserData();
             
-            // تهيئة نظام الإعلانات بعد تحميل الصفحة
-            setTimeout(() => {
-                initAdSystem();
-            }, 1000);
+            // تعبئة عنوان المحفظة إذا كان موجوداً
+            if (window.adSystem.userData.walletAddress) {
+                walletAddressInput.value = window.adSystem.userData.walletAddress;
+            }
+            
+            // تحديث الواجهة الأولية
+            updateUI();
+            
+            // تهيئة نظام الإعلانات
+            const initSuccess = await window.adSystem.initAdSystem();
+            
+            if (initSuccess) {
+                adStatus.className = 'ad-status status-ready';
+                adStatus.textContent = 'نظام الإعلانات جاهز للمشاهدة';
+                watchAdBtn.disabled = false;
+                watchAdBtn.textContent = 'شاهد الإعلان الآن';
+            } else {
+                adStatus.className = 'ad-status status-error';
+                adStatus.textContent = 'خطأ في تحميل الإعلانات';
+                watchAdBtn.disabled = true;
+                watchAdBtn.textContent = 'تعذر تحميل الإعلانات';
+            }
             
             // إضافة event listener للزر
             watchAdBtn.addEventListener('click', showAd);
-            
-            // حفظ البيانات تلقائياً
-            setInterval(saveUserData, 10000);
         });
     </script>
 </body>
-</html>
+</html> 
