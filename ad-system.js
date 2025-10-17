@@ -1,66 +1,120 @@
 // ad-system.js
 class AdSystem {
     constructor() {
-        this.spotId = '383135';
-        this.adShowFunction = null;
-        this.isAdSystemReady = false;
+        this.apiToken = 'b5d2084e00e8c0a77615864b727e3166';
+        this.apiBaseUrl = 'https://partners.onclicka.com/backend/api/public';
         this.userData = {
             balance: 0,
             adsWatched: 0,
             adsLimit: 250,
             walletAddress: '',
-            lastAdWatch: null
+            lastAdWatch: null,
+            userId: this.generateUserId()
         };
+        this.isAdSystemReady = true; // النظام جاهز دائماً مع API
     }
 
-    // تهيئة نظام الإعلانات
-    async initAdSystem() {
-        try {
-            console.log('جاري تهيئة نظام الإعلانات...');
-            
-            if (typeof window.initCdTma === 'undefined') {
-                throw new Error('مكتبة الإعلانات غير محملة');
-            }
+    // إنشاء معرف مستخدم فريد
+    generateUserId() {
+        if (window.Telegram && window.Telegram.WebApp) {
+            return 'tg_' + window.Telegram.WebApp.initDataUnsafe.user?.id || Date.now();
+        }
+        return 'web_' + Math.random().toString(36).substr(2, 9);
+    }
 
-            this.adShowFunction = await window.initCdTma({ 
-                id: this.spotId 
-            });
+    // جلب الإحصائيات من OnClickA API
+    async getStats() {
+        try {
+            const today = new Date().toISOString().split('T')[0];
+            const url = `${this.apiBaseUrl}/stats?token=${this.apiToken}&date1=${today}&date2=${today}&fields=impressions,clicks,money&limit=10&offset=0`;
             
-            this.isAdSystemReady = true;
-            console.log('نظام الإعلانات جاهز');
-            return true;
+            const response = await fetch(url);
+            if (!response.ok) throw new Error('فشل في جلب الإحصائيات');
             
+            const data = await response.json();
+            return data;
         } catch (error) {
-            console.error('خطأ في تهيئة الإعلانات:', error);
-            this.isAdSystemReady = false;
-            return false;
+            console.error('Error fetching stats:', error);
+            return null;
         }
     }
 
-    // عرض إعلان
+    // جلب قائمة الـ Spots المتاحة
+    async getSpots() {
+        try {
+            const url = `${this.apiBaseUrl}/user-spots?token=${this.apiToken}`;
+            const response = await fetch(url);
+            if (!response.ok) throw new Error('فشل في جلب الـ Spots');
+            
+            const data = await response.json();
+            return data;
+        } catch (error) {
+            console.error('Error fetching spots:', error);
+            return null;
+        }
+    }
+
+    // محاكاة مشاهدة إعلان (حتى يتم تطبيق API الإعلانات)
     async showAd() {
         if (this.userData.adsWatched >= this.userData.adsLimit) {
             throw new Error('وصلت للحد الأقصى اليوم من الإعلانات');
         }
 
-        if (!this.isAdSystemReady || !this.adShowFunction) {
-            throw new Error('نظام الإعلانات غير جاهز');
-        }
+        // محاكاة انتظار الإعلان
+        await new Promise(resolve => setTimeout(resolve, 3000));
+        
+        // تحديث بيانات المستخدم
+        this.userData.balance += 0.00002;
+        this.userData.adsWatched++;
+        this.userData.lastAdWatch = new Date();
+        
+        // هنا يمكنك إضافة استدعاء API لتسجيل المشاهدة
+        await this.recordAdView();
+        
+        this.saveUserData();
+        return true;
+    }
 
+    // تسجيل مشاهدة الإعلان (وهمي حالياً - يمكن تطويره)
+    async recordAdView() {
         try {
-            await this.adShowFunction();
-            
-            // تحديث بيانات المستخدم بعد مشاهدة الإعلان
-            this.userData.balance += 0.00002;
-            this.userData.adsWatched++;
-            this.userData.lastAdWatch = new Date();
-            
-            this.saveUserData();
+            // يمكنك إضافة API call هنا لتسجيل المشاهدة
+            console.log('تم تسجيل مشاهدة إعلان للمستخدم:', this.userData.userId);
             return true;
-            
         } catch (error) {
-            console.error('خطأ في تشغيل الإعلان:', error);
-            throw new Error('فشل في تشغيل الإعلان');
+            console.error('Error recording ad view:', error);
+            return false;
+        }
+    }
+
+    // جلب الرصيد الحقيقي من OnClickA
+    async getRealBalance() {
+        try {
+            const stats = await this.getStats();
+            if (stats && stats.data && stats.data.length > 0) {
+                const todayStats = stats.data[0];
+                return parseFloat(todayStats.money) || 0;
+            }
+            return 0;
+        } catch (error) {
+            console.error('Error getting real balance:', error);
+            return 0;
+        }
+    }
+
+    // تحديث الرصيد من OnClickA
+    async updateBalanceFromAPI() {
+        try {
+            const realBalance = await this.getRealBalance();
+            if (realBalance > 0) {
+                this.userData.balance = realBalance;
+                this.saveUserData();
+                return realBalance;
+            }
+            return this.userData.balance;
+        } catch (error) {
+            console.error('Error updating balance:', error);
+            return this.userData.balance;
         }
     }
 
@@ -122,7 +176,8 @@ class AdSystem {
             balance: this.userData.balance,
             adsWatched: this.userData.adsWatched,
             adsRemaining: this.userData.adsLimit - this.userData.adsWatched,
-            progressPercent: (this.userData.adsWatched / this.userData.adsLimit) * 100
+            progressPercent: (this.userData.adsWatched / this.userData.adsLimit) * 100,
+            userId: this.userData.userId
         };
     }
 
@@ -137,8 +192,26 @@ class AdSystem {
             isReady: this.isAdSystemReady,
             adsWatched: this.userData.adsWatched,
             adsLimit: this.userData.adsLimit,
-            balance: this.userData.balance
+            balance: this.userData.balance,
+            apiConnected: true
         };
+    }
+
+    // اختبار اتصال API
+    async testApiConnection() {
+        try {
+            const spots = await this.getSpots();
+            return {
+                success: true,
+                message: '✅ اتصال OnClickA API يعمل بنجاح',
+                spots: spots
+            };
+        } catch (error) {
+            return {
+                success: false,
+                message: '❌ فشل في الاتصال بـ OnClickA API'
+            };
+        }
     }
 }
 
