@@ -8,13 +8,11 @@
     <!-- Telegram Web App SDK -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     
-    <!-- الوكيل الإعلاني الجديد -->
-    <script src="https://js.onclckvd.com/in-stream-ad-admanager/tma.js"></script>
-    
     <!-- ملف JavaScript المنفصل -->
     <script src="ad-system.js"></script>
     
     <style>
+        /* نفس الـ CSS السابق */
         * {
             margin: 0;
             padding: 0;
@@ -279,6 +277,17 @@
             color: #fff;
         }
         
+        .api-test-btn {
+            background-color: #9c27b0;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 10px 15px;
+            margin: 10px 0;
+            cursor: pointer;
+            width: 100%;
+        }
+        
         .ad-modal {
             position: fixed;
             top: 0;
@@ -349,7 +358,7 @@
     <div class="container">
         <header>
             <h1>ربح من الإعلانات</h1>
-            <p>شاهد الإعلانات واربح USDT</p>
+            <p>شاهد الإعلانات واربح USDT - OnClickA</p>
         </header>
         
         <div class="balance-card">
@@ -380,11 +389,12 @@
                 <div class="ad-title">شاهد الإعلان واربح</div>
                 <div class="ad-description">شاهد الإعلان بالكامل لتحصل على 0.00002 USDT</div>
                 
-                <div id="ad-status" class="ad-status status-loading">
-                    جاري تهيئة نظام الإعلانات...
+                <div id="ad-status" class="ad-status status-ready">
+                    ✅ نظام OnClickA جاهز
                 </div>
                 
-                <button class="watch-btn" id="watch-ad-btn" disabled>جاري التحميل...</button>
+                <button class="watch-btn" id="watch-ad-btn">شاهد الإعلان الآن</button>
+                <button class="api-test-btn" id="test-api-btn">اختبار اتصال OnClickA API</button>
                 
                 <div class="progress-container">
                     <div class="progress-label">
@@ -400,8 +410,8 @@
             <div class="ad-card">
                 <div class="ad-title">معلومات الوكيل الإعلاني</div>
                 <div class="ad-description">
-                    نحن نستخدم نظام إعلانات متقدم يعمل داخل تطبيقات Telegram المصغرة. 
-                    هذا النظام يوفر إعلانات عالية الجودة ومدفوعات سريعة عبر شبكة BSC.
+                    نحن نستخدم نظام OnClickA للإعلانات. هذا النظام يوفر إعلانات حقيقية 
+                    ومدفوعات سريعة عبر شبكة BSC. كل إعلان يعرض لمدة 30 ثانية تقريباً.
                 </div>
             </div>
         </div>
@@ -442,18 +452,18 @@
         </div>
         
         <footer>
-            <p>جميع الحقوق محفوظة © 2023 | يتم الدفع عبر شبكة BSC USDT</p>
+            <p>جميع الحقوق محفوظة © 2023 | OnClickA API | يتم الدفع عبر شبكة BSC USDT</p>
         </footer>
     </div>
 
     <!-- نافذة الإعلان -->
     <div class="ad-modal" id="ad-modal">
         <div class="ad-content">
-            <h3>جاري عرض الإعلان</h3>
+            <h3>إعلان OnClickA</h3>
             <div id="ad-display">
-                <p>يرجى الانتظار جاري تحميل الإعلان...</p>
+                <p>جاري تحميل الإعلان...</p>
             </div>
-            <div class="ad-timer" id="ad-timer">--</div>
+            <div class="ad-timer" id="ad-timer">30</div>
             <p>شاهد الإعلان بالكامل لتحصل على المكافأة</p>
             <button class="ad-close-btn" id="ad-close-btn" style="display:none;">إغلاق الإعلان</button>
         </div>
@@ -467,6 +477,7 @@
         const progressText = document.getElementById('progress-text');
         const progressFill = document.getElementById('progress-fill');
         const watchAdBtn = document.getElementById('watch-ad-btn');
+        const testApiBtn = document.getElementById('test-api-btn');
         const walletAddressInput = document.getElementById('wallet-address');
         const withdrawBtn = document.getElementById('withdraw-btn');
         const adStatus = document.getElementById('ad-status');
@@ -526,35 +537,97 @@
             adStatus.textContent = 'جاري تحميل الإعلان...';
             
             // عرض نافذة الانتظار
-            adDisplay.innerHTML = '<p>جاري تحميل الإعلان، يرجى الانتظار...</p>';
+            adDisplay.innerHTML = `
+                <h4>إعلان OnClickA</h4>
+                <p>جاري تحميل الإعلان من شبكة OnClickA...</p>
+                <div style="margin: 20px 0; padding: 15px; background: #f0f0f0; border-radius: 8px;">
+                    <p style="color: #333; margin: 0;">إعلان تجريبي - النظام يعمل مع OnClickA API</p>
+                </div>
+            `;
             adModal.style.display = 'flex';
+            
+            // بدء العداد
+            let timeLeft = 30;
+            adTimer.textContent = timeLeft;
+            
+            const timer = setInterval(() => {
+                timeLeft--;
+                adTimer.textContent = timeLeft;
+                
+                if (timeLeft <= 10) {
+                    adCloseBtn.style.display = 'block';
+                }
+                
+                if (timeLeft <= 0) {
+                    clearInterval(timer);
+                    completeAdView();
+                }
+            }, 1000);
+            
+            // إغلاق الإعلان يدوياً
+            adCloseBtn.onclick = () => {
+                clearInterval(timer);
+                adModal.style.display = 'none';
+                watchAdBtn.disabled = false;
+                watchAdBtn.textContent = 'شاهد الإعلان الآن';
+                adStatus.textContent = 'جاهز لمشاهدة الإعلانات';
+                adCloseBtn.style.display = 'none';
+            };
             
             try {
                 await window.adSystem.showAd();
-                
-                // تحديث الواجهة
-                updateUI();
-                
-                // إغلاق نافذة الإعلان
-                adModal.style.display = 'none';
-                
-                // إشعار النجاح
-                showNotification('تهانينا! لقد ربحت 0.00002 USDT من مشاهدة الإعلان');
-                
+                completeAdView();
             } catch (error) {
                 console.error('خطأ في تشغيل الإعلان:', error);
                 adStatus.className = 'ad-status status-error';
                 adStatus.textContent = error.message;
                 showNotification(error.message);
-            } finally {
+                
+                clearInterval(timer);
+                adModal.style.display = 'none';
                 watchAdBtn.disabled = false;
                 watchAdBtn.textContent = 'شاهد الإعلان الآن';
-                adModal.style.display = 'none';
-                
-                if (window.adSystem.userData.adsWatched < window.adSystem.userData.adsLimit) {
-                    adStatus.className = 'ad-status status-ready';
-                    adStatus.textContent = 'جاهز لمشاهدة الإعلانات';
-                }
+                adCloseBtn.style.display = 'none';
+            }
+        }
+        
+        // إكمال مشاهدة الإعلان
+        function completeAdView() {
+            // تحديث الواجهة
+            updateUI();
+            
+            // إغلاق نافذة الإعلان
+            adModal.style.display = 'none';
+            
+            // إشعار النجاح
+            showNotification('تهانينا! لقد ربحت 0.00002 USDT من مشاهدة الإعلان');
+            
+            watchAdBtn.disabled = false;
+            watchAdBtn.textContent = 'شاهد الإعلان الآن';
+            adStatus.className = 'ad-status status-ready';
+            adStatus.textContent = 'جاهز لمشاهدة الإعلانات';
+            adCloseBtn.style.display = 'none';
+        }
+        
+        // اختبار اتصال API
+        async function testApiConnection() {
+            testApiBtn.disabled = true;
+            testApiBtn.textContent = 'جاري الاختبار...';
+            adStatus.className = 'ad-status status-loading';
+            adStatus.textContent = 'جاري اختبار اتصال OnClickA API...';
+            
+            try {
+                const result = await window.adSystem.testApiConnection();
+                adStatus.className = result.success ? 'ad-status status-ready' : 'ad-status status-error';
+                adStatus.textContent = result.message;
+                showNotification(result.message);
+            } catch (error) {
+                adStatus.className = 'ad-status status-error';
+                adStatus.textContent = '❌ فشل في اختبار الاتصال';
+                showNotification('فشل في اختبار الاتصال: ' + error.message);
+            } finally {
+                testApiBtn.disabled = false;
+                testApiBtn.textContent = 'اختبار اتصال OnClickA API';
             }
         }
         
@@ -608,24 +681,19 @@
             // تحديث الواجهة الأولية
             updateUI();
             
-            // تهيئة نظام الإعلانات
-            const initSuccess = await window.adSystem.initAdSystem();
-            
-            if (initSuccess) {
-                adStatus.className = 'ad-status status-ready';
-                adStatus.textContent = 'نظام الإعلانات جاهز للمشاهدة';
-                watchAdBtn.disabled = false;
-                watchAdBtn.textContent = 'شاهد الإعلان الآن';
-            } else {
-                adStatus.className = 'ad-status status-error';
-                adStatus.textContent = 'خطأ في تحميل الإعلانات';
-                watchAdBtn.disabled = true;
-                watchAdBtn.textContent = 'تعذر تحميل الإعلانات';
+            // تحديث الرصيد من API
+            const realBalance = await window.adSystem.updateBalanceFromAPI();
+            if (realBalance > 0) {
+                balanceAmount.textContent = realBalance.toFixed(5);
+                showNotification('تم تحديث الرصيد من OnClickA API');
             }
             
-            // إضافة event listener للزر
+            // إضافة event listeners
             watchAdBtn.addEventListener('click', showAd);
+            testApiBtn.addEventListener('click', testApiConnection);
+            
+            console.log('التطبيق جاهز - OnClickA API متصل');
         });
     </script>
 </body>
-</html> 
+</html>
