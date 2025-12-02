@@ -163,6 +163,7 @@ img.chat-img {
 
 <script>
 document.addEventListener("DOMContentLoaded", () => {
+
 const input = document.getElementById("msgInput");
 const micBtn = document.getElementById("micBtn");
 const sendBtn = document.getElementById("sendBtn");
@@ -274,7 +275,7 @@ async function startRecord() {
 
     recorder.onstop = () => {
       if(chunks.length>0){
-        const blob = new Blob(chunks, { type:"audio/mp3" });
+        const blob = new Blob(chunks, { type:"audio/mp3" }); // أكثر توافق
         const url = URL.createObjectURL(blob);
         addMessage(url,"audio");
       }
@@ -305,6 +306,7 @@ function stopRecord(){
 /* حدث اللمس لتسجيل الصوت */
 micBtn.addEventListener("touchstart", startRecord);
 micBtn.addEventListener("touchend", stopRecord);
+
 });
 </script>
 
