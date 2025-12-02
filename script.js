@@ -1,21 +1,30 @@
-const btn = document.createElement("button");
-btn.className = "voice-btn";
-btn.textContent = "▶️ تشغيل الصوت";
-const audioEl = new Audio(url);
+let cancelRecording = false;
+let startY = 0;
+const cancelThreshold = 60; // عدد البكسلات لسحب الإصبع لأعلى لإلغاء التسجيل
 
-btn.addEventListener("click", () => {
-  // إيقاف أي صوت آخر
-  document.querySelectorAll(".voice-btn").forEach(b => {
-    if(b!==btn && b.audioEl){b.audioEl.pause(); b.textContent="▶️ تشغيل الصوت";}
-  });
+micBtn.addEventListener("touchstart", (e) => {
+  startY = e.touches[0].clientY;
+  cancelRecording = false;
+  startRecord();
+});
 
-  if(audioEl.paused){
-    audioEl.play(); // التشغيل فقط عند الضغط
-    btn.textContent="⏸ إيقاف";
+micBtn.addEventListener("touchmove", (e) => {
+  const currentY = e.touches[0].clientY;
+  if(startY - currentY > cancelThreshold) {
+    cancelRecording = true;
+    recordingBox.textContent = "❌ تم إلغاء التسجيل";
   } else {
-    audioEl.pause();
-    btn.textContent="▶️ تشغيل الصوت";
+    recordingBox.textContent = `🔴 جاري التسجيل… <span id="timer">${String(Math.floor(seconds/60)).padStart(2,"0")}:${String(seconds%60).padStart(2,"0")}</span>`;
   }
 });
-btn.audioEl = audioEl;
-div.appendChild(btn);
+
+micBtn.addEventListener("touchend", () => {
+  if(cancelRecording) {
+    // إلغاء التسجيل
+    if(recorder && recorder.state === "recording") recorder.stop();
+    chunks = []; // حذف أي بيانات صوتية
+    recordingBox.style.display = "none";
+  } else {
+    stopRecord(); // إنهاء التسجيل وإرسال الصوت
+  }
+});
