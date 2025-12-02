@@ -10,13 +10,11 @@ body {margin:0; background:#121212; font-family:'Tajawal',sans-serif; color:whit
 header.chat-header {text-align:center; padding:15px; background:#2c2c2c; font-weight:bold; border-bottom:1px solid #333;}
 .chat-messages {flex:1; padding:12px; overflow-y:auto; display:flex; flex-direction:column; gap:14px;}
 .message {background:#0078ff; padding:10px 14px; max-width:75%; border-radius:12px; align-self:flex-end; word-wrap:break-word; border-bottom-right-radius:4px; position:relative;}
-.status {margin-top:4px; font-size:11px; opacity:.7; text-align:right;}
-img.chat-img {max-width:100%; border-radius:12px; margin-top:5px;}
 #recordingBox {display:none; background:#b00020; padding:12px; text-align:center; font-weight:bold; position:absolute; bottom:60px; left:0; width:100%; animation:blink 1s infinite;}
 @keyframes blink {0%{opacity:1;} 50%{opacity:0.5;} 100%{opacity:1;}}
 .chat-input {padding:10px; background:#2c2c2c; display:flex; align-items:center; gap:8px;}
 .chat-input input {flex:1; background:#3c3c3c; padding:12px; border:none; color:white; border-radius:10px;}
-.btn {width:45px; height:45px; background:#0078ff; border-radius:50%; border:none; font-size:20px; color:white;}
+.btn {width:60px; height:45px; background:#0078ff; border-radius:50%; border:none; font-size:20px; color:white;}
 </style>
 </head>
 <body>
@@ -38,7 +36,7 @@ const recordingBox = document.getElementById("recordingBox");
 const timerDisplay = document.getElementById("timer");
 
 let recorder = null, stream = null, chunks = [], seconds = 0, timerInterval = null;
-let isRecording = false; // ← متغير للتحكم بحالة التسجيل
+let isRecording = false;
 
 function updateTimer() {
   seconds++;
@@ -47,16 +45,15 @@ function updateTimer() {
   timerDisplay.textContent = `${m}:${s}`;
 }
 
-async function startRecord() {
-  if(isRecording) return; // يمنع بدء تسجيل جديد أثناء تسجيل جاري
-  try{
+async function startRecording() {
+  if(isRecording) return;
+  try {
     isRecording = true;
-
     if(stream){ stream.getTracks().forEach(track=>track.stop()); stream=null; }
 
     stream = await navigator.mediaDevices.getUserMedia({audio:true});
     recorder = new MediaRecorder(stream);
-    chunks=[];
+    chunks = [];
 
     recorder.ondataavailable = e=>chunks.push(e.data);
 
@@ -69,25 +66,30 @@ async function startRecord() {
       if(stream){ stream.getTracks().forEach(track=>track.stop()); stream=null; }
       recorder=null; chunks=[]; recordingBox.style.display="none";
       clearInterval(timerInterval); timerInterval=null; seconds=0; timerDisplay.textContent="00:00";
-      isRecording = false; // ← إعادة تعيين الحالة للسماح بتسجيل جديد
+      isRecording=false;
     };
 
     recorder.start();
     seconds=0; timerDisplay.textContent="00:00"; recordingBox.style.display="block";
     timerInterval = setInterval(updateTimer,1000);
 
-  } catch(e){ alert("تعذر الوصول للميكروفون. تحقق من سماح المتصفح بالصوت."); console.error(e); isRecording=false; }
+  } catch(e){
+    alert("تعذر الوصول للميكروفون.");
+    console.error(e);
+    isRecording=false;
+  }
 }
 
-function stopRecord(){ if(recorder && recorder.state==="recording") recorder.stop(); }
+function stopRecording() {
+  if(recorder && recorder.state==="recording") recorder.stop();
+}
 
-// تسجيل الصوت لللمس والماوس
-micBtn.addEventListener("touchstart", startRecord);
-micBtn.addEventListener("touchend", stopRecord);
-micBtn.addEventListener("mousedown", startRecord);
-micBtn.addEventListener("mouseup", stopRecord);
+// زر واحد للتحويل بين بدء/إيقاف التسجيل
+micBtn.addEventListener("click", () => {
+  if(!isRecording) startRecording();
+  else stopRecording();
+});
 
-// إضافة رسالة صوتية
 function addAudioMessage(url){
   const div = document.createElement("div");
   div.className = "message";
