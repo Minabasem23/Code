@@ -288,6 +288,9 @@
 
             // Toolbar عند الضغط على الرسالة
             div.addEventListener("click", (e) => {
+                // لا تعرض شريط الأدوات إذا كانت الرسالة صوتية
+                if (type === "audio") return;
+
                 const existingToolbar = document.querySelector(".msg-toolbar");
                 if (existingToolbar) existingToolbar.remove();
 
