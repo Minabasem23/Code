@@ -12,7 +12,7 @@ body {margin:0;background:#121212;font-family:'Tajawal',sans-serif;color:white;d
 .message {background:#0078ff;padding:10px 14px;max-width:75%;border-radius:12px;align-self:flex-end;word-wrap:break-word;border-bottom-right-radius:4px;position:relative;}
 .status {margin-top:4px;font-size:11px;opacity:.7;text-align:right;}
 img.chat-img {max-width:100%;border-radius:12px;margin-top:5px;}
-audio {width:100%;margin-top:5px;}
+.voice-btn {background:#005bbb;color:white;border:none;padding:8px 12px;border-radius:6px;cursor:pointer;margin-top:5px;}
 .chat-input {padding:10px;background:#2c2c2c;display:flex;align-items:center;gap:8px;}
 .chat-input input {flex:1;background:#3c3c3c;padding:12px;border:none;color:white;border-radius:10px;}
 .btn {width:45px;height:45px;background:#0078ff;border-radius:50%;border:none;font-size:20px;color:white;}
@@ -24,6 +24,7 @@ audio {width:100%;margin-top:5px;}
 </head>
 <body>
 <div class="chat-container">
+
   <div class="chat-header">💬 دردشة</div>
 
   <!-- إشعار التسجيل -->
@@ -45,10 +46,11 @@ audio {width:100%;margin-top:5px;}
     <button class="btn" id="sendBtn" style="display:none;">✈️</button>
   </div>
 
-  <!-- مدخلات الملفات مخفية -->
+  <!-- مخفي نهائياً -->
   <input id="cameraInput" type="file" accept="image/*" capture="camera" style="display:none;">
   <input id="imageInput" type="file" accept="image/*" style="display:none;">
   <input id="fileInput" type="file" style="display:none;">
+
 </div>
 
 <script>
@@ -60,13 +62,43 @@ let recordingBox = document.getElementById("recordingBox");
 let timerDisplay = document.getElementById("timer");
 
 /* زر مايك ↔ إرسال */
-input.addEventListener("input",()=>{if(input.value.trim()===""){micBtn.style.display="block";sendBtn.style.display="none";}else{micBtn.style.display="none";sendBtn.style.display="block";}});
+input.addEventListener("input",()=>{
+  if(input.value.trim()===""){micBtn.style.display="block";sendBtn.style.display="none";}
+  else{micBtn.style.display="none";sendBtn.style.display="block";}
+});
 
 /* إرسال النص */
-sendBtn.onclick=()=>{let t=input.value.trim();if(!t)return;addMessage(t);input.value="";micBtn.style.display="block";sendBtn.style.display="none";}
+sendBtn.onclick=()=>{
+  let t=input.value.trim();
+  if(!t)return;
+  addMessage(t);
+  input.value="";micBtn.style.display="block";sendBtn.style.display="none";
+}
 
 /* عرض الرسالة */
-function addMessage(content,type="text"){let div=document.createElement("div");div.className="message";if(type==="img"){div.innerHTML=`<img class="chat-img" src="${content}"><div class="status">✓✓ تمت القراءة</div>`}else if(type==="audio"){div.innerHTML=`<audio controls src="${content}"></audio><div class="status">✓✓ تمت القراءة</div>`}else{div.innerHTML=`${content}<div class="status">✓✓ تمت القراءة</div>`}chat.appendChild(div);chat.scrollTop=chat.scrollHeight;}
+function addMessage(content,type="text"){
+  let div=document.createElement("div");
+  div.className="message";
+  if(type==="img"){
+    div.innerHTML=`<img class="chat-img" src="${content}"><div class="status">✓✓ تمت القراءة</div>`;
+  } else if(type==="audio"){
+    let btn = document.createElement("button");
+    btn.textContent="▶️ تشغيل الصوت";
+    btn.className="voice-btn";
+    btn.onclick=()=>{
+      if(btn.audioEl.paused){btn.audioEl.play();btn.textContent="⏸ إيقاف"} 
+      else {btn.audioEl.pause();btn.textContent="▶️ تشغيل الصوت";}
+    };
+    let audioEl=new Audio(content);
+    btn.audioEl=audioEl;
+    div.appendChild(btn);
+    div.innerHTML+=`<div class="status">✓✓ تمت القراءة</div>`;
+  } else {
+    div.innerHTML=`${content}<div class="status">✓✓ تمت القراءة</div>`;
+  }
+  chat.appendChild(div);
+  chat.scrollTop=chat.scrollHeight;
+}
 
 /* قائمة الدبوس */
 document.getElementById("attachBtn").onclick=()=>{let menu=document.getElementById("attachMenu");menu.style.display=menu.style.display==="flex"?"none":"flex";}
@@ -75,23 +107,31 @@ function openImage(){document.getElementById("imageInput").click();}
 function openFile(){document.getElementById("fileInput").click();}
 
 /* رفع الصور */
-document.getElementById("imageInput").onchange=document.getElementById("cameraInput").onchange=function(){let file=this.files[0];let reader=new FileReader();reader.onload=()=>addMessage(reader.result,"img");reader.readAsDataURL(file);}
+document.getElementById("imageInput").onchange=document.getElementById("cameraInput").onchange=function(){
+  let file=this.files[0];
+  let reader=new FileReader();
+  reader.onload=()=>addMessage(reader.result,"img");
+  reader.readAsDataURL(file);
+}
 
-/* رفع الملفات صوت / PDF / Word */
-document.getElementById("fileInput").onchange=function(){let file=this.files[0];let reader=new FileReader();reader.onload=()=>addMessage(reader.result,"audio");reader.readAsDataURL(file);}
+/* رفع الملفات صوت/غير صوت */
+document.getElementById("fileInput").onchange=function(){
+  let file=this.files[0];
+  let reader=new FileReader();
+  reader.onload=()=>{
+    // تفحص نوع الملف لو كان صوتي
+    if(file.type.startsWith("audio")) addMessage(reader.result,"audio");
+    else addMessage(reader.result,"text");
+  }
+  reader.readAsDataURL(file);
+}
 
 /* تسجيل الصوت */
-let recorder;
-let chunks=[];
-let seconds=0;
-let timerInterval=null;
-
-function updateTimer(){seconds++;let m=String(Math.floor(seconds/60)).padStart(2,"0");let s=String(seconds%60).padStart(2,"0");timerDisplay.textContent=`${m}:${s}`}
-
+let recorder; let chunks=[]; let seconds=0; let timerInterval=null;
+function updateTimer(){seconds++; let m=String(Math.floor(seconds/60)).padStart(2,"0"); let s=String(seconds%60).padStart(2,"0"); timerDisplay.textContent=`${m}:${s}`}
 async function startRecord(){
-  if(timerInterval) return; // منع تكرار التايمر
-  seconds=0;
-  timerDisplay.textContent="00:00";
+  if(timerInterval) return;
+  seconds=0; timerDisplay.textContent="00:00";
   let stream=await navigator.mediaDevices.getUserMedia({audio:true});
   recorder=new MediaRecorder(stream);
   recorder.ondataavailable=e=>chunks.push(e.data);
@@ -105,15 +145,12 @@ async function startRecord(){
   recordingBox.style.display="block";
   timerInterval=setInterval(updateTimer,1000);
 }
-
 function stopRecord(){
   if(recorder) recorder.stop();
   recordingBox.style.display="none";
   clearInterval(timerInterval);
   timerInterval=null;
 }
-
-/* المايك يعمل باللمس والضغط */
 micBtn.onmousedown=startRecord;
 micBtn.onmouseup=stopRecord;
 micBtn.ontouchstart=startRecord;
