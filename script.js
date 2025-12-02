@@ -1,30 +1,17 @@
-let cancelRecording = false;
-let startY = 0;
-const cancelThreshold = 60; // عدد البكسلات لسحب الإصبع لأعلى لإلغاء التسجيل
+function addAudioMessage(url){
+  const div = document.createElement("div");
+  div.className = "message";
 
-micBtn.addEventListener("touchstart", (e) => {
-  startY = e.touches[0].clientY;
-  cancelRecording = false;
-  startRecord();
-});
+  const audioEl = document.createElement("audio");
+  audioEl.controls = true;
+  audioEl.src = url;
 
-micBtn.addEventListener("touchmove", (e) => {
-  const currentY = e.touches[0].clientY;
-  if(startY - currentY > cancelThreshold) {
-    cancelRecording = true;
-    recordingBox.textContent = "❌ تم إلغاء التسجيل";
-  } else {
-    recordingBox.textContent = `🔴 جاري التسجيل… <span id="timer">${String(Math.floor(seconds/60)).padStart(2,"0")}:${String(seconds%60).padStart(2,"0")}</span>`;
-  }
-});
+  // جعل مشغل الصوت صغير
+  audioEl.style.width = "120px";  // عرض صغير مناسب للهاتف
+  audioEl.style.height = "25px";  // ارتفاع صغير
+  audioEl.style.borderRadius = "8px"; // اختياري لمظهر أفضل
 
-micBtn.addEventListener("touchend", () => {
-  if(cancelRecording) {
-    // إلغاء التسجيل
-    if(recorder && recorder.state === "recording") recorder.stop();
-    chunks = []; // حذف أي بيانات صوتية
-    recordingBox.style.display = "none";
-  } else {
-    stopRecord(); // إنهاء التسجيل وإرسال الصوت
-  }
-});
+  div.appendChild(audioEl);
+  chat.appendChild(div);
+  chat.scrollTop = chat.scrollHeight;
+}
