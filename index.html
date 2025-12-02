@@ -140,8 +140,24 @@ try{
 }catch(e){ alert("تعذر الوصول للميكروفون."); console.error(e); isRecording=false; }
 }
 function stopRecording(){ if(!isRecording) return; isRecording=false; if(recorder && recorder.state==="recording") recorder.stop(); recordingBox.style.display="none"; clearInterval(timerInterval); timerInterval=null; seconds=0; timerDisplay.textContent="00:00"; }
-micBtn.addEventListener("pointerdown", ()=>{ if(!isRecording) startRecording(); else stopRecording(); });
 
+/* تحويل زر الميكروفون إلى زر إرسال */
+msgInput.addEventListener("input", ()=>{
+  if(msgInput.value.trim().length > 0) micBtn.textContent = "📤";
+  else micBtn.textContent = "🎤";
+});
+
+micBtn.addEventListener("click", ()=>{
+  if(msgInput.value.trim().length > 0){
+    // إرسال النص
+    addMessage(msgInput.value,"text");
+    msgInput.value="";
+    micBtn.textContent = "🎤";
+  } else {
+    if(!isRecording) startRecording();
+    else stopRecording();
+  }
+});
 </script>
 
 </body>
