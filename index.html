@@ -38,62 +38,54 @@
 
   .chat-messages {
     flex: 1;
-    overflow-y: auto;
     padding: 12px;
+    overflow-y: auto;
     display: flex;
     flex-direction: column;
     gap: 14px;
   }
 
   .message {
-    max-width: 75%;
-    padding: 10px 14px;
     background: #0078ff;
+    padding: 10px 14px;
+    max-width: 75%;
     border-radius: 12px;
     align-self: flex-end;
     word-wrap: break-word;
-    position: relative;
     border-bottom-right-radius: 4px;
   }
 
-  .received {
-    background: #2f2f2f;
-    align-self: flex-start;
-    border-bottom-left-radius: 4px;
-  }
-
   .status {
-    font-size: 11px;
-    text-align: right;
     margin-top: 4px;
-    opacity: .8;
+    font-size: 11px;
+    opacity: .7;
+    text-align: right;
   }
 
   img.chat-img {
-    margin-top: 6px;
     max-width: 100%;
     border-radius: 12px;
+    margin-top: 5px;
   }
 
   audio {
-    margin-top: 6px;
     width: 100%;
+    margin-top: 5px;
   }
 
-  /* الإدخال */
   .chat-input {
     padding: 10px;
+    background: #2c2c2c;
     display: flex;
     align-items: center;
-    gap: 6px;
-    background: #2c2c2c;
+    gap: 8px;
   }
 
   .chat-input input {
     flex: 1;
+    background: #3c3c3c;
     padding: 12px;
     border: none;
-    background: #3c3c3c;
     color: white;
     border-radius: 10px;
   }
@@ -101,21 +93,22 @@
   .btn {
     width: 45px;
     height: 45px;
-    border-radius: 50%;
     background: #0078ff;
+    border-radius: 50%;
     border: none;
-    color: white;
     font-size: 20px;
+    color: white;
   }
 
-  /* القائمة */
+  /* قائمة الدبوس */
   .attach-menu {
+    display: none;
     position: absolute;
-    bottom: 70px;
+    bottom: 75px;
     right: 20px;
     background: #2c2c2c;
-    padding: 12px;
     border-radius: 12px;
+    padding: 12px;
     display: none;
     flex-direction: column;
     gap: 10px;
@@ -123,14 +116,25 @@
 
   .attach-menu button {
     background: #3c3c3c;
-    border: none;
     padding: 10px;
     border-radius: 8px;
+    border: none;
     color: white;
   }
 
-  input[type="file"] {
+  #recordingBox {
     display: none;
+    background: #b00020;
+    padding: 15px;
+    text-align: center;
+    font-weight: bold;
+    animation: blink 1s infinite;
+  }
+
+  @keyframes blink {
+    0% {opacity: 1;}
+    50% {opacity: .5;}
+    100% {opacity: 1;}
   }
 </style>
 </head>
@@ -141,6 +145,9 @@
 
   <div class="chat-header">💬 دردشة</div>
 
+  <!-- واجهة التسجيل -->
+  <div id="recordingBox">🔴 جاري التسجيل… <span id="timer">00:00</span></div>
+
   <div class="chat-messages" id="chatMessages"></div>
 
   <!-- قائمة الدبوس -->
@@ -150,22 +157,15 @@
     <button onclick="openFile()">📎 ملف</button>
   </div>
 
-  <!-- الإدخال -->
   <div class="chat-input">
-
     <button class="btn" id="attachBtn">📎</button>
 
     <input type="text" id="msgInput" placeholder="اكتب رسالة...">
 
-    <!-- زر المايك -->
     <button class="btn" id="micBtn">🎤</button>
-
-    <!-- زر الإرسال -->
     <button class="btn" id="sendBtn" style="display:none;">✈️</button>
-
   </div>
 
-  <!-- ملفات -->
   <input id="cameraInput" type="file" accept="image/*" capture="camera">
   <input id="imageInput" type="file" accept="image/*">
   <input id="fileInput" type="file">
@@ -174,13 +174,14 @@
 
 <script>
 
-let chat = document.getElementById("chatMessages");
+// عناصر
 let input = document.getElementById("msgInput");
 let micBtn = document.getElementById("micBtn");
 let sendBtn = document.getElementById("sendBtn");
+let chat = document.getElementById("chatMessages");
 
 /*------------------------------------------
-    1) تغيير المايك إلى إرسال عند الكتابة
+   تغيير المايك ↔ الإرسال
 -------------------------------------------*/
 input.addEventListener("input", () => {
   if (input.value.trim() === "") {
@@ -193,7 +194,7 @@ input.addEventListener("input", () => {
 });
 
 /*------------------------------------------
-    2) إرسال رسالة نصية
+   إرسال نص
 -------------------------------------------*/
 sendBtn.onclick = () => {
   let text = input.value.trim();
@@ -205,45 +206,38 @@ sendBtn.onclick = () => {
 };
 
 /*------------------------------------------
-    3) إضافة رسالة في الشاشة
+   عرض رسالة
 -------------------------------------------*/
 function addMessage(content, type="text") {
   let div = document.createElement("div");
   div.className = "message";
 
-  if (type === "img")
-    div.innerHTML = `<img class='chat-img' src='${content}'><div class="status">✓✓ تمت القراءة</div>`;
-  else if (type === "audio")
+  if (type === "img") {
+    div.innerHTML = `<img class="chat-img" src="${content}"><div class="status">✓✓ تمت القراءة</div>`;
+  } else if (type === "audio") {
     div.innerHTML = `<audio controls src="${content}"></audio><div class="status">✓✓ تمت القراءة</div>`;
-  else
+  } else {
     div.innerHTML = `${content}<div class="status">✓✓ تمت القراءة</div>`;
+  }
 
   chat.appendChild(div);
   chat.scrollTop = chat.scrollHeight;
 }
 
 /*------------------------------------------
-    4) قائمة الدبوس
+   قائمة الدبوس
 -------------------------------------------*/
 document.getElementById("attachBtn").onclick = () => {
   let menu = document.getElementById("attachMenu");
   menu.style.display = menu.style.display === "flex" ? "none" : "flex";
 };
 
-function openCamera(){
-  document.getElementById("cameraInput").click();
-}
-
-function openImage(){
-  document.getElementById("imageInput").click();
-}
-
-function openFile(){
-  document.getElementById("fileInput").click();
-}
+function openCamera() { document.getElementById("cameraInput").click(); }
+function openImage() { document.getElementById("imageInput").click(); }
+function openFile()  { document.getElementById("fileInput").click(); }
 
 /*------------------------------------------
-    5) رفع صورة
+   رفع الصور
 -------------------------------------------*/
 document.getElementById("imageInput").onchange =
 document.getElementById("cameraInput").onchange = function() {
@@ -254,7 +248,7 @@ document.getElementById("cameraInput").onchange = function() {
 };
 
 /*------------------------------------------
-    6) رفع ملف صوت / PDF / Word
+   رفع ملف (صوت / PDF)
 -------------------------------------------*/
 document.getElementById("fileInput").onchange = function() {
   let file = this.files[0];
@@ -264,35 +258,54 @@ document.getElementById("fileInput").onchange = function() {
 };
 
 /*------------------------------------------
-    7) تسجيل صوت حقيقي 🎤
+   تسجيل الصوت مع واجهة التسجيل
 -------------------------------------------*/
 let recorder;
 let chunks = [];
+let seconds = 0;
+let timerInterval;
 
-micBtn.onmousedown = startRecord;
-micBtn.onmouseup = stopRecord;
+function updateTimer() {
+  seconds++;
+  let m = String(Math.floor(seconds / 60)).padStart(2, "0");
+  let s = String(seconds % 60).padStart(2, "0");
+  document.getElementById("timer").textContent = `${m}:${s}`;
+}
 
-async function startRecord(){
+async function startRecord() {
+  seconds = 0;
+  document.getElementById("timer").textContent = "00:00";
+
   let stream = await navigator.mediaDevices.getUserMedia({ audio: true });
   recorder = new MediaRecorder(stream);
 
   recorder.ondataavailable = e => chunks.push(e.data);
-
   recorder.onstop = () => {
-    let blob = new Blob(chunks, {type: "audio/mp3"});
+    let blob = new Blob(chunks, { type: "audio/mp3" });
     chunks = [];
     let url = URL.createObjectURL(blob);
     addMessage(url, "audio");
   };
 
   recorder.start();
+
+  document.getElementById("recordingBox").style.display = "block";
+  timerInterval = setInterval(updateTimer, 1000);
 }
 
-function stopRecord(){
+function stopRecord() {
   if (recorder) recorder.stop();
+  document.getElementById("recordingBox").style.display = "none";
+  clearInterval(timerInterval);
 }
+
+// يعمل باللمس والموس
+micBtn.onmousedown = startRecord;
+micBtn.onmouseup = stopRecord;
+micBtn.ontouchstart = startRecord;
+micBtn.ontouchend = stopRecord;
 
 </script>
 
 </body>
-</html>
+  </html>
