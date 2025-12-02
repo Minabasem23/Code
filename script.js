@@ -85,7 +85,7 @@ fileInput.addEventListener("change", function() {
   reader.readAsDataURL(file);
 });
 
-/* تسجيل الصوت */
+/* تسجيل الصوت للهاتف */
 let recorder = null;
 let stream = null;
 let chunks = [];
@@ -112,7 +112,7 @@ async function startRecord() {
       const url = URL.createObjectURL(blob);
       addMessage(url, "audio");
 
-      // إيقاف الميكروفون بشكل نهائي
+      // إيقاف الميكروفون نهائيًا
       if(stream){
         stream.getTracks().forEach(track => track.stop());
         stream = null;
@@ -126,7 +126,7 @@ async function startRecord() {
     recordingBox.style.display = "block";
     timerInterval = setInterval(updateTimer, 1000);
   } catch(e) {
-    alert("تعذر الوصول للميكروفون. تحقق من سماح المتصفح بالوصول للصوت.");
+    alert("تعذر الوصول للميكروفون. تحقق من السماح للصوت في المتصفح.");
   }
 }
 
@@ -137,8 +137,6 @@ function stopRecord() {
   timerInterval = null;
 }
 
-micBtn.addEventListener("mousedown", startRecord);
-micBtn.addEventListener("mouseup", stopRecord);
 micBtn.addEventListener("touchstart", startRecord);
 micBtn.addEventListener("touchend", stopRecord);
 
