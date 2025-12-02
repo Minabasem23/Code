@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>دردشة مع شريط المرفقات السفلي</title>
+<title>دردشة نهائية</title>
 <style>
 body {margin:0; background:#121212; font-family:'Tajawal',sans-serif; color:white; display:flex; justify-content:center; align-items:center; height:100vh;}
 .chat-container {width:95%; max-width:450px; height:92vh; background:#1e1e1e; border-radius:16px; display:flex; flex-direction:column; overflow:hidden; position:relative;}
@@ -101,6 +101,15 @@ document.getElementById("locationBtn").addEventListener("click", ()=>{
 function addMessage(content,type="text"){
   const div=document.createElement("div"); div.className="message";
   if(type==="img") div.innerHTML=`<img class="chat-img" src="${content}"><div class="status">✓✓ تمت القراءة</div>`;
+  else if(type==="audio"){
+    const audioEl = document.createElement("audio");
+    audioEl.controls = true; audioEl.src = content;
+    audioEl.style.width="120px";   // عرض صغير
+    audioEl.style.height="25px";   // ارتفاع صغير
+    audioEl.style.borderRadius="8px";
+    div.appendChild(audioEl);
+    div.innerHTML+=`<div class="status">✓✓ تمت القراءة</div>`;
+  }
   else div.innerHTML=`${content}<div class="status">✓✓ تمت القراءة</div>`;
   chat.appendChild(div);
   chat.scrollTop = chat.scrollHeight;
@@ -116,7 +125,11 @@ try{
   recorder=new MediaRecorder(stream); chunks=[];
   recorder.ondataavailable=e=>chunks.push(e.data);
   recorder.onstop=()=>{
-    if(chunks.length>0){ const blob=new Blob(chunks,{type:"audio/mp3"}); const url=URL.createObjectURL(blob); addMessage(url,"text"); }
+    if(chunks.length>0){ 
+      const blob=new Blob(chunks,{type:"audio/mp3"}); 
+      const url=URL.createObjectURL(blob); 
+      addMessage(url,"audio");
+    }
     if(stream){ stream.getTracks().forEach(t=>t.stop()); stream=null; }
     recorder=null; chunks=[]; recordingBox.style.display="none";
     clearInterval(timerInterval); timerInterval=null; seconds=0; timerDisplay.textContent="00:00"; isRecording=false;
