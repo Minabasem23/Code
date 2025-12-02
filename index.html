@@ -39,8 +39,8 @@ img.chat-img {max-width:100%;border-radius:12px;margin-top:5px;}
   <div class="chat-input">
     <button class="btn" id="attachBtn">📎</button>
     <input type="text" id="msgInput" placeholder="اكتب رسالة...">
-    <button class="btn" id="micBtn">🎤</button>
-    <button class="btn" id="sendBtn" style="display:none;">✈️</button>
+    <button class="btn" type="button" id="micBtn">🎤</button>
+    <button class="btn" type="button" id="sendBtn" style="display:none;">✈️</button>
   </div>
 
   <input type="file" id="cameraInput" accept="image/*" capture="camera" style="display:none;">
@@ -50,7 +50,6 @@ img.chat-img {max-width:100%;border-radius:12px;margin-top:5px;}
 
 <script>
 document.addEventListener("DOMContentLoaded", () => {
-
 const input = document.getElementById("msgInput");
 const micBtn = document.getElementById("micBtn");
 const sendBtn = document.getElementById("sendBtn");
@@ -82,7 +81,6 @@ sendBtn.addEventListener("click", () => {
 function addMessage(content, type="text") {
   const div = document.createElement("div");
   div.className = "message";
-
   if(type === "img") {
     div.innerHTML = `<img class="chat-img" src="${content}"><div class="status">✓✓ تمت القراءة</div>`;
   } else if(type === "audio") {
@@ -90,13 +88,12 @@ function addMessage(content, type="text") {
     btn.className = "voice-btn";
     btn.textContent = "▶️ تشغيل الصوت";
     const audioEl = new Audio(content);
-
     btn.addEventListener("click", () => {
       document.querySelectorAll(".voice-btn").forEach(b => {
-        if(b !== btn && b.audioEl){ b.audioEl.pause(); b.textContent = "▶️ تشغيل الصوت"; }
+        if(b!==btn && b.audioEl){b.audioEl.pause(); b.textContent="▶️ تشغيل الصوت";}
       });
-      if(audioEl.paused){ audioEl.play(); btn.textContent = "⏸ إيقاف"; }
-      else { audioEl.pause(); btn.textContent = "▶️ تشغيل الصوت"; }
+      if(audioEl.paused){audioEl.play(); btn.textContent="⏸ إيقاف";}
+      else {audioEl.pause(); btn.textContent="▶️ تشغيل الصوت";}
     });
     btn.audioEl = audioEl;
     div.appendChild(btn);
@@ -104,7 +101,6 @@ function addMessage(content, type="text") {
   } else {
     div.innerHTML = `${content}<div class="status">✓✓ تمت القراءة</div>`;
   }
-
   chat.appendChild(div);
   chat.scrollTop = chat.scrollHeight;
 }
@@ -153,21 +149,25 @@ function updateTimer() {
 
 async function startRecord() {
   if(recorder) return;
-  const stream = await navigator.mediaDevices.getUserMedia({ audio:true });
-  recorder = new MediaRecorder(stream);
-  chunks = [];
-  recorder.ondataavailable = e => chunks.push(e.data);
-  recorder.onstop = () => {
-    const blob = new Blob(chunks, { type:"audio/mp3" });
-    const url = URL.createObjectURL(blob);
-    addMessage(url, "audio");
-    recorder = null;
-  };
-  recorder.start();
-  seconds = 0;
-  timerDisplay.textContent = "00:00";
-  recordingBox.style.display = "block";
-  timerInterval = setInterval(updateTimer, 1000);
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio:true });
+    recorder = new MediaRecorder(stream);
+    chunks = [];
+    recorder.ondataavailable = e => chunks.push(e.data);
+    recorder.onstop = () => {
+      const blob = new Blob(chunks, { type:"audio/mp3" });
+      const url = URL.createObjectURL(blob);
+      addMessage(url, "audio");
+      recorder = null;
+    };
+    recorder.start();
+    seconds = 0;
+    timerDisplay.textContent = "00:00";
+    recordingBox.style.display = "block";
+    timerInterval = setInterval(updateTimer, 1000);
+  } catch(e) {
+    alert("تعذر الوصول للميكروفون. تحقق من سماح المتصفح بالوصول للصوت.");
+  }
 }
 
 function stopRecord() {
@@ -177,6 +177,7 @@ function stopRecord() {
   timerInterval = null;
 }
 
+/* ربط الأحداث */
 micBtn.addEventListener("mousedown", startRecord);
 micBtn.addEventListener("mouseup", stopRecord);
 micBtn.addEventListener("touchstart", startRecord);
