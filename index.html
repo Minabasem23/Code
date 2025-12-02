@@ -51,9 +51,14 @@ function updateTimer() {
 }
 
 async function startRecord() {
-  if(recorder) return;
+  if(recorder) return; // يمنع البدء إذا هناك تسجيل جاري
   try {
-    if(stream){ stream.getTracks().forEach(track => track.stop()); stream=null; }
+    // إغلاق أي تسجيل سابق بالكامل
+    if(stream){
+      stream.getTracks().forEach(track => track.stop());
+      stream = null;
+    }
+
     stream = await navigator.mediaDevices.getUserMedia({ audio:true });
     recorder = new MediaRecorder(stream);
     chunks = [];
@@ -66,19 +71,25 @@ async function startRecord() {
         const url = URL.createObjectURL(blob);
         addAudioMessage(url);
       }
-      if(stream){ stream.getTracks().forEach(track=>track.stop()); stream=null; }
+      // إغلاق الميكروفون نهائياً
+      if(stream){
+        stream.getTracks().forEach(track=>track.stop());
+        stream = null;
+      }
       recorder = null;
       chunks = [];
       recordingBox.style.display="none";
       clearInterval(timerInterval);
       timerInterval=null;
+      seconds = 0;
+      timerDisplay.textContent="00:00";
     };
 
     recorder.start();
-    seconds=0;
+    seconds = 0;
     timerDisplay.textContent="00:00";
     recordingBox.style.display="block";
-    timerInterval = setInterval(updateTimer,1000);
+    timerInterval = setInterval(updateTimer, 1000);
 
   } catch(e){
     alert("تعذر الوصول للميكروفون. تحقق من سماح المتصفح بالصوت.");
@@ -86,21 +97,23 @@ async function startRecord() {
   }
 }
 
-function stopRecord(){ if(recorder && recorder.state==="recording") recorder.stop(); }
+function stopRecord(){
+  if(recorder && recorder.state === "recording") recorder.stop();
+}
 
-/* تسجيل الصوت للمس والماوس */
+// تسجيل الصوت للمس والماوس
 micBtn.addEventListener("touchstart", startRecord);
 micBtn.addEventListener("touchend", stopRecord);
 micBtn.addEventListener("mousedown", startRecord);
 micBtn.addEventListener("mouseup", stopRecord);
 
-/* إضافة رسالة صوتية مع مشغل audio */
+// إضافة رسالة صوتية مع مشغل audio
 function addAudioMessage(url){
   const div = document.createElement("div");
   div.className = "message";
 
   const audioEl = document.createElement("audio");
-  audioEl.controls = true; // يظهر مشغل الصوت العادي
+  audioEl.controls = true; // مشغل صوت عادي
   audioEl.src = url;
 
   div.appendChild(audioEl);
