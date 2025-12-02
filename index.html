@@ -12,11 +12,12 @@ header.chat-header {text-align:center; padding:15px; font-weight:bold; border-bo
 .message {background:#000; color:#fff; padding:10px 14px; max-width:75%; border-radius:12px; align-self:flex-end; word-wrap:break-word; border:1px solid #fff; display:flex; flex-direction:column; gap:6px;}
 .status {margin-top:4px; font-size:11px; opacity:.7; text-align:right;}
 img.chat-img {max-width:100%; border:1px solid #fff; border-radius:8px; margin-top:5px;}
-#recordingBox {display:none; background:#fff; color:#000; padding:12px; text-align:center; font-weight:bold; position:absolute; bottom:60px; left:0; width:100%;}
+#recordingBox {display:none; background:#fff; color:#000; padding:12px; text-align:center; font-weight:bold; position:absolute; bottom:60px; left:0; width:100%; border-radius:8px;}
 .chat-input {padding:10px; background:#000; display:flex; align-items:center; gap:8px; position:relative;}
 .chat-input input {flex:1; background:#000; color:#fff; padding:12px; border:1px solid #fff; border-radius:10px;}
 .btn {width:60px; height:45px; background:#000; border-radius:50%; border:1px solid #fff; font-size:20px; color:#fff;}
-.attach-bar {display:none; position:absolute; bottom:60px; left:0; width:100%; background:#000; border-top-left-radius:12px; border-top-right-radius:12px; padding:10px; flex-direction:row; justify-content:space-around;}
+.attach-bar {position:absolute; bottom:-70px; left:0; width:100%; background:#000; border-top-left-radius:12px; border-top-right-radius:12px; padding:10px; display:flex; justify-content:space-around; transition:bottom 0.3s;}
+.attach-bar.show {bottom:60px;}
 .attach-bar button {background:#000; border:1px solid #fff; padding:12px; border-radius:10px; color:#fff; font-size:16px;}
 .audio-player {background:#000; padding:6px 10px; border-radius:12px; display:flex; align-items:center; gap:8px;}
 .audio-player button {background:#000; border:1px solid #fff; border-radius:50%; width:36px; height:36px; color:#fff; font-size:16px;}
@@ -67,11 +68,13 @@ const timerDisplay = document.getElementById("timer");
 
 let recorder=null, stream=null, chunks=[], seconds=0, timerInterval=null, isRecording=false;
 
-/* شريط المرفقات */
-attachBtn.addEventListener("click", ()=>{ attachBar.style.display = attachBar.style.display==="flex"?"none":"flex"; attachBar.style.flexDirection="row"; });
+/* شريط المرفقات مع انزلاق سلس */
+attachBtn.addEventListener("click", ()=>{ attachBar.classList.toggle("show"); });
+
 cameraInput.addEventListener("change", function(){ const file=this.files[0]; if(!file) return; const reader=new FileReader(); reader.onload=()=>addMessage(reader.result,"img"); reader.readAsDataURL(file); });
 imageInput.addEventListener("change", function(){ const file=this.files[0]; if(!file) return; const reader=new FileReader(); reader.onload=()=>addMessage(reader.result,"img"); reader.readAsDataURL(file); });
 fileInput.addEventListener("change", function(){ const file=this.files[0]; if(!file) return; const reader=new FileReader(); reader.onload=()=>addMessage(reader.result,"text"); reader.readAsDataURL(file); });
+
 document.getElementById("cameraBtn").addEventListener("click",()=>cameraInput.click());
 document.getElementById("imageBtn").addEventListener("click",()=>imageInput.click());
 document.getElementById("fileBtn").addEventListener("click",()=>fileInput.click());
@@ -149,7 +152,6 @@ msgInput.addEventListener("input", ()=>{
 
 micBtn.addEventListener("click", ()=>{
   if(msgInput.value.trim().length > 0){
-    // إرسال النص
     addMessage(msgInput.value,"text");
     msgInput.value="";
     micBtn.textContent = "🎤";
