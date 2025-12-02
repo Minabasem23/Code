@@ -105,6 +105,11 @@ audio{
   padding:12px;
   text-align:center;
   font-weight:bold;
+  position:absolute;
+  bottom:60px;
+  left:0;
+  width:100%;
+  border-radius:8px;
 }
 .attach-bar{
   position:absolute;
@@ -150,6 +155,8 @@ audio{
   <button id="fileBtn">File</button>
   <button id="cameraBtn">Camera</button>
   <button id="imageBtn">Image</button>
+  <button id="pollBtn">Poll</button>
+  <button id="locationBtn">Location</button>
 </div>
 
 <input type="file" id="cameraInput" accept="image/*" capture="camera" style="display:none;">
@@ -197,6 +204,23 @@ fileInput.addEventListener("change", function(){
 document.getElementById("cameraBtn").addEventListener("click",()=>cameraInput.click());
 document.getElementById("imageBtn").addEventListener("click",()=>imageInput.click());
 document.getElementById("fileBtn").addEventListener("click",()=>fileInput.click());
+
+document.getElementById("pollBtn").addEventListener("click", ()=>{
+  const question = prompt("اكتب سؤال الاستطلاع:");
+  if(!question) return;
+  const option1 = prompt("الخيار الأول:");
+  const option2 = prompt("الخيار الثاني:");
+  if(option1 && option2){ addMessage(`Poll: ${question}\n1: ${option1}\n2: ${option2}`,"text"); }
+});
+
+document.getElementById("locationBtn").addEventListener("click", ()=>{
+  if(navigator.geolocation){
+    navigator.geolocation.getCurrentPosition(pos=>{
+      const lat = pos.coords.latitude; const lon = pos.coords.longitude;
+      addMessage(`Location: https://www.google.com/maps?q=${lat},${lon}`,"text");
+    }, ()=>alert("تعذر الحصول على الموقع."));
+  } else alert("الموقع غير مدعوم.");
+});
 
 /* إضافة رسالة */
 function addMessage(content,type="text"){
