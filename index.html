@@ -129,7 +129,10 @@ function addMessage(content,type="text"){
     player.appendChild(progress);
     player.appendChild(speedSelect);
     div.appendChild(player);
-    div.appendChild(document.createElement("div")).className="status";
+    const statusDiv = document.createElement("div");
+    statusDiv.className="status";
+    statusDiv.innerHTML = "✓✓ تمت القراءة";
+    div.appendChild(statusDiv);
 
     chat.appendChild(div);
     chat.scrollTop = chat.scrollHeight;
@@ -139,17 +142,28 @@ function addMessage(content,type="text"){
       if(audio.paused){ audio.play(); playBtn.innerHTML="⏸️"; }
       else{ audio.pause(); playBtn.innerHTML="▶️"; }
     });
+
     audio.addEventListener("timeupdate", ()=>{
       const percent = (audio.currentTime/audio.duration)*100;
       progressFilled.style.width = percent+"%";
     });
+
     progress.addEventListener("click", e=>{
       const rect = progress.getBoundingClientRect();
       const clickX = e.clientX - rect.left;
       const width = rect.width;
       audio.currentTime = (clickX/width)*audio.duration;
     });
+
     speedSelect.addEventListener("change", ()=>{ audio.playbackRate = speedSelect.value; });
+
+    /* عند انتهاء الصوت */
+    audio.addEventListener("ended", ()=>{
+      playBtn.innerHTML = "▶️";  // زر Play
+      progressFilled.style.width = "0%"; // إعادة شريط التقدم
+      audio.currentTime = 0; // إعادة المؤشر
+    });
+
   } else div.innerHTML=`${content}<div class="status">✓✓ تمت القراءة</div>`;
   if(type!=="audio") chat.appendChild(div);
   chat.scrollTop = chat.scrollHeight;
