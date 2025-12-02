@@ -163,7 +163,6 @@ img.chat-img {
 
 <script>
 document.addEventListener("DOMContentLoaded", () => {
-
 const input = document.getElementById("msgInput");
 const micBtn = document.getElementById("micBtn");
 const sendBtn = document.getElementById("sendBtn");
@@ -207,7 +206,7 @@ function addMessage(content, type="text") {
       document.querySelectorAll(".voice-btn").forEach(b => {
         if(b!==btn && b.audioEl){b.audioEl.pause(); b.textContent="▶️ تشغيل الصوت";}
       });
-      if(audioEl.paused){audioEl.play(); btn.textContent="⏸ إيقاف";}
+      if(audioEl.paused){audioEl.play().catch(e=>console.log(e)); btn.textContent="⏸ إيقاف";}
       else {audioEl.pause(); btn.textContent="▶️ تشغيل الصوت";}
     });
     btn.audioEl = audioEl;
@@ -249,15 +248,12 @@ fileInput.addEventListener("change", function() {
   reader.readAsDataURL(file);
 });
 
-/* تسجيل الصوت للهاتف مع إلغاء السحب */
+/* تسجيل الصوت */
 let recorder = null;
 let stream = null;
 let chunks = [];
 let seconds = 0;
 let timerInterval = null;
-let cancelRecording = false;
-let startY = 0;
-const cancelThreshold = 60; // pixels
 
 function updateTimer() {
   seconds++;
@@ -269,43 +265,32 @@ function updateTimer() {
 async function startRecord() {
   if(recorder) return;
   try {
-    if(stream){
-      stream.getTracks().forEach(track => track.stop());
-      stream = null;
-    }
+    if(stream){ stream.getTracks().forEach(track => track.stop()); stream=null; }
     stream = await navigator.mediaDevices.getUserMedia({ audio:true });
     recorder = new MediaRecorder(stream);
     chunks = [];
 
     recorder.ondataavailable = e => chunks.push(e.data);
 
-    recorder.onstop = async () => {
-      if(cancelRecording) {
-        chunks = []; // حذف أي بيانات
-      } else if(chunks.length>0) {
-        const blob = new Blob(chunks, { type: "audio/webm" });
+    recorder.onstop = () => {
+      if(chunks.length>0){
+        const blob = new Blob(chunks, { type:"audio/mp3" });
         const url = URL.createObjectURL(blob);
-        addMessage(url, "audio");
+        addMessage(url,"audio");
       }
-
-      await new Promise(r => setTimeout(r, 100));
-
-      if(stream){
-        stream.getTracks().forEach(track => track.stop());
-        stream = null;
-      }
+      if(stream){ stream.getTracks().forEach(track=>track.stop()); stream=null; }
       recorder = null;
       chunks = [];
-      recordingBox.style.display = "none";
+      recordingBox.style.display="none";
       clearInterval(timerInterval);
-      timerInterval = null;
+      timerInterval=null;
     };
 
     recorder.start();
-    seconds = 0;
-    timerDisplay.textContent = "00:00";
-    recordingBox.style.display = "block";
-    timerInterval = setInterval(updateTimer, 1000);
+    seconds=0;
+    timerDisplay.textContent="00:00";
+    recordingBox.style.display="block";
+    timerInterval = setInterval(updateTimer,1000);
 
   } catch(e){
     alert("تعذر الوصول للميكروفون. تحقق من سماح المتصفح بالصوت.");
@@ -313,32 +298,13 @@ async function startRecord() {
   }
 }
 
-function stopRecord() {
-  if(recorder && recorder.state === "recording"){
-    recorder.stop();
-  }
+function stopRecord(){
+  if(recorder && recorder.state==="recording") recorder.stop();
 }
 
-/* حدث اللمس مع إلغاء السحب */
-micBtn.addEventListener("touchstart", (e) => {
-  startY = e.touches[0].clientY;
-  cancelRecording = false;
-  startRecord();
-});
-
-micBtn.addEventListener("touchmove", (e) => {
-  const currentY = e.touches[0].clientY;
-  if(startY - currentY > cancelThreshold){
-    cancelRecording = true;
-    recordingBox.textContent = "❌ تم إلغاء التسجيل";
-  } else {
-    recordingBox.innerHTML = `🔴 جاري التسجيل… <span id="timer">${String(Math.floor(seconds/60)).padStart(2,"0")}:${String(seconds%60).padStart(2,"0")}</span>`;
-  }
-});
-
-micBtn.addEventListener("touchend", () => {
-  stopRecord();
-});
+/* حدث اللمس لتسجيل الصوت */
+micBtn.addEventListener("touchstart", startRecord);
+micBtn.addEventListener("touchend", stopRecord);
 });
 </script>
 
