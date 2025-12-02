@@ -1,6 +1,6 @@
 function addAudioMessage(url){
   const div = document.createElement("div");
-  div.className = "message";
+  div.className = "audio";
 
   const audioEl = document.createElement("audio");
   audioEl.controls = true;
