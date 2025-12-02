@@ -5,25 +5,151 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>دردشة صوتية</title>
 <style>
-body {margin:0;background:#121212;font-family:'Tajawal',sans-serif;color:white;display:flex;justify-content:center;align-items:center;height:100vh;}
-.chat-container {width:95%;max-width:450px;height:92vh;background:#1e1e1e;border-radius:16px;display:flex;flex-direction:column;overflow:hidden;position:relative;}
-header.chat-header {text-align:center;padding:15px;background:#2c2c2c;font-weight:bold;border-bottom:1px solid #333;}
-.chat-messages {flex:1;padding:12px;overflow-y:auto;display:flex;flex-direction:column;gap:14px;}
-.message {background:#0078ff;padding:10px 14px;max-width:75%;border-radius:12px;align-self:flex-end;word-wrap:break-word;border-bottom-right-radius:4px;position:relative;}
-.status {margin-top:4px;font-size:11px;opacity:.7;text-align:right;}
-img.chat-img {max-width:100%;border-radius:12px;margin-top:5px;}
-.voice-btn {background:#005bbb;color:white;border:none;padding:8px 12px;border-radius:6px;cursor:pointer;margin-top:5px;}
-.chat-input {padding:10px;background:#2c2c2c;display:flex;align-items:center;gap:8px;}
-.chat-input input {flex:1;background:#3c3c3c;padding:12px;border:none;color:white;border-radius:10px;}
-.btn {width:45px;height:45px;background:#0078ff;border-radius:50%;border:none;font-size:20px;color:white;}
-.attach-menu {display:none;position:absolute;bottom:70px;right:20px;background:#2c2c2c;border-radius:12px;padding:12px;flex-direction:column;gap:10px;}
-.attach-menu button {background:#3c3c3c;padding:10px;border-radius:8px;border:none;color:white;}
-#recordingBox {display:none;background:#b00020;padding:12px;text-align:center;font-weight:bold;position:absolute;bottom:60px;left:0;width:100%;animation:blink 1s infinite;}
-@keyframes blink {0%{opacity:1;}50%{opacity:0.5;}100%{opacity:1;}}
+body {
+  margin:0;
+  background:#121212;
+  font-family:'Tajawal',sans-serif;
+  color:white;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  height:100vh;
+}
+
+.chat-container {
+  width:95%;
+  max-width:450px;
+  height:92vh;
+  background:#1e1e1e;
+  border-radius:16px;
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+  position:relative;
+}
+
+header.chat-header {
+  text-align:center;
+  padding:15px;
+  background:#2c2c2c;
+  font-weight:bold;
+  border-bottom:1px solid #333;
+}
+
+.chat-messages {
+  flex:1;
+  padding:12px;
+  overflow-y:auto;
+  display:flex;
+  flex-direction:column;
+  gap:14px;
+}
+
+.message {
+  background:#0078ff;
+  padding:10px 14px;
+  max-width:75%;
+  border-radius:12px;
+  align-self:flex-end;
+  word-wrap:break-word;
+  border-bottom-right-radius:4px;
+  position:relative;
+}
+
+.status {
+  margin-top:4px;
+  font-size:11px;
+  opacity:.7;
+  text-align:right;
+}
+
+img.chat-img {
+  max-width:100%;
+  border-radius:12px;
+  margin-top:5px;
+}
+
+.voice-btn {
+  background:#005bbb;
+  color:white;
+  border:none;
+  padding:8px 12px;
+  border-radius:6px;
+  cursor:pointer;
+  margin-top:5px;
+}
+
+.chat-input {
+  padding:10px;
+  background:#2c2c2c;
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+
+.chat-input input {
+  flex:1;
+  background:#3c3c3c;
+  padding:12px;
+  border:none;
+  color:white;
+  border-radius:10px;
+}
+
+.btn {
+  width:45px;
+  height:45px;
+  background:#0078ff;
+  border-radius:50%;
+  border:none;
+  font-size:20px;
+  color:white;
+}
+
+.attach-menu {
+  display:none;
+  position:absolute;
+  bottom:70px;
+  right:20px;
+  background:#2c2c2c;
+  border-radius:12px;
+  padding:12px;
+  flex-direction:column;
+  gap:10px;
+}
+
+.attach-menu button {
+  background:#3c3c3c;
+  padding:10px;
+  border-radius:8px;
+  border:none;
+  color:white;
+}
+
+#recordingBox {
+  display:none;
+  background:#b00020;
+  padding:12px;
+  text-align:center;
+  font-weight:bold;
+  position:absolute;
+  bottom:60px;
+  left:0;
+  width:100%;
+  animation:blink 1s infinite;
+}
+
+@keyframes blink {
+  0%{opacity:1;}
+  50%{opacity:0.5;}
+  100%{opacity:1;}
+}
 </style>
 </head>
 <body>
+
 <div class="chat-container">
+
   <header class="chat-header">💬 دردشة</header>
 
   <div id="recordingBox">🔴 جاري التسجيل… <span id="timer">00:00</span></div>
@@ -46,9 +172,11 @@ img.chat-img {max-width:100%;border-radius:12px;margin-top:5px;}
   <input type="file" id="cameraInput" accept="image/*" capture="camera" style="display:none;">
   <input type="file" id="imageInput" accept="image/*" style="display:none;">
   <input type="file" id="fileInput" style="display:none;">
+
 </div>
 
 <!-- ربط ملف JavaScript خارجي -->
 <script src="script.js"></script>
+
 </body>
 </html>
