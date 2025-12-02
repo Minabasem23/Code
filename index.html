@@ -274,6 +274,7 @@
             div.className = "message";
 
             if (type === "img") div.innerHTML = `<img class="chat-img" src="${content}"><div class="status">Read</div>`;
+            else if (type === "audio") div.innerHTML = `<audio controls src="${content}"></audio><div class="status">Read</div>`;
             else div.innerHTML = `<span class="msg-text">${content}</span><div class="status">Read</div>`;
 
             chat.appendChild(div);
