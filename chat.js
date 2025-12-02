@@ -78,3 +78,42 @@ function addMessage(content, type="text") {
   chat.appendChild(div);
   chat.scrollTop = chat.scrollHeight;
 }
+let recorder = null;
+let stream = null; // المتغير لتخزين MediaStream
+let chunks = [];
+let seconds = 0;
+let timerInterval = null;
+
+async function startRecord() {
+  if(recorder) return;
+  try {
+    stream = await navigator.mediaDevices.getUserMedia({ audio:true });
+    recorder = new MediaRecorder(stream);
+    chunks = [];
+    recorder.ondataavailable = e => chunks.push(e.data);
+    recorder.onstop = () => {
+      const blob = new Blob(chunks, { type:"audio/mp3" });
+      const url = URL.createObjectURL(blob);
+      addMessage(url, "audio"); // عرض الرسالة مع زر التشغيل
+
+      // إغلاق الميكروفون بالكامل بعد إرسال الرسالة
+      stream.getTracks().forEach(track => track.stop());
+      recorder = null;
+      stream = null;
+    };
+    recorder.start();
+    seconds = 0;
+    timerDisplay.textContent = "00:00";
+    recordingBox.style.display = "block";
+    timerInterval = setInterval(updateTimer, 1000);
+  } catch(e) {
+    alert("تعذر الوصول للميكروفون. تحقق من سماح المتصفح بالوصول للصوت.");
+  }
+}
+
+function stopRecord() {
+  if(recorder && recorder.state === "recording") recorder.stop();
+  recordingBox.style.display = "none";
+  clearInterval(timerInterval);
+  timerInterval = null;
+}
