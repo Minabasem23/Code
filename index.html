@@ -11,13 +11,11 @@ header.chat-header {text-align:center; padding:15px; background:#2c2c2c; font-we
 .chat-messages {flex:1; padding:12px; overflow-y:auto; display:flex; flex-direction:column; gap:14px;}
 .message {background:#0078ff; padding:10px 14px; max-width:75%; border-radius:12px; align-self:flex-end; word-wrap:break-word; border-bottom-right-radius:4px; position:relative;}
 .status {margin-top:4px; font-size:11px; opacity:.7; text-align:right;}
-img.chat-img {max-width:100%; border-radius:12px; margin-top:5px;}
-.voice-btn {background:#005bbb; color:white; border:none; padding:8px 12px; border-radius:6px; cursor:pointer; margin-top:5px;}
+#recordingBox {display:none; background:#b00020; padding:12px; text-align:center; font-weight:bold; position:absolute; bottom:60px; left:0; width:100%; animation:blink 1s infinite;}
+@keyframes blink {0%{opacity:1;} 50%{opacity:0.5;} 100%{opacity:1;}}
 .chat-input {padding:10px; background:#2c2c2c; display:flex; align-items:center; gap:8px;}
 .chat-input input {flex:1; background:#3c3c3c; padding:12px; border:none; color:white; border-radius:10px;}
 .btn {width:45px; height:45px; background:#0078ff; border-radius:50%; border:none; font-size:20px; color:white;}
-#recordingBox {display:none; background:#b00020; padding:12px; text-align:center; font-weight:bold; position:absolute; bottom:60px; left:0; width:100%; animation:blink 1s infinite;}
-@keyframes blink {0%{opacity:1;} 50%{opacity:0.5;} 100%{opacity:1;}}
 </style>
 </head>
 <body>
@@ -90,35 +88,22 @@ async function startRecord() {
 
 function stopRecord(){ if(recorder && recorder.state==="recording") recorder.stop(); }
 
-/* حدث لمس الهاتف أو نقرة الماوس لتسجيل الصوت */
+/* تسجيل الصوت للمس والماوس */
 micBtn.addEventListener("touchstart", startRecord);
 micBtn.addEventListener("touchend", stopRecord);
 micBtn.addEventListener("mousedown", startRecord);
 micBtn.addEventListener("mouseup", stopRecord);
 
-/* إضافة رسالة صوتية مع زر التشغيل */
+/* إضافة رسالة صوتية مع مشغل audio */
 function addAudioMessage(url){
   const div = document.createElement("div");
   div.className = "message";
 
-  const btn = document.createElement("button");
-  btn.className = "voice-btn";
-  btn.textContent = "▶️ تشغيل الصوت";
+  const audioEl = document.createElement("audio");
+  audioEl.controls = true; // يظهر مشغل الصوت العادي
+  audioEl.src = url;
 
-  const audioEl = new Audio(url);
-
-  btn.addEventListener("click", () => {
-    // إيقاف أي أصوات أخرى
-    document.querySelectorAll(".voice-btn").forEach(b => {
-      if(b!==btn && b.audioEl){b.audioEl.pause(); b.textContent="▶️ تشغيل الصوت";}
-    });
-
-    if(audioEl.paused){ audioEl.play().catch(e=>console.log(e)); btn.textContent="⏸ إيقاف"; }
-    else { audioEl.pause(); btn.textContent="▶️ تشغيل الصوت"; }
-  });
-
-  btn.audioEl = audioEl;
-  div.appendChild(btn);
+  div.appendChild(audioEl);
   chat.appendChild(div);
   chat.scrollTop = chat.scrollHeight;
 }
