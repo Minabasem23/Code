@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>دردشة كاملة</title>
+<title>دردشة صوتية</title>
 <style>
 body {margin:0;background:#121212;font-family:'Tajawal',sans-serif;color:white;display:flex;justify-content:center;align-items:center;height:100vh;}
 .chat-container {width:95%;max-width:450px;height:92vh;background:#1e1e1e;border-radius:16px;display:flex;flex-direction:column;overflow:hidden;position:relative;}
@@ -137,6 +137,7 @@ fileInput.addEventListener("change", function() {
 
 /* تسجيل الصوت */
 let recorder = null;
+let stream = null;
 let chunks = [];
 let seconds = 0;
 let timerInterval = null;
@@ -151,15 +152,19 @@ function updateTimer() {
 async function startRecord() {
   if(recorder) return;
   try {
-    const stream = await navigator.mediaDevices.getUserMedia({ audio:true });
+    stream = await navigator.mediaDevices.getUserMedia({ audio:true });
     recorder = new MediaRecorder(stream);
     chunks = [];
     recorder.ondataavailable = e => chunks.push(e.data);
     recorder.onstop = () => {
       const blob = new Blob(chunks, { type:"audio/mp3" });
       const url = URL.createObjectURL(blob);
-      addMessage(url, "audio"); // فقط اضف زر التشغيل، لا تشغل الصوت تلقائياً
+      addMessage(url, "audio");
+
+      // إيقاف المايكروفون بالكامل بعد التسجيل
+      stream.getTracks().forEach(track => track.stop());
       recorder = null;
+      stream = null;
     };
     recorder.start();
     seconds = 0;
@@ -187,4 +192,4 @@ micBtn.addEventListener("touchend", stopRecord);
 });
 </script>
 </body>
-  </html>
+</html>
