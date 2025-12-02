@@ -88,6 +88,7 @@ function addMessage(content, type="text") {
     btn.className = "voice-btn";
     btn.textContent = "▶️ تشغيل الصوت";
     const audioEl = new Audio(content);
+
     btn.addEventListener("click", () => {
       document.querySelectorAll(".voice-btn").forEach(b => {
         if(b!==btn && b.audioEl){b.audioEl.pause(); b.textContent="▶️ تشغيل الصوت";}
@@ -157,7 +158,7 @@ async function startRecord() {
     recorder.onstop = () => {
       const blob = new Blob(chunks, { type:"audio/mp3" });
       const url = URL.createObjectURL(blob);
-      addMessage(url, "audio");
+      addMessage(url, "audio"); // فقط اضف زر التشغيل، لا تشغل الصوت تلقائياً
       recorder = null;
     };
     recorder.start();
@@ -186,4 +187,4 @@ micBtn.addEventListener("touchend", stopRecord);
 });
 </script>
 </body>
-</html>
+  </html>
