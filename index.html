@@ -15,7 +15,6 @@ body {
   align-items:center;
   height:100vh;
 }
-
 .chat-container {
   width:95%;
   max-width:450px;
@@ -27,7 +26,6 @@ body {
   overflow:hidden;
   position:relative;
 }
-
 header.chat-header {
   text-align:center;
   padding:15px;
@@ -35,7 +33,6 @@ header.chat-header {
   font-weight:bold;
   border-bottom:1px solid #333;
 }
-
 .chat-messages {
   flex:1;
   padding:12px;
@@ -44,7 +41,6 @@ header.chat-header {
   flex-direction:column;
   gap:14px;
 }
-
 .message {
   background:#0078ff;
   padding:10px 14px;
@@ -55,20 +51,17 @@ header.chat-header {
   border-bottom-right-radius:4px;
   position:relative;
 }
-
 .status {
   margin-top:4px;
   font-size:11px;
   opacity:.7;
   text-align:right;
 }
-
 img.chat-img {
   max-width:100%;
   border-radius:12px;
   margin-top:5px;
 }
-
 .voice-btn {
   background:#005bbb;
   color:white;
@@ -78,7 +71,6 @@ img.chat-img {
   cursor:pointer;
   margin-top:5px;
 }
-
 .chat-input {
   padding:10px;
   background:#2c2c2c;
@@ -86,7 +78,6 @@ img.chat-img {
   align-items:center;
   gap:8px;
 }
-
 .chat-input input {
   flex:1;
   background:#3c3c3c;
@@ -95,7 +86,6 @@ img.chat-img {
   color:white;
   border-radius:10px;
 }
-
 .btn {
   width:45px;
   height:45px;
@@ -105,7 +95,6 @@ img.chat-img {
   font-size:20px;
   color:white;
 }
-
 .attach-menu {
   display:none;
   position:absolute;
@@ -117,7 +106,6 @@ img.chat-img {
   flex-direction:column;
   gap:10px;
 }
-
 .attach-menu button {
   background:#3c3c3c;
   padding:10px;
@@ -125,7 +113,6 @@ img.chat-img {
   border:none;
   color:white;
 }
-
 #recordingBox {
   display:none;
   background:#b00020;
@@ -138,7 +125,6 @@ img.chat-img {
   width:100%;
   animation:blink 1s infinite;
 }
-
 @keyframes blink {
   0%{opacity:1;}
   50%{opacity:0.5;}
@@ -263,12 +249,15 @@ fileInput.addEventListener("change", function() {
   reader.readAsDataURL(file);
 });
 
-/* تسجيل الصوت للهاتف */
+/* تسجيل الصوت للهاتف مع إلغاء السحب */
 let recorder = null;
 let stream = null;
 let chunks = [];
 let seconds = 0;
 let timerInterval = null;
+let cancelRecording = false;
+let startY = 0;
+const cancelThreshold = 60; // pixels
 
 function updateTimer() {
   seconds++;
@@ -284,7 +273,6 @@ async function startRecord() {
       stream.getTracks().forEach(track => track.stop());
       stream = null;
     }
-
     stream = await navigator.mediaDevices.getUserMedia({ audio:true });
     recorder = new MediaRecorder(stream);
     chunks = [];
@@ -292,13 +280,14 @@ async function startRecord() {
     recorder.ondataavailable = e => chunks.push(e.data);
 
     recorder.onstop = async () => {
-      if(chunks.length > 0){
+      if(cancelRecording) {
+        chunks = []; // حذف أي بيانات
+      } else if(chunks.length>0) {
         const blob = new Blob(chunks, { type: "audio/webm" });
         const url = URL.createObjectURL(blob);
         addMessage(url, "audio");
       }
 
-      // delay صغير لحل مشاكل Chrome على الهاتف
       await new Promise(r => setTimeout(r, 100));
 
       if(stream){
@@ -330,9 +319,26 @@ function stopRecord() {
   }
 }
 
-micBtn.addEventListener("touchstart", startRecord);
-micBtn.addEventListener("touchend", stopRecord);
+/* حدث اللمس مع إلغاء السحب */
+micBtn.addEventListener("touchstart", (e) => {
+  startY = e.touches[0].clientY;
+  cancelRecording = false;
+  startRecord();
+});
 
+micBtn.addEventListener("touchmove", (e) => {
+  const currentY = e.touches[0].clientY;
+  if(startY - currentY > cancelThreshold){
+    cancelRecording = true;
+    recordingBox.textContent = "❌ تم إلغاء التسجيل";
+  } else {
+    recordingBox.innerHTML = `🔴 جاري التسجيل… <span id="timer">${String(Math.floor(seconds/60)).padStart(2,"0")}:${String(seconds%60).padStart(2,"0")}</span>`;
+  }
+});
+
+micBtn.addEventListener("touchend", () => {
+  stopRecord();
+});
 });
 </script>
 
