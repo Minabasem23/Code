@@ -1,300 +1,518 @@
 <!DOCTYPE html>
 <html lang="ar">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Chat</title>
-
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Chat — Minimal Modern</title>
 <style>
-body{
-  margin:0;
-  background:#000;
-  color:#fff;
-  font-family:'Tajawal',sans-serif;
-  display:flex;
-  justify-content:center;
-}
-.chat{
-  width:95%;
-  max-width:450px;
-  height:97vh;
-  background:#000;
-  border-left:1px solid #fff;
-  border-right:1px solid #fff;
-  display:flex;
-  flex-direction:column;
-}
-header{
-  text-align:center;
-  padding:12px;
-  border-bottom:1px solid #fff;
-}
-#chatBox{
-  flex:1;
-  overflow-y:auto;
-  padding:10px;
-  display:flex;
-  flex-direction:column;
-  gap:12px;
-}
-.message{
-  align-self:flex-end;
-  border:1px solid #fff;
-  border-radius:10px;
-  padding:10px;
-  max-width:75%;
-  position:relative;
-  display:flex;
-  flex-direction:column;
-  gap:6px;
-}
-.msg-text{
-  white-space:pre-wrap;
-  word-break:break-word;
-}
-.status{
-  font-size:11px;
-  opacity:.6;
-  text-align:right;
-}
-#inputArea{
-  display:flex;
-  padding:10px;
-  gap:8px;
-}
-#msgInput{
-  flex:1;
-  padding:10px;
-  border-radius:10px;
-  border:1px solid #fff;
-  background:#000;
-  color:#fff;
-}
-.btn{
-  width:55px;
-  height:45px;
-  border-radius:50%;
-  border:1px solid #fff;
-  background:#000;
-  color:#fff;
-}
-.msg-toolbar{
-  position:absolute;
-  background:#fff;
-  color:#000;
-  padding:5px;
-  border-radius:8px;
-  display:flex;
-  gap:6px;
-  z-index:1000;
-}
-.msg-toolbar button{
-  background:#fff;
-  border:1px solid #000;
-  border-radius:4px;
-  padding:4px 6px;
-}
-audio{
-  width:150px;
-}
-#recordingBox{
-  display:none;
-  background:#fff;
-  color:#000;
-  padding:12px;
-  text-align:center;
-  font-weight:bold;
-}
+  :root{
+    --bg:#0b0b0b;
+    --card:#0f0f10;
+    --accent:#ffffff;
+    --muted:rgba(255,255,255,0.65);
+    --border: rgba(255,255,255,0.08);
+    --radius:12px;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--accent);
+    font-family:Inter, "Tajawal", system-ui, Arial;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:18px;
+  }
+
+  /* Wrapper */
+  .app{
+    width:100%;
+    max-width:460px;
+    height:95vh;
+    background:linear-gradient(180deg,var(--card), #080808);
+    border-radius:16px;
+    display:flex;
+    flex-direction:column;
+    overflow:hidden;
+    border:1px solid var(--border);
+    box-shadow: 0 6px 30px rgba(0,0,0,0.6);
+  }
+
+  header.app-header{
+    padding:14px;
+    display:flex;
+    align-items:center;
+    gap:12px;
+    border-bottom:1px solid var(--border);
+  }
+  .title{
+    font-weight:600;
+    letter-spacing:0.2px;
+  }
+  .subtitle{
+    font-size:12px;
+    color:var(--muted);
+  }
+
+  /* chat area */
+  .messages{
+    flex:1;
+    padding:12px;
+    overflow:auto;
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+    background:
+      linear-gradient(0deg, rgba(255,255,255,0.01), transparent 40%);
+  }
+
+  .msg{
+    max-width:78%;
+    align-self:flex-end;
+    background:transparent;
+    border:1px solid var(--border);
+    border-radius:12px;
+    padding:10px;
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+    position:relative;
+  }
+  .msg .msg-content{ color:var(--accent); font-size:15px; white-space:pre-wrap; word-break:break-word; }
+  .msg .meta{ font-size:11px; color:var(--muted); text-align:right; }
+  .msg img{ max-width:100%; border-radius:8px; display:block; }
+
+  /* audio player minimal (use browser controls but small) */
+  .msg audio{
+    width:170px;
+    height:auto;
+    outline:none;
+    background:transparent;
+  }
+
+  /* input area */
+  .composer{
+    padding:12px;
+    border-top:1px solid var(--border);
+    display:flex;
+    gap:8px;
+    align-items:center;
+    background:linear-gradient(180deg, rgba(255,255,255,0.01), transparent);
+  }
+  .attach-btn, .action-btn{
+    width:52px; height:44px;
+    border-radius:10px;
+    border:1px solid var(--border);
+    background:transparent;
+    color:var(--accent);
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    font-size:18px;
+  }
+  .text-input{
+    flex:1;
+    background:transparent;
+    border:1px solid var(--border);
+    padding:10px 12px;
+    border-radius:10px;
+    color:var(--accent);
+    font-size:15px;
+    outline:none;
+  }
+
+  /* attach bar sliding from bottom */
+  .attach-bar{
+    position:absolute;
+    left:0; right:0;
+    bottom:-120px;
+    margin:0 auto;
+    width:100%;
+    max-width:460px;
+    display:flex;
+    gap:10px;
+    justify-content:center;
+    padding:12px;
+    transition:bottom .28s ease;
+    pointer-events:auto;
+  }
+  .attach-bar.open{ bottom:84px; } /* seats above composer */
+  .attach-item{
+    min-width:84px;
+    border-radius:10px;
+    border:1px solid var(--border);
+    padding:10px;
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+    align-items:center;
+    justify-content:center;
+    background:transparent;
+    color:var(--accent);
+    font-size:13px;
+  }
+
+  /* toolbar popup for message */
+  .toolbar{
+    position:absolute;
+    background:var(--accent);
+    color:#000;
+    padding:6px;
+    border-radius:10px;
+    display:flex;
+    gap:6px;
+    box-shadow:0 6px 18px rgba(0,0,0,0.4);
+    z-index:1200;
+  }
+  .toolbar button{
+    background:transparent;
+    border:none;
+    padding:6px 8px;
+    cursor:pointer;
+    font-weight:600;
+  }
+
+  /* small screens adjustments */
+  @media (max-width:420px){
+    .msg audio{ width:140px; }
+    .attach-item{ min-width:68px; font-size:12px; padding:8px; }
+  }
+
 </style>
 </head>
 <body>
 
-<div class="chat">
+<div class="app" role="application" aria-label="chat-app">
+  <header class="app-header">
+    <div>
+      <div class="title">Chat — Minimal</div>
+      <div class="subtitle">Ready · Modern · Single file</div>
+    </div>
+  </header>
 
-<header>Chat</header>
+  <main class="messages" id="messages"></main>
 
-<div id="recordingBox">جاري التسجيل… <span id="timer">00:00</span></div>
+  <div class="composer">
+    <button class="attach-btn" id="attachBtn" title="Attach">📎</button>
+    <input id="input" class="text-input" placeholder="اكتب رسالة..." autocomplete="off" />
+    <button id="actionBtn" class="action-btn" title="Record or Send">🎤</button>
+  </div>
 
-<div id="chatBox"></div>
+  <!-- sliding attach bar -->
+  <div class="attach-bar" id="attachBar" aria-hidden="true">
+    <div class="attach-item" id="attachFile">File</div>
+    <div class="attach-item" id="attachCamera">Camera</div>
+    <div class="attach-item" id="attachImage">Image</div>
+    <div class="attach-item" id="attachPoll">Poll</div>
+    <div class="attach-item" id="attachLocation">Location</div>
+  </div>
 
-<div id="inputArea">
-  <input type="text" id="msgInput" placeholder="اكتب...">
-  <button class="btn" id="micBtn">Mic</button>
-</div>
-
+  <!-- hidden inputs -->
+  <input id="fileInput" type="file" style="display:none" />
+  <input id="imageInput" type="file" accept="image/*" style="display:none" />
+  <input id="cameraInput" type="file" accept="image/*" capture="environment" style="display:none" />
+  <div id="recordingBox" style="display:none; position:fixed; left:50%; transform:translateX(-50%); bottom:100px; background:#fff; color:#000; padding:8px 12px; border-radius:8px;">Recording… <span id="timer">00:00</span></div>
 </div>
 
 <script>
-const chatBox = document.getElementById("chatBox");
-const msgInput = document.getElementById("msgInput");
-const micBtn = document.getElementById("micBtn");
-const recordingBox = document.getElementById("recordingBox");
-const timerDisplay = document.getElementById("timer");
+/* Minimal Modern single-file chat */
+const messagesEl = document.getElementById('messages');
+const inputEl = document.getElementById('input');
+const actionBtn = document.getElementById('actionBtn');
+const attachBtn = document.getElementById('attachBtn');
+const attachBar = document.getElementById('attachBar');
+const fileInput = document.getElementById('fileInput');
+const imageInput = document.getElementById('imageInput');
+const cameraInput = document.getElementById('cameraInput');
+const attachFile = document.getElementById('attachFile');
+const attachImage = document.getElementById('attachImage');
+const attachCamera = document.getElementById('attachCamera');
+const attachPoll = document.getElementById('attachPoll');
+const attachLocation = document.getElementById('attachLocation');
+const recordingBox = document.getElementById('recordingBox');
+const timerDisplay = document.getElementById('timer');
 
-let recorder=null, stream=null, chunks=[];
-let seconds=0, timerInterval=null, isRecording=false;
+let isRecording = false;
+let recorder = null;
+let stream = null;
+let chunks = [];
+let seconds = 0, timerInterval = null;
 
-/* --- إضافة رسالة (نص / صورة / صوت / ملف) --- */
-function addMessage(content, type="text"){
-  const msg = document.createElement("div");
-  msg.className="message";
+/* Utilities */
+function scrollToBottom(){ messagesEl.scrollTop = messagesEl.scrollHeight; }
 
-  let inner = document.createElement("span");
-  inner.className="msg-text";
+/* addMessage: wraps content inside span.msg-content for all types */
+function addMessage(content, type = 'text'){
+  const msg = document.createElement('div');
+  msg.className = 'msg';
 
-  if(type==="text"){
-    inner.textContent = content;
-    msg.appendChild(inner);
+  const container = document.createElement('span');
+  container.className = 'msg-content';
+
+  if(type === 'text'){
+    container.textContent = content;
+  } else if(type === 'img'){
+    const img = document.createElement('img');
+    img.src = content;
+    container.appendChild(img);
+  } else if(type === 'audio'){
+    const audio = document.createElement('audio');
+    audio.controls = true;
+    audio.src = content;
+    audio.preload = 'metadata';
+    audio.addEventListener('ended', ()=> {
+      // reset UI when ended (do not autoplay)
+      // if custom buttons were used, set them to "play" here
+      // ensure playbackRate not changed
+      // no auto replay
+      audio.currentTime = 0;
+    });
+    container.appendChild(audio);
+  } else { // fallback - show as text
+    container.textContent = String(content);
   }
 
-  else if(type==="img"){
-    inner.innerHTML = `<img src="${content}" style="max-width:100%; border-radius:8px;">`;
-    msg.appendChild(inner);
-  }
+  const meta = document.createElement('div');
+  meta.className = 'meta';
+  meta.textContent = '✓✓ Read';
 
-  else if(type==="audio"){  // voice الحقيقي
-    inner.innerHTML = `<audio controls src="${content}"></audio>`;
-    msg.appendChild(inner);
-  }
+  msg.appendChild(container);
+  msg.appendChild(meta);
+  messagesEl.appendChild(msg);
+  scrollToBottom();
 
-  let sts = document.createElement("div");
-  sts.className="status";
-  sts.textContent="Read";
-  msg.appendChild(sts);
-
-  chatBox.appendChild(msg);
-  chatBox.scrollTop = chatBox.scrollHeight;
-
-  attachToolbar(msg);
+  attachMsgToolbar(msg);
 }
 
-/* --- Toolbar: Copy / Edit / Delete --- */
-function attachToolbar(msg){
-  msg.addEventListener("click", ()=>{
-
-    const old = document.querySelector(".msg-toolbar");
+/* Toolbar (Copy / Edit / Delete) - works for every message type
+   Copy: uses temporary textarea (works on mobile & desktop)
+   Edit: only for text messages (msg-content with no child elements)
+*/
+function attachMsgToolbar(msg){
+  msg.addEventListener('click', (ev)=>{
+    ev.stopPropagation(); // avoid body click
+    // remove existing toolbar
+    const old = document.querySelector('.toolbar');
     if(old) old.remove();
 
-    const toolbar = document.createElement("div");
-    toolbar.className="msg-toolbar";
+    const toolbar = document.createElement('div');
+    toolbar.className = 'toolbar';
 
-    const copyBtn = document.createElement("button");
-    const editBtn = document.createElement("button");
-    const delBtn  = document.createElement("button");
+    const btnCopy = document.createElement('button'); btnCopy.textContent = 'Copy';
+    const btnEdit = document.createElement('button'); btnEdit.textContent = 'Edit';
+    const btnDel  = document.createElement('button'); btnDel.textContent = 'Delete';
 
-    copyBtn.textContent="Copy";
-    editBtn.textContent="Edit";
-    delBtn.textContent="Delete";
-
-    toolbar.appendChild(copyBtn);
-    toolbar.appendChild(editBtn);
-    toolbar.appendChild(delBtn);
-
+    toolbar.appendChild(btnCopy);
+    toolbar.appendChild(btnEdit);
+    toolbar.appendChild(btnDel);
     document.body.appendChild(toolbar);
 
-    let rect = msg.getBoundingClientRect();
-    toolbar.style.top = (rect.top + window.scrollY - 40) + "px";
-    toolbar.style.left = rect.left + "px";
+    // place toolbar above message if possible
+    const r = msg.getBoundingClientRect();
+    let top = window.scrollY + r.top - toolbar.offsetHeight - 8;
+    if(top < 8) top = window.scrollY + r.bottom + 8; // if not enough space, place under
+    toolbar.style.top = top + 'px';
+    toolbar.style.left = Math.max(8, r.left) + 'px';
 
-    // Copy
-    copyBtn.onclick = ()=>{
-      let text = msg.querySelector(".msg-text").innerText;
-      let ta = document.createElement("textarea");
-      ta.value = text;
+    // COPY
+    btnCopy.onclick = ()=> {
+      const contentEl = msg.querySelector('.msg-content');
+      let textToCopy = '';
+      // for different types, decide what to copy
+      const audio = contentEl.querySelector('audio');
+      const img = contentEl.querySelector('img');
+      if(audio) textToCopy = audio.src || '';
+      else if(img) textToCopy = img.src || '';
+      else textToCopy = contentEl.innerText || contentEl.textContent || '';
+      // fallback: use textarea method
+      const ta = document.createElement('textarea');
+      ta.value = textToCopy;
       document.body.appendChild(ta);
       ta.select();
-      document.execCommand("copy");
+      try{ document.execCommand('copy'); alert('Copied'); }
+      catch(e){ alert('Copy failed'); }
       ta.remove();
       toolbar.remove();
-      alert("Copied!");
     };
 
-    // Edit
-    editBtn.onclick = ()=>{
-      let span = msg.querySelector(".msg-text");
-      let newText = prompt("Edit message:", span.innerText);
-      if(newText!==null) span.innerText = newText;
+    // EDIT (only for plain text messages)
+    btnEdit.onclick = ()=> {
+      const contentEl = msg.querySelector('.msg-content');
+      // allow edit only if contentEl has no child elements (pure text)
+      if(contentEl.children.length === 0){
+        const oldText = contentEl.textContent;
+        const n = prompt('Edit message:', oldText);
+        if(n !== null){
+          contentEl.textContent = n;
+        }
+      } else {
+        alert('Editing supported for text messages only.');
+      }
       toolbar.remove();
     };
 
-    // Delete
-    delBtn.onclick = ()=>{
+    // DELETE
+    btnDel.onclick = ()=> {
       msg.remove();
       toolbar.remove();
     };
 
-    document.addEventListener("click", function hide(ev){
-      if(!msg.contains(ev.target) && !toolbar.contains(ev.target)){
+    // hide toolbar clicking outside
+    function hideListener(e){
+      if(!toolbar.contains(e.target) && !msg.contains(e.target)){
         toolbar.remove();
-        document.removeEventListener("click", hide);
+        document.removeEventListener('click', hideListener);
       }
-    });
-
+    }
+    document.addEventListener('click', hideListener);
   });
 }
 
-/* --- Voice Recording --- */
+/* Attach bar toggle */
+attachBtn.addEventListener('click', ()=> {
+  attachBar.classList.toggle('open');
+  attachBar.setAttribute('aria-hidden', String(!attachBar.classList.contains('open')));
+});
+
+/* Attach actions */
+attachFile.addEventListener('click', ()=> fileInput.click());
+attachImage.addEventListener('click', ()=> imageInput.click());
+attachCamera.addEventListener('click', ()=> cameraInput.click());
+
+fileInput.addEventListener('change', (e)=>{
+  const f = e.target.files && e.target.files[0];
+  if(!f) return;
+  // read text/file as dataURL if image else show filename
+  if(f.type.startsWith('image/')) {
+    const fr = new FileReader();
+    fr.onload = ()=> addMessage(fr.result, 'img');
+    fr.readAsDataURL(f);
+  } else {
+    addMessage(`${f.name} (file)`, 'text');
+  }
+  fileInput.value = '';
+});
+
+imageInput.addEventListener('change', (e)=>{
+  const f = e.target.files && e.target.files[0];
+  if(!f) return;
+  const fr = new FileReader();
+  fr.onload = ()=> addMessage(fr.result, 'img');
+  fr.readAsDataURL(f);
+  imageInput.value = '';
+});
+
+cameraInput.addEventListener('change', (e)=>{
+  const f = e.target.files && e.target.files[0];
+  if(!f) return;
+  const fr = new FileReader();
+  fr.onload = ()=> addMessage(fr.result, 'img');
+  fr.readAsDataURL(f);
+  cameraInput.value = '';
+});
+
+attachPoll.addEventListener('click', ()=>{
+  const q = prompt('Poll question:');
+  if(!q) return;
+  const a1 = prompt('Option 1:'); if(!a1) return;
+  const a2 = prompt('Option 2:'); if(!a2) return;
+  addMessage(`Poll: ${q}\n1) ${a1}\n2) ${a2}`, 'text');
+});
+
+attachLocation.addEventListener('click', ()=>{
+  if(!navigator.geolocation){ alert('Geolocation not supported'); return; }
+  navigator.geolocation.getCurrentPosition(pos=>{
+    const lat = pos.coords.latitude, lon = pos.coords.longitude;
+    addMessage(`Location: https://www.google.com/maps?q=${lat},${lon}`, 'text');
+  }, ()=> alert('Unable to get location'));
+});
+
+/* Recording logic: single button toggles record / stop
+   Using click (not touchstart) to avoid duplicate events on mobile.
+*/
 function updateTimer(){
   seconds++;
-  timerDisplay.textContent =
-    String(Math.floor(seconds/60)).padStart(2,"0") + ":" +
-    String(seconds%60).padStart(2,"0");
+  const mm = String(Math.floor(seconds/60)).padStart(2,'0');
+  const ss = String(seconds % 60).padStart(2,'0');
+  timerDisplay.textContent = `${mm}:${ss}`;
 }
 
-async function startRecording(){
+async function startRecord(){
   if(isRecording) return;
-  isRecording=true;
-
-  stream = await navigator.mediaDevices.getUserMedia({audio:true});
-  recorder = new MediaRecorder(stream);
-  chunks = [];
-
-  recorder.ondataavailable = e => chunks.push(e.data);
-
-  recorder.onstop = ()=>{
-    const blob = new Blob(chunks,{type:"audio/mp3"});
-    const url = URL.createObjectURL(blob);
-    addMessage(url, "audio");   // *** الآن تُرسل كـ صوت وليس نص ***
-
-    stream.getTracks().forEach(t=>t.stop());
-    stream=null;
-    recorder=null;
-    chunks=[];
-    recordingBox.style.display="none";
-    clearInterval(timerInterval);
-    seconds=0;
-    timerDisplay.textContent="00:00";
-    isRecording=false;
-  };
-
-  recorder.start();
-  seconds=0;
-  timerDisplay.textContent="00:00";
-  recordingBox.style.display="block";
-  timerInterval = setInterval(updateTimer,1000);
+  try{
+    stream = await navigator.mediaDevices.getUserMedia({ audio:true });
+    recorder = new MediaRecorder(stream);
+    chunks = [];
+    recorder.ondataavailable = e => chunks.push(e.data);
+    recorder.onstop = ()=>{
+      if(chunks.length){
+        const blob = new Blob(chunks, { type: 'audio/webm' }); // webm widely supported; browser will play it
+        const url = URL.createObjectURL(blob);
+        addMessage(url, 'audio'); // << send as audio
+      }
+      // stop tracks & cleanup
+      if(stream){
+        stream.getTracks().forEach(t=>t.stop());
+        stream = null;
+      }
+      recorder = null;
+      chunks = [];
+      isRecording = false;
+      clearInterval(timerInterval);
+      timerInterval = null;
+      seconds = 0;
+      recordingBox.style.display = 'none';
+    };
+    recorder.start();
+    isRecording = true;
+    seconds = 0;
+    timerDisplay.textContent = '00:00';
+    recordingBox.style.display = 'block';
+    timerInterval = setInterval(updateTimer, 1000);
+  }catch(err){
+    alert('Microphone access denied or not available.');
+    isRecording = false;
+  }
 }
 
-function stopRecording(){
+function stopRecord(){
   if(!isRecording) return;
-  if(recorder && recorder.state==="recording") recorder.stop();
+  if(recorder && recorder.state === 'recording') recorder.stop();
 }
 
-/* زر Mic ↔ Send */
-msgInput.addEventListener("input", ()=>{
-  micBtn.textContent = msgInput.value.trim().length ? "Send" : "Mic";
+/* Action button behavior: if there's text -> send; else toggle record */
+inputEl = inputEl || inputEl; // noop
+inputEl = inputEl = null; // silence linter (not used)
+
+inputEl = inputEl; // keep
+
+inputEl = null; // keep
+
+// hook input element for changing icon text
+inputEl = document.getElementById('input');
+inputEl.addEventListener('input', ()=>{
+  const has = inputEl.value.trim().length > 0;
+  actionBtn.textContent = has ? '➡' : '🎤';
 });
 
-micBtn.addEventListener("click", ()=>{
-  if(msgInput.value.trim().length){
-    addMessage(msgInput.value,"text");
-    msgInput.value="";
-    micBtn.textContent="Mic";
+// main action
+actionBtn.addEventListener('click', ()=>{
+  const has = inputEl.value.trim().length > 0;
+  if(has){
+    addMessage(inputEl.value.trim(), 'text');
+    inputEl.value = '';
+    actionBtn.textContent = '🎤';
   } else {
-    if(!isRecording) startRecording();
-    else stopRecording();
+    if(!isRecording) startRecord();
+    else stopRecord();
   }
 });
-</script>
 
+/* initial demo messages (optional) */
+// addMessage('مرحبا! هذه واجهة مُبسطة وعصرية', 'text');
+
+</script>
 </body>
 </html>
