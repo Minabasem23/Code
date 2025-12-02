@@ -176,7 +176,6 @@ img.chat-img {
 </div>
 
 <script>
-// ======== JavaScript =========
 document.addEventListener("DOMContentLoaded", () => {
 
 const input = document.getElementById("msgInput");
@@ -281,7 +280,6 @@ function updateTimer() {
 async function startRecord() {
   if(recorder) return;
   try {
-    // إيقاف أي stream قديم
     if(stream){
       stream.getTracks().forEach(track => track.stop());
       stream = null;
