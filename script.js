@@ -111,7 +111,7 @@ async function startRecord() {
       const url = URL.createObjectURL(blob);
       addMessage(url, "audio");
 
-      // إغلاق الميكروفون بالكامل
+      // إغلاق الميكروفون بالكامل بعد التسجيل
       if(stream){
         stream.getTracks().forEach(track => track.stop());
         stream = null;
