@@ -9,9 +9,8 @@ body {margin:0; background:#000; font-family:'Tajawal',sans-serif; color:#fff; d
 .chat-container {width:95%; max-width:450px; height:92vh; background:#000; border-radius:16px; display:flex; flex-direction:column; overflow:hidden; position:relative;}
 header.chat-header {text-align:center; padding:15px; font-weight:bold; border-bottom:1px solid #fff;}
 .chat-messages {flex:1; padding:12px; overflow-y:auto; display:flex; flex-direction:column; gap:14px;}
-.message {background:#000; color:#fff; padding:10px 14px; max-width:75%; border-radius:12px; align-self:flex-end; word-wrap:break-word; border:1px solid #fff; display:flex; flex-direction:column; gap:6px;}
+.message {background:#000; color:#fff; padding:10px 14px; max-width:75%; border-radius:12px; align-self:flex-end; word-wrap:break-word; border:1px solid #fff; display:flex; flex-direction:column; gap:6px; position:relative;}
 .status {margin-top:4px; font-size:11px; opacity:.7; text-align:right;}
-img.chat-img {max-width:100%; border:1px solid #fff; border-radius:8px; margin-top:5px;}
 #recordingBox {display:none; background:#fff; color:#000; padding:12px; text-align:center; font-weight:bold; position:absolute; bottom:60px; left:0; width:100%; border-radius:8px;}
 .chat-input {padding:10px; background:#000; display:flex; align-items:center; gap:8px; position:relative;}
 .chat-input input {flex:1; background:#000; color:#fff; padding:12px; border:1px solid #fff; border-radius:10px;}
@@ -19,34 +18,31 @@ img.chat-img {max-width:100%; border:1px solid #fff; border-radius:8px; margin-t
 .attach-bar {position:absolute; bottom:-70px; left:0; width:100%; background:#000; border-top-left-radius:12px; border-top-right-radius:12px; padding:10px; display:flex; justify-content:space-around; transition:bottom 0.3s;}
 .attach-bar.show {bottom:60px;}
 .attach-bar button {background:#000; border:1px solid #fff; padding:12px; border-radius:10px; color:#fff; font-size:16px;}
-.audio-player {background:#000; padding:6px 10px; border-radius:12px; display:flex; align-items:center; gap:8px;}
-.audio-player button {background:#000; border:1px solid #fff; border-radius:50%; width:36px; height:36px; color:#fff; font-size:16px;}
-.audio-player .progress {flex:1; height:6px; background:#fff; border-radius:3px; cursor:pointer; position:relative;}
-.audio-player .progress-filled {height:100%; background:#fff; width:0%; border-radius:3px;}
-.audio-player select {background:#000; border:1px solid #fff; color:#fff; padding:2px 6px; border-radius:6px;}
+.msg-toolbar {background:#fff; color:#000; border-radius:8px; padding:4px; display:flex; gap:6px; position:absolute; z-index:1000;}
+.msg-toolbar button {background:#fff; border:1px solid #000; padding:4px 6px; border-radius:4px; cursor:pointer;}
 </style>
 </head>
 <body>
 
 <div class="chat-container">
-  <header class="chat-header">💬 دردشة أبيض وأسود</header>
+  <header class="chat-header">دردشة أبيض وأسود</header>
 
-  <div id="recordingBox">🔴 جاري التسجيل… <span id="timer">00:00</span></div>
+  <div id="recordingBox">جاري التسجيل… <span id="timer">00:00</span></div>
 
   <div class="chat-messages" id="chatMessages"></div>
 
   <div class="chat-input">
-    <button class="btn" id="attachBtn">📎</button>
+    <button class="btn" id="attachBtn">Attach</button>
     <input type="text" id="msgInput" placeholder="اكتب رسالة...">
-    <button class="btn" id="micBtn">🎤</button>
+    <button class="btn" id="micBtn">Mic</button>
   </div>
 
   <div class="attach-bar" id="attachBar">
-    <button id="fileBtn">📎 ملف</button>
-    <button id="cameraBtn">📷 كاميرا</button>
-    <button id="imageBtn">🖼 صورة</button>
-    <button id="pollBtn">📊 استطلاع</button>
-    <button id="locationBtn">📍 موقعي</button>
+    <button id="fileBtn">File</button>
+    <button id="cameraBtn">Camera</button>
+    <button id="imageBtn">Image</button>
+    <button id="pollBtn">Poll</button>
+    <button id="locationBtn">Location</button>
   </div>
 
   <input type="file" id="cameraInput" accept="image/*" capture="camera" style="display:none;">
@@ -84,44 +80,70 @@ document.getElementById("pollBtn").addEventListener("click", ()=>{
   if(!question) return;
   const option1 = prompt("الخيار الأول:");
   const option2 = prompt("الخيار الثاني:");
-  if(option1 && option2){ addMessage(`📊 استطلاع: ${question}\n1️⃣ ${option1}\n2️⃣ ${option2}`,"text"); }
+  if(option1 && option2){ addMessage(`Poll: ${question}\n1: ${option1}\n2: ${option2}`,"text"); }
 });
 
 document.getElementById("locationBtn").addEventListener("click", ()=>{
   if(navigator.geolocation){
     navigator.geolocation.getCurrentPosition(pos=>{
       const lat = pos.coords.latitude; const lon = pos.coords.longitude;
-      addMessage(`📍 موقعي: https://www.google.com/maps?q=${lat},${lon}`,"text");
+      addMessage(`Location: https://www.google.com/maps?q=${lat},${lon}`,"text");
     }, ()=>alert("تعذر الحصول على الموقع."));
   } else alert("الموقع غير مدعوم.");
 });
 
 function addMessage(content,type="text"){
   const div=document.createElement("div"); div.className="message";
-  if(type==="img") div.innerHTML=`<img class="chat-img" src="${content}"><div class="status">✓✓ تمت القراءة</div>`;
-  else if(type==="audio"){
-    const player = document.createElement("div");
-    player.className="audio-player";
-    const playBtn = document.createElement("button"); playBtn.innerHTML="▶️";
-    const audio = document.createElement("audio"); audio.src=content;
-    const progress = document.createElement("div"); progress.className="progress";
-    const progressFilled = document.createElement("div"); progressFilled.className="progress-filled"; progress.appendChild(progressFilled);
-    const speedSelect = document.createElement("select");
-    [1,1.25,1.5,2].forEach(s=>{ const opt = document.createElement("option"); opt.value=s; opt.text=s+"x"; speedSelect.appendChild(opt); });
-    speedSelect.value=1;
-    player.appendChild(playBtn); player.appendChild(progress); player.appendChild(speedSelect);
-    div.appendChild(player);
-    const statusDiv = document.createElement("div"); statusDiv.className="status"; statusDiv.innerHTML="✓✓ تمت القراءة"; div.appendChild(statusDiv);
-    chat.appendChild(div); chat.scrollTop = chat.scrollHeight;
 
-    playBtn.addEventListener("click", ()=>{ if(audio.paused){ audio.play(); playBtn.innerHTML="⏸️"; } else{ audio.pause(); playBtn.innerHTML="▶️"; } });
-    audio.addEventListener("timeupdate", ()=>{ const percent=(audio.currentTime/audio.duration)*100; progressFilled.style.width=percent+"%"; });
-    progress.addEventListener("click", e=>{ const rect=progress.getBoundingClientRect(); const clickX=e.clientX-rect.left; const width=rect.width; audio.currentTime=(clickX/width)*audio.duration; });
-    speedSelect.addEventListener("change", ()=>{ audio.playbackRate = speedSelect.value; });
-    audio.addEventListener("ended", ()=>{ playBtn.innerHTML="▶️"; progressFilled.style.width="0%"; audio.currentTime=0; });
-  } else div.innerHTML=`${content}<div class="status">✓✓ تمت القراءة</div>`;
-  if(type!=="audio") chat.appendChild(div);
+  if(type==="img") div.innerHTML=`<img class="chat-img" src="${content}"><div class="status">Read</div>`;
+  else div.innerHTML=`<span class="msg-text">${content}</span><div class="status">Read</div>`;
+
+  chat.appendChild(div);
   chat.scrollTop = chat.scrollHeight;
+
+  // Toolbar عند الضغط على الرسالة
+  div.addEventListener("click", (e)=>{
+    const existingToolbar = document.querySelector(".msg-toolbar");
+    if(existingToolbar) existingToolbar.remove();
+
+    const toolbar = document.createElement("div");
+    toolbar.className = "msg-toolbar";
+
+    toolbar.style.top = (div.getBoundingClientRect().top + window.scrollY - 40) + "px";
+    toolbar.style.left = (div.getBoundingClientRect().left) + "px";
+
+    const copyBtn = document.createElement("button"); copyBtn.textContent="Copy";
+    const editBtn = document.createElement("button"); editBtn.textContent="Edit";
+    const deleteBtn = document.createElement("button"); deleteBtn.textContent="Delete";
+
+    toolbar.appendChild(copyBtn);
+    toolbar.appendChild(editBtn);
+    toolbar.appendChild(deleteBtn);
+    document.body.appendChild(toolbar);
+
+    copyBtn.addEventListener("click", ()=>{
+      const text = div.querySelector(".msg-text").textContent;
+      navigator.clipboard.writeText(text);
+      toolbar.remove();
+    });
+    editBtn.addEventListener("click", ()=>{
+      const textSpan = div.querySelector(".msg-text");
+      const newText = prompt("Edit message:", textSpan.textContent);
+      if(newText!==null) textSpan.textContent = newText;
+      toolbar.remove();
+    });
+    deleteBtn.addEventListener("click", ()=>{
+      div.remove();
+      toolbar.remove();
+    });
+
+    document.addEventListener("click", function hideToolbar(ev){
+      if(!div.contains(ev.target) && !toolbar.contains(ev.target)){
+        toolbar.remove();
+        document.removeEventListener("click", hideToolbar);
+      }
+    });
+  });
 }
 
 /* تسجيل صوت */
@@ -133,7 +155,7 @@ try{
   recorder=new MediaRecorder(stream); chunks=[];
   recorder.ondataavailable=e=>chunks.push(e.data);
   recorder.onstop=()=>{
-    if(chunks.length>0){ const blob=new Blob(chunks,{type:"audio/mp3"}); const url=URL.createObjectURL(blob); addMessage(url,"audio"); }
+    if(chunks.length>0){ const blob=new Blob(chunks,{type:"audio/mp3"}); const url=URL.createObjectURL(blob); addMessage(url,"text"); }
     if(stream){ stream.getTracks().forEach(t=>t.stop()); stream=null; }
     recorder=null; chunks=[]; recordingBox.style.display="none";
     clearInterval(timerInterval); timerInterval=null; seconds=0; timerDisplay.textContent="00:00"; isRecording=false;
@@ -144,17 +166,17 @@ try{
 }
 function stopRecording(){ if(!isRecording) return; isRecording=false; if(recorder && recorder.state==="recording") recorder.stop(); recordingBox.style.display="none"; clearInterval(timerInterval); timerInterval=null; seconds=0; timerDisplay.textContent="00:00"; }
 
-/* تحويل زر الميكروفون إلى زر إرسال */
+/* زر Mic يتحول لإرسال عند الكتابة */
 msgInput.addEventListener("input", ()=>{
-  if(msgInput.value.trim().length > 0) micBtn.textContent = "📤";
-  else micBtn.textContent = "🎤";
+  if(msgInput.value.trim().length > 0) micBtn.textContent = "Send";
+  else micBtn.textContent = "Mic";
 });
 
 micBtn.addEventListener("click", ()=>{
   if(msgInput.value.trim().length > 0){
     addMessage(msgInput.value,"text");
     msgInput.value="";
-    micBtn.textContent = "🎤";
+    micBtn.textContent = "Mic";
   } else {
     if(!isRecording) startRecording();
     else stopRecording();
