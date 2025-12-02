@@ -1,699 +1,298 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="ar">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ربح من الإعلانات</title>
-    
-    <!-- Telegram Web App SDK -->
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    
-    <!-- ملف JavaScript المنفصل -->
-    <script src="ad-system.js"></script>
-    
-    <style>
-        /* نفس الـ CSS السابق */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-        
-        body {
-            background-color: #121212;
-            color: #ffffff;
-            min-height: 100vh;
-            padding: 20px;
-            direction: rtl;
-        }
-        
-        .container {
-            max-width: 500px;
-            margin: 0 auto;
-        }
-        
-        header {
-            text-align: center;
-            margin-bottom: 30px;
-            padding: 15px;
-            border-bottom: 1px solid #333;
-        }
-        
-        h1 {
-            font-size: 24px;
-            margin-bottom: 10px;
-            color: #4CAF50;
-        }
-        
-        .balance-card {
-            background: linear-gradient(135deg, #1e3c72, #2a5298);
-            border-radius: 15px;
-            padding: 20px;
-            margin-bottom: 25px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-            text-align: center;
-        }
-        
-        .balance-label {
-            font-size: 16px;
-            margin-bottom: 10px;
-            opacity: 0.8;
-        }
-        
-        .balance-amount {
-            font-size: 32px;
-            font-weight: bold;
-            margin-bottom: 5px;
-        }
-        
-        .balance-usd {
-            font-size: 14px;
-            opacity: 0.7;
-        }
-        
-        .nav-tabs {
-            display: flex;
-            background-color: #1e1e1e;
-            border-radius: 10px;
-            padding: 5px;
-            margin-bottom: 20px;
-        }
-        
-        .tab {
-            flex: 1;
-            text-align: center;
-            padding: 12px;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-        
-        .tab.active {
-            background-color: #4CAF50;
-            color: white;
-        }
-        
-        .content {
-            display: none;
-        }
-        
-        .content.active {
-            display: block;
-        }
-        
-        .ad-card {
-            background-color: #1e1e1e;
-            border-radius: 12px;
-            padding: 20px;
-            margin-bottom: 15px;
-            text-align: center;
-            border: 1px solid #333;
-        }
-        
-        .ad-icon {
-            font-size: 40px;
-            margin-bottom: 15px;
-            color: #4CAF50;
-        }
-        
-        .ad-title {
-            font-size: 18px;
-            margin-bottom: 10px;
-        }
-        
-        .ad-description {
-            font-size: 14px;
-            margin-bottom: 15px;
-            opacity: 0.8;
-        }
-        
-        .watch-btn {
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            padding: 12px 25px;
-            font-size: 16px;
-            cursor: pointer;
-            width: 100%;
-            transition: background-color 0.3s;
-        }
-        
-        .watch-btn:hover {
-            background-color: #45a049;
-        }
-        
-        .watch-btn:disabled {
-            background-color: #555;
-            cursor: not-allowed;
-        }
-        
-        .progress-container {
-            margin-top: 15px;
-        }
-        
-        .progress-label {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 5px;
-            font-size: 14px;
-        }
-        
-        .progress-bar {
-            height: 8px;
-            background-color: #333;
-            border-radius: 4px;
-            overflow: hidden;
-        }
-        
-        .progress-fill {
-            height: 100%;
-            background-color: #4CAF50;
-            border-radius: 4px;
-            transition: width 0.5s;
-        }
-        
-        .withdraw-card {
-            background-color: #1e1e1e;
-            border-radius: 12px;
-            padding: 20px;
-            margin-bottom: 15px;
-            border: 1px solid #333;
-        }
-        
-        .withdraw-title {
-            font-size: 18px;
-            margin-bottom: 15px;
-            text-align: center;
-        }
-        
-        .withdraw-info {
-            background-color: #252525;
-            border-radius: 8px;
-            padding: 15px;
-            margin-bottom: 15px;
-        }
-        
-        .info-row {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 10px;
-            font-size: 14px;
-        }
-        
-        .info-row:last-child {
-            margin-bottom: 0;
-        }
-        
-        .withdraw-btn {
-            background-color: #2196F3;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            padding: 12px 25px;
-            font-size: 16px;
-            cursor: pointer;
-            width: 100%;
-            transition: background-color 0.3s;
-        }
-        
-        .withdraw-btn:hover {
-            background-color: #0b7dda;
-        }
-        
-        .withdraw-btn:disabled {
-            background-color: #555;
-            cursor: not-allowed;
-        }
-        
-        .stats-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-            margin-bottom: 20px;
-        }
-        
-        .stat-card {
-            background-color: #1e1e1e;
-            border-radius: 12px;
-            padding: 15px;
-            text-align: center;
-            border: 1px solid #333;
-        }
-        
-        .stat-value {
-            font-size: 24px;
-            font-weight: bold;
-            margin-bottom: 5px;
-            color: #4CAF50;
-        }
-        
-        .stat-label {
-            font-size: 14px;
-            opacity: 0.8;
-        }
-        
-        .ad-status {
-            margin: 10px 0;
-            padding: 10px;
-            border-radius: 5px;
-            text-align: center;
-            font-size: 14px;
-        }
-        
-        .status-loading {
-            background-color: #ffa500;
-            color: #000;
-        }
-        
-        .status-ready {
-            background-color: #4CAF50;
-            color: #fff;
-        }
-        
-        .status-error {
-            background-color: #ff4757;
-            color: #fff;
-        }
-        
-        .api-test-btn {
-            background-color: #9c27b0;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            padding: 10px 15px;
-            margin: 10px 0;
-            cursor: pointer;
-            width: 100%;
-        }
-        
-        .ad-modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.95);
-            z-index: 1000;
-            display: none;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-        }
-        
-        .ad-content {
-            background: white;
-            color: black;
-            padding: 20px;
-            border-radius: 15px;
-            text-align: center;
-            max-width: 90%;
-            max-height: 80%;
-            overflow-y: auto;
-        }
-        
-        .ad-timer {
-            font-size: 24px;
-            margin: 20px 0;
-            color: #4CAF50;
-            font-weight: bold;
-        }
-        
-        .ad-close-btn {
-            background-color: #ff4757;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            padding: 8px 15px;
-            cursor: pointer;
-            margin-top: 10px;
-        }
-        
-        footer {
-            text-align: center;
-            margin-top: 30px;
-            padding-top: 20px;
-            border-top: 1px solid #333;
-            font-size: 12px;
-            opacity: 0.7;
-        }
-        
-        @media (max-width: 480px) {
-            .container {
-                padding: 10px;
-            }
-            
-            h1 {
-                font-size: 20px;
-            }
-            
-            .balance-amount {
-                font-size: 28px;
-            }
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>دردشة كاملة</title>
+
+<style>
+  body {
+    margin: 0;
+    background: #121212;
+    font-family: 'Tajawal', sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    color: white;
+  }
+
+  .chat-container {
+    width: 95%;
+    max-width: 450px;
+    height: 92vh;
+    background: #1e1e1e;
+    border-radius: 16px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .chat-header {
+    text-align: center;
+    padding: 15px;
+    background: #2c2c2c;
+    font-weight: bold;
+    border-bottom: 1px solid #333;
+  }
+
+  .chat-messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .message {
+    max-width: 75%;
+    padding: 10px 14px;
+    background: #0078ff;
+    border-radius: 12px;
+    align-self: flex-end;
+    word-wrap: break-word;
+    position: relative;
+    border-bottom-right-radius: 4px;
+  }
+
+  .received {
+    background: #2f2f2f;
+    align-self: flex-start;
+    border-bottom-left-radius: 4px;
+  }
+
+  .status {
+    font-size: 11px;
+    text-align: right;
+    margin-top: 4px;
+    opacity: .8;
+  }
+
+  img.chat-img {
+    margin-top: 6px;
+    max-width: 100%;
+    border-radius: 12px;
+  }
+
+  audio {
+    margin-top: 6px;
+    width: 100%;
+  }
+
+  /* الإدخال */
+  .chat-input {
+    padding: 10px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: #2c2c2c;
+  }
+
+  .chat-input input {
+    flex: 1;
+    padding: 12px;
+    border: none;
+    background: #3c3c3c;
+    color: white;
+    border-radius: 10px;
+  }
+
+  .btn {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    background: #0078ff;
+    border: none;
+    color: white;
+    font-size: 20px;
+  }
+
+  /* القائمة */
+  .attach-menu {
+    position: absolute;
+    bottom: 70px;
+    right: 20px;
+    background: #2c2c2c;
+    padding: 12px;
+    border-radius: 12px;
+    display: none;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .attach-menu button {
+    background: #3c3c3c;
+    border: none;
+    padding: 10px;
+    border-radius: 8px;
+    color: white;
+  }
+
+  input[type="file"] {
+    display: none;
+  }
+</style>
 </head>
+
 <body>
-    <div class="container">
-        <header>
-            <h1>ربح من الإعلانات</h1>
-            <p>شاهد الإعلانات واربح USDT - OnClickA</p>
-        </header>
-        
-        <div class="balance-card">
-            <div class="balance-label">رصيدك الحالي</div>
-            <div class="balance-amount" id="balance-amount">0.00000</div>
-            <div class="balance-usd">USDT</div>
-        </div>
-        
-        <div class="nav-tabs">
-            <div class="tab active" data-tab="watch">مشاهدة الإعلانات</div>
-            <div class="tab" data-tab="withdraw">السحب</div>
-        </div>
-        
-        <div class="content active" id="watch-tab">
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <div class="stat-value" id="ads-watched">0</div>
-                    <div class="stat-label">إعلان شاهدته</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-value" id="ads-remaining">250</div>
-                    <div class="stat-label">إعلان متبقي</div>
-                </div>
-            </div>
-            
-            <div class="ad-card">
-                <div class="ad-icon">📱</div>
-                <div class="ad-title">شاهد الإعلان واربح</div>
-                <div class="ad-description">شاهد الإعلان بالكامل لتحصل على 0.00002 USDT</div>
-                
-                <div id="ad-status" class="ad-status status-ready">
-                    ✅ نظام OnClickA جاهز
-                </div>
-                
-                <button class="watch-btn" id="watch-ad-btn">شاهد الإعلان الآن</button>
-                <button class="api-test-btn" id="test-api-btn">اختبار اتصال OnClickA API</button>
-                
-                <div class="progress-container">
-                    <div class="progress-label">
-                        <span>تقدم اليوم</span>
-                        <span id="progress-text">0/250</span>
-                    </div>
-                    <div class="progress-bar">
-                        <div class="progress-fill" id="progress-fill" style="width: 0%"></div>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="ad-card">
-                <div class="ad-title">معلومات الوكيل الإعلاني</div>
-                <div class="ad-description">
-                    نحن نستخدم نظام OnClickA للإعلانات. هذا النظام يوفر إعلانات حقيقية 
-                    ومدفوعات سريعة عبر شبكة BSC. كل إعلان يعرض لمدة 30 ثانية تقريباً.
-                </div>
-            </div>
-        </div>
-        
-        <div class="content" id="withdraw-tab">
-            <div class="withdraw-card">
-                <div class="withdraw-title">سحب الأرباح</div>
-                
-                <div class="withdraw-info">
-                    <div class="info-row">
-                        <span>الحد الأدنى للسحب:</span>
-                        <span>0.1 USDT</span>
-                    </div>
-                    <div class="info-row">
-                        <span>عمولة السحب:</span>
-                        <span>0.001 USDT</span>
-                    </div>
-                    <div class="info-row">
-                        <span>شبكة السحب:</span>
-                        <span>BSC (BEP-20)</span>
-                    </div>
-                </div>
-                
-                <div class="info-row" style="margin-bottom: 15px;">
-                    <span>عنوان محفظة BSC:</span>
-                </div>
-                <input type="text" id="wallet-address" placeholder="أدخل عنوان محفظتك BSC" style="width: 100%; padding: 10px; border-radius: 8px; background: #252525; border: 1px solid #333; color: white; margin-bottom: 15px;">
-                
-                <button class="withdraw-btn" id="withdraw-btn" disabled>سحب الأرباح</button>
-            </div>
-            
-            <div class="withdraw-card">
-                <div class="withdraw-title">آخر عمليات السحب</div>
-                <div style="text-align: center; padding: 20px; opacity: 0.7;">
-                    لا توجد عمليات سحب سابقة
-                </div>
-            </div>
-        </div>
-        
-        <footer>
-            <p>جميع الحقوق محفوظة © 2023 | OnClickA API | يتم الدفع عبر شبكة BSC USDT</p>
-        </footer>
-    </div>
 
-    <!-- نافذة الإعلان -->
-    <div class="ad-modal" id="ad-modal">
-        <div class="ad-content">
-            <h3>إعلان OnClickA</h3>
-            <div id="ad-display">
-                <p>جاري تحميل الإعلان...</p>
-            </div>
-            <div class="ad-timer" id="ad-timer">30</div>
-            <p>شاهد الإعلان بالكامل لتحصل على المكافأة</p>
-            <button class="ad-close-btn" id="ad-close-btn" style="display:none;">إغلاق الإعلان</button>
-        </div>
-    </div>
+<div class="chat-container">
 
-    <script>
-        // عناصر الواجهة
-        const balanceAmount = document.getElementById('balance-amount');
-        const adsWatchedElement = document.getElementById('ads-watched');
-        const adsRemainingElement = document.getElementById('ads-remaining');
-        const progressText = document.getElementById('progress-text');
-        const progressFill = document.getElementById('progress-fill');
-        const watchAdBtn = document.getElementById('watch-ad-btn');
-        const testApiBtn = document.getElementById('test-api-btn');
-        const walletAddressInput = document.getElementById('wallet-address');
-        const withdrawBtn = document.getElementById('withdraw-btn');
-        const adStatus = document.getElementById('ad-status');
-        const adModal = document.getElementById('ad-modal');
-        const adTimer = document.getElementById('ad-timer');
-        const adCloseBtn = document.getElementById('ad-close-btn');
-        const adDisplay = document.getElementById('ad-display');
-        
-        // التبويبات
-        const tabs = document.querySelectorAll('.tab');
-        const contents = document.querySelectorAll('.content');
-        
-        tabs.forEach(tab => {
-            tab.addEventListener('click', () => {
-                const tabId = tab.getAttribute('data-tab');
-                
-                tabs.forEach(t => t.classList.remove('active'));
-                contents.forEach(c => c.classList.remove('active'));
-                
-                tab.classList.add('active');
-                document.getElementById(`${tabId}-tab`).classList.add('active');
-            });
-        });
-        
-        // تحديث الواجهة
-        function updateUI() {
-            const stats = window.adSystem.getUserStats();
-            
-            balanceAmount.textContent = stats.balance.toFixed(5);
-            adsWatchedElement.textContent = stats.adsWatched;
-            adsRemainingElement.textContent = stats.adsRemaining;
-            
-            progressText.textContent = `${stats.adsWatched}/${window.adSystem.userData.adsLimit}`;
-            progressFill.style.width = `${stats.progressPercent}%`;
-            
-            // تعطيل زر مشاهدة الإعلان إذا وصل للحد الأقصى
-            if (stats.adsWatched >= window.adSystem.userData.adsLimit) {
-                watchAdBtn.disabled = true;
-                watchAdBtn.textContent = 'وصلت للحد الأقصى اليوم';
-                adStatus.className = 'ad-status status-error';
-                adStatus.textContent = 'وصلت للحد الأقصى اليوم من الإعلانات';
-            }
-            
-            // تفعيل زر السحب إذا كان الرصيد كافياً والعنوان مملوء
-            if (stats.balance >= 0.1 && window.adSystem.userData.walletAddress.trim() !== '') {
-                withdrawBtn.disabled = false;
-            } else {
-                withdrawBtn.disabled = true;
-            }
-        }
-        
-        // عرض إعلان
-        async function showAd() {
-            watchAdBtn.disabled = true;
-            watchAdBtn.textContent = 'جاري تحميل الإعلان...';
-            adStatus.className = 'ad-status status-loading';
-            adStatus.textContent = 'جاري تحميل الإعلان...';
-            
-            // عرض نافذة الانتظار
-            adDisplay.innerHTML = `
-                <h4>إعلان OnClickA</h4>
-                <p>جاري تحميل الإعلان من شبكة OnClickA...</p>
-                <div style="margin: 20px 0; padding: 15px; background: #f0f0f0; border-radius: 8px;">
-                    <p style="color: #333; margin: 0;">إعلان تجريبي - النظام يعمل مع OnClickA API</p>
-                </div>
-            `;
-            adModal.style.display = 'flex';
-            
-            // بدء العداد
-            let timeLeft = 30;
-            adTimer.textContent = timeLeft;
-            
-            const timer = setInterval(() => {
-                timeLeft--;
-                adTimer.textContent = timeLeft;
-                
-                if (timeLeft <= 10) {
-                    adCloseBtn.style.display = 'block';
-                }
-                
-                if (timeLeft <= 0) {
-                    clearInterval(timer);
-                    completeAdView();
-                }
-            }, 1000);
-            
-            // إغلاق الإعلان يدوياً
-            adCloseBtn.onclick = () => {
-                clearInterval(timer);
-                adModal.style.display = 'none';
-                watchAdBtn.disabled = false;
-                watchAdBtn.textContent = 'شاهد الإعلان الآن';
-                adStatus.textContent = 'جاهز لمشاهدة الإعلانات';
-                adCloseBtn.style.display = 'none';
-            };
-            
-            try {
-                await window.adSystem.showAd();
-                completeAdView();
-            } catch (error) {
-                console.error('خطأ في تشغيل الإعلان:', error);
-                adStatus.className = 'ad-status status-error';
-                adStatus.textContent = error.message;
-                showNotification(error.message);
-                
-                clearInterval(timer);
-                adModal.style.display = 'none';
-                watchAdBtn.disabled = false;
-                watchAdBtn.textContent = 'شاهد الإعلان الآن';
-                adCloseBtn.style.display = 'none';
-            }
-        }
-        
-        // إكمال مشاهدة الإعلان
-        function completeAdView() {
-            // تحديث الواجهة
-            updateUI();
-            
-            // إغلاق نافذة الإعلان
-            adModal.style.display = 'none';
-            
-            // إشعار النجاح
-            showNotification('تهانينا! لقد ربحت 0.00002 USDT من مشاهدة الإعلان');
-            
-            watchAdBtn.disabled = false;
-            watchAdBtn.textContent = 'شاهد الإعلان الآن';
-            adStatus.className = 'ad-status status-ready';
-            adStatus.textContent = 'جاهز لمشاهدة الإعلانات';
-            adCloseBtn.style.display = 'none';
-        }
-        
-        // اختبار اتصال API
-        async function testApiConnection() {
-            testApiBtn.disabled = true;
-            testApiBtn.textContent = 'جاري الاختبار...';
-            adStatus.className = 'ad-status status-loading';
-            adStatus.textContent = 'جاري اختبار اتصال OnClickA API...';
-            
-            try {
-                const result = await window.adSystem.testApiConnection();
-                adStatus.className = result.success ? 'ad-status status-ready' : 'ad-status status-error';
-                adStatus.textContent = result.message;
-                showNotification(result.message);
-            } catch (error) {
-                adStatus.className = 'ad-status status-error';
-                adStatus.textContent = '❌ فشل في اختبار الاتصال';
-                showNotification('فشل في اختبار الاتصال: ' + error.message);
-            } finally {
-                testApiBtn.disabled = false;
-                testApiBtn.textContent = 'اختبار اتصال OnClickA API';
-            }
-        }
-        
-        // إشعار
-        function showNotification(message) {
-            if (window.Telegram && window.Telegram.WebApp) {
-                window.Telegram.WebApp.showPopup({
-                    title: 'إشعار',
-                    message: message,
-                    buttons: [{ type: 'ok' }]
-                });
-            } else {
-                alert(message);
-            }
-        }
-        
-        // تحديث عنوان المحفظة
-        walletAddressInput.addEventListener('input', () => {
-            window.adSystem.updateWalletAddress(walletAddressInput.value);
-            updateUI();
-        });
-        
-        // سحب الأرباح
-        withdrawBtn.addEventListener('click', async () => {
-            try {
-                const amount = window.adSystem.withdrawEarnings();
-                showNotification(`تم طلب سحب ${amount.toFixed(5)} USDT إلى العنوان: ${window.adSystem.userData.walletAddress}\nسيتم تحويل المبلغ خلال 24 ساعة`);
-                updateUI();
-            } catch (error) {
-                showNotification(error.message);
-            }
-        });
-        
-        // تهيئة التطبيق
-        document.addEventListener('DOMContentLoaded', async () => {
-            // تهيئة Telegram Web App
-            if (window.Telegram && window.Telegram.WebApp) {
-                window.Telegram.WebApp.expand();
-                window.Telegram.WebApp.enableClosingConfirmation();
-                console.log('Telegram Web App initialized');
-            }
-            
-            // تحميل بيانات المستخدم
-            window.adSystem.loadUserData();
-            
-            // تعبئة عنوان المحفظة إذا كان موجوداً
-            if (window.adSystem.userData.walletAddress) {
-                walletAddressInput.value = window.adSystem.userData.walletAddress;
-            }
-            
-            // تحديث الواجهة الأولية
-            updateUI();
-            
-            // تحديث الرصيد من API
-            const realBalance = await window.adSystem.updateBalanceFromAPI();
-            if (realBalance > 0) {
-                balanceAmount.textContent = realBalance.toFixed(5);
-                showNotification('تم تحديث الرصيد من OnClickA API');
-            }
-            
-            // إضافة event listeners
-            watchAdBtn.addEventListener('click', showAd);
-            testApiBtn.addEventListener('click', testApiConnection);
-            
-            console.log('التطبيق جاهز - OnClickA API متصل');
-        });
-    </script>
+  <div class="chat-header">💬 دردشة</div>
+
+  <div class="chat-messages" id="chatMessages"></div>
+
+  <!-- قائمة الدبوس -->
+  <div class="attach-menu" id="attachMenu">
+    <button onclick="openCamera()">📷 كاميرا</button>
+    <button onclick="openImage()">🖼 صورة</button>
+    <button onclick="openFile()">📎 ملف</button>
+  </div>
+
+  <!-- الإدخال -->
+  <div class="chat-input">
+
+    <button class="btn" id="attachBtn">📎</button>
+
+    <input type="text" id="msgInput" placeholder="اكتب رسالة...">
+
+    <!-- زر المايك -->
+    <button class="btn" id="micBtn">🎤</button>
+
+    <!-- زر الإرسال -->
+    <button class="btn" id="sendBtn" style="display:none;">✈️</button>
+
+  </div>
+
+  <!-- ملفات -->
+  <input id="cameraInput" type="file" accept="image/*" capture="camera">
+  <input id="imageInput" type="file" accept="image/*">
+  <input id="fileInput" type="file">
+
+</div>
+
+<script>
+
+let chat = document.getElementById("chatMessages");
+let input = document.getElementById("msgInput");
+let micBtn = document.getElementById("micBtn");
+let sendBtn = document.getElementById("sendBtn");
+
+/*------------------------------------------
+    1) تغيير المايك إلى إرسال عند الكتابة
+-------------------------------------------*/
+input.addEventListener("input", () => {
+  if (input.value.trim() === "") {
+    micBtn.style.display = "block";
+    sendBtn.style.display = "none";
+  } else {
+    micBtn.style.display = "none";
+    sendBtn.style.display = "block";
+  }
+});
+
+/*------------------------------------------
+    2) إرسال رسالة نصية
+-------------------------------------------*/
+sendBtn.onclick = () => {
+  let text = input.value.trim();
+  if (!text) return;
+  addMessage(text);
+  input.value = "";
+  micBtn.style.display = "block";
+  sendBtn.style.display = "none";
+};
+
+/*------------------------------------------
+    3) إضافة رسالة في الشاشة
+-------------------------------------------*/
+function addMessage(content, type="text") {
+  let div = document.createElement("div");
+  div.className = "message";
+
+  if (type === "img")
+    div.innerHTML = `<img class='chat-img' src='${content}'><div class="status">✓✓ تمت القراءة</div>`;
+  else if (type === "audio")
+    div.innerHTML = `<audio controls src="${content}"></audio><div class="status">✓✓ تمت القراءة</div>`;
+  else
+    div.innerHTML = `${content}<div class="status">✓✓ تمت القراءة</div>`;
+
+  chat.appendChild(div);
+  chat.scrollTop = chat.scrollHeight;
+}
+
+/*------------------------------------------
+    4) قائمة الدبوس
+-------------------------------------------*/
+document.getElementById("attachBtn").onclick = () => {
+  let menu = document.getElementById("attachMenu");
+  menu.style.display = menu.style.display === "flex" ? "none" : "flex";
+};
+
+function openCamera(){
+  document.getElementById("cameraInput").click();
+}
+
+function openImage(){
+  document.getElementById("imageInput").click();
+}
+
+function openFile(){
+  document.getElementById("fileInput").click();
+}
+
+/*------------------------------------------
+    5) رفع صورة
+-------------------------------------------*/
+document.getElementById("imageInput").onchange =
+document.getElementById("cameraInput").onchange = function() {
+  let file = this.files[0];
+  let reader = new FileReader();
+  reader.onload = () => addMessage(reader.result, "img");
+  reader.readAsDataURL(file);
+};
+
+/*------------------------------------------
+    6) رفع ملف صوت / PDF / Word
+-------------------------------------------*/
+document.getElementById("fileInput").onchange = function() {
+  let file = this.files[0];
+  let reader = new FileReader();
+  reader.onload = () => addMessage(reader.result, "audio");
+  reader.readAsDataURL(file);
+};
+
+/*------------------------------------------
+    7) تسجيل صوت حقيقي 🎤
+-------------------------------------------*/
+let recorder;
+let chunks = [];
+
+micBtn.onmousedown = startRecord;
+micBtn.onmouseup = stopRecord;
+
+async function startRecord(){
+  let stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+  recorder = new MediaRecorder(stream);
+
+  recorder.ondataavailable = e => chunks.push(e.data);
+
+  recorder.onstop = () => {
+    let blob = new Blob(chunks, {type: "audio/mp3"});
+    chunks = [];
+    let url = URL.createObjectURL(blob);
+    addMessage(url, "audio");
+  };
+
+  recorder.start();
+}
+
+function stopRecord(){
+  if (recorder) recorder.stop();
+}
+
+</script>
+
 </body>
 </html>
