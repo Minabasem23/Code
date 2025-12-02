@@ -1,14 +1,13 @@
 <!DOCTYPE html>
 <html lang="ar">
 <head>
-<script src="chat.js"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>دردشة كاملة</title>
 <style>
 body {margin:0;background:#121212;font-family:'Tajawal',sans-serif;color:white;display:flex;justify-content:center;align-items:center;height:100vh;}
 .chat-container {width:95%;max-width:450px;height:92vh;background:#1e1e1e;border-radius:16px;display:flex;flex-direction:column;overflow:hidden;position:relative;}
-.chat-header {text-align:center;padding:15px;background:#2c2c2c;font-weight:bold;border-bottom:1px solid #333;}
+header.chat-header {text-align:center;padding:15px;background:#2c2c2c;font-weight:bold;border-bottom:1px solid #333;}
 .chat-messages {flex:1;padding:12px;overflow-y:auto;display:flex;flex-direction:column;gap:14px;}
 .message {background:#0078ff;padding:10px 14px;max-width:75%;border-radius:12px;align-self:flex-end;word-wrap:break-word;border-bottom-right-radius:4px;position:relative;}
 .status {margin-top:4px;font-size:11px;opacity:.7;text-align:right;}
@@ -20,24 +19,21 @@ img.chat-img {max-width:100%;border-radius:12px;margin-top:5px;}
 .attach-menu {display:none;position:absolute;bottom:70px;right:20px;background:#2c2c2c;border-radius:12px;padding:12px;flex-direction:column;gap:10px;}
 .attach-menu button {background:#3c3c3c;padding:10px;border-radius:8px;border:none;color:white;}
 #recordingBox {display:none;background:#b00020;padding:12px;text-align:center;font-weight:bold;position:absolute;bottom:60px;left:0;width:100%;animation:blink 1s infinite;}
-@keyframes blink {0%{opacity:1;}50%{opacity:.5;}100%{opacity:1;}}
+@keyframes blink {0%{opacity:1;}50%{opacity:0.5;}100%{opacity:1;}}
 </style>
 </head>
 <body>
 <div class="chat-container">
+  <header class="chat-header">💬 دردشة</header>
 
-  <div class="chat-header">💬 دردشة</div>
-
-  <!-- إشعار التسجيل -->
   <div id="recordingBox">🔴 جاري التسجيل… <span id="timer">00:00</span></div>
 
   <div class="chat-messages" id="chatMessages"></div>
 
-  <!-- قائمة الدبوس -->
   <div class="attach-menu" id="attachMenu">
-    <button onclick="openCamera()">📷 كاميرا</button>
-    <button onclick="openImage()">🖼 صورة</button>
-    <button onclick="openFile()">📎 ملف</button>
+    <button id="cameraBtn">📷 كاميرا</button>
+    <button id="imageBtn">🖼 صورة</button>
+    <button id="fileBtn">📎 ملف</button>
   </div>
 
   <div class="chat-input">
@@ -47,115 +43,146 @@ img.chat-img {max-width:100%;border-radius:12px;margin-top:5px;}
     <button class="btn" id="sendBtn" style="display:none;">✈️</button>
   </div>
 
-  <!-- مخفي نهائياً -->
-  <input id="cameraInput" type="file" accept="image/*" capture="camera" style="display:none;">
-  <input id="imageInput" type="file" accept="image/*" style="display:none;">
-  <input id="fileInput" type="file" style="display:none;">
-
+  <input type="file" id="cameraInput" accept="image/*" capture="camera" style="display:none;">
+  <input type="file" id="imageInput" accept="image/*" style="display:none;">
+  <input type="file" id="fileInput" style="display:none;">
 </div>
 
 <script>
-let input = document.getElementById("msgInput");
-let micBtn = document.getElementById("micBtn");
-let sendBtn = document.getElementById("sendBtn");
-let chat = document.getElementById("chatMessages");
-let recordingBox = document.getElementById("recordingBox");
-let timerDisplay = document.getElementById("timer");
+document.addEventListener("DOMContentLoaded", () => {
+
+const input = document.getElementById("msgInput");
+const micBtn = document.getElementById("micBtn");
+const sendBtn = document.getElementById("sendBtn");
+const chat = document.getElementById("chatMessages");
+const recordingBox = document.getElementById("recordingBox");
+const timerDisplay = document.getElementById("timer");
+const attachBtn = document.getElementById("attachBtn");
+const attachMenu = document.getElementById("attachMenu");
+const cameraInput = document.getElementById("cameraInput");
+const imageInput = document.getElementById("imageInput");
+const fileInput = document.getElementById("fileInput");
 
 /* زر مايك ↔ إرسال */
-input.addEventListener("input",()=>{
-  if(input.value.trim()===""){micBtn.style.display="block";sendBtn.style.display="none";}
-  else{micBtn.style.display="none";sendBtn.style.display="block";}
+input.addEventListener("input", () => {
+  sendBtn.style.display = input.value.trim() ? "block" : "none";
+  micBtn.style.display = input.value.trim() ? "none" : "block";
 });
 
 /* إرسال النص */
-sendBtn.onclick=()=>{
-  let t=input.value.trim();
-  if(!t)return;
-  addMessage(t);
-  input.value="";micBtn.style.display="block";sendBtn.style.display="none";
-}
+sendBtn.addEventListener("click", () => {
+  const text = input.value.trim();
+  if(text) addMessage(text, "text");
+  input.value = "";
+  micBtn.style.display = "block";
+  sendBtn.style.display = "none";
+});
 
-/* عرض الرسالة */
-function addMessage(content,type="text"){
-  let div=document.createElement("div");
-  div.className="message";
-  if(type==="img"){
-    div.innerHTML=`<img class="chat-img" src="${content}"><div class="status">✓✓ تمت القراءة</div>`;
-  } else if(type==="audio"){
-    let btn = document.createElement("button");
-    btn.textContent="▶️ تشغيل الصوت";
-    btn.className="voice-btn";
-    btn.onclick=()=>{
-      if(btn.audioEl.paused){btn.audioEl.play();btn.textContent="⏸ إيقاف"} 
-      else {btn.audioEl.pause();btn.textContent="▶️ تشغيل الصوت";}
-    };
-    let audioEl=new Audio(content);
-    btn.audioEl=audioEl;
+/* إضافة رسالة */
+function addMessage(content, type="text") {
+  const div = document.createElement("div");
+  div.className = "message";
+
+  if(type === "img") {
+    div.innerHTML = `<img class="chat-img" src="${content}"><div class="status">✓✓ تمت القراءة</div>`;
+  } else if(type === "audio") {
+    const btn = document.createElement("button");
+    btn.className = "voice-btn";
+    btn.textContent = "▶️ تشغيل الصوت";
+    const audioEl = new Audio(content);
+
+    btn.addEventListener("click", () => {
+      document.querySelectorAll(".voice-btn").forEach(b => {
+        if(b !== btn && b.audioEl){ b.audioEl.pause(); b.textContent = "▶️ تشغيل الصوت"; }
+      });
+      if(audioEl.paused){ audioEl.play(); btn.textContent = "⏸ إيقاف"; }
+      else { audioEl.pause(); btn.textContent = "▶️ تشغيل الصوت"; }
+    });
+    btn.audioEl = audioEl;
     div.appendChild(btn);
-    div.innerHTML+=`<div class="status">✓✓ تمت القراءة</div>`;
+    div.innerHTML += `<div class="status">✓✓ تمت القراءة</div>`;
   } else {
-    div.innerHTML=`${content}<div class="status">✓✓ تمت القراءة</div>`;
+    div.innerHTML = `${content}<div class="status">✓✓ تمت القراءة</div>`;
   }
+
   chat.appendChild(div);
-  chat.scrollTop=chat.scrollHeight;
+  chat.scrollTop = chat.scrollHeight;
 }
 
 /* قائمة الدبوس */
-document.getElementById("attachBtn").onclick=()=>{let menu=document.getElementById("attachMenu");menu.style.display=menu.style.display==="flex"?"none":"flex";}
-function openCamera(){document.getElementById("cameraInput").click();}
-function openImage(){document.getElementById("imageInput").click();}
-function openFile(){document.getElementById("fileInput").click();}
+attachBtn.addEventListener("click", () => {
+  attachMenu.style.display = attachMenu.style.display === "flex" ? "none" : "flex";
+});
 
-/* رفع الصور */
-document.getElementById("imageInput").onchange=document.getElementById("cameraInput").onchange=function(){
-  let file=this.files[0];
-  let reader=new FileReader();
-  reader.onload=()=>addMessage(reader.result,"img");
-  reader.readAsDataURL(file);
-}
+/* رفع الصور والكاميرا */
+document.getElementById("cameraBtn").addEventListener("click", () => cameraInput.click());
+document.getElementById("imageBtn").addEventListener("click", () => imageInput.click());
+document.getElementById("fileBtn").addEventListener("click", () => fileInput.click());
 
-/* رفع الملفات صوت/غير صوت */
-document.getElementById("fileInput").onchange=function(){
-  let file=this.files[0];
-  let reader=new FileReader();
-  reader.onload=()=>{
-    // تفحص نوع الملف لو كان صوتي
-    if(file.type.startsWith("audio")) addMessage(reader.result,"audio");
-    else addMessage(reader.result,"text");
-  }
+[cameraInput, imageInput].forEach(inputEl => {
+  inputEl.addEventListener("change", function() {
+    const file = this.files[0];
+    const reader = new FileReader();
+    reader.onload = () => addMessage(reader.result, "img");
+    reader.readAsDataURL(file);
+  });
+});
+
+fileInput.addEventListener("change", function() {
+  const file = this.files[0];
+  const reader = new FileReader();
+  reader.onload = () => {
+    if(file.type.startsWith("audio")) addMessage(reader.result, "audio");
+    else addMessage(reader.result, "text");
+  };
   reader.readAsDataURL(file);
-}
+});
 
 /* تسجيل الصوت */
-let recorder; let chunks=[]; let seconds=0; let timerInterval=null;
-function updateTimer(){seconds++; let m=String(Math.floor(seconds/60)).padStart(2,"0"); let s=String(seconds%60).padStart(2,"0"); timerDisplay.textContent=`${m}:${s}`}
-async function startRecord(){
-  if(timerInterval) return;
-  seconds=0; timerDisplay.textContent="00:00";
-  let stream=await navigator.mediaDevices.getUserMedia({audio:true});
-  recorder=new MediaRecorder(stream);
-  recorder.ondataavailable=e=>chunks.push(e.data);
-  recorder.onstop=()=>{
-    let blob=new Blob(chunks,{type:"audio/mp3"});
-    chunks=[];
-    let url=URL.createObjectURL(blob);
-    addMessage(url,"audio");
-  }
+let recorder = null;
+let chunks = [];
+let seconds = 0;
+let timerInterval = null;
+
+function updateTimer() {
+  seconds++;
+  const m = String(Math.floor(seconds/60)).padStart(2,"0");
+  const s = String(seconds%60).padStart(2,"0");
+  timerDisplay.textContent = `${m}:${s}`;
+}
+
+async function startRecord() {
+  if(recorder) return;
+  const stream = await navigator.mediaDevices.getUserMedia({ audio:true });
+  recorder = new MediaRecorder(stream);
+  chunks = [];
+  recorder.ondataavailable = e => chunks.push(e.data);
+  recorder.onstop = () => {
+    const blob = new Blob(chunks, { type:"audio/mp3" });
+    const url = URL.createObjectURL(blob);
+    addMessage(url, "audio");
+    recorder = null;
+  };
   recorder.start();
-  recordingBox.style.display="block";
-  timerInterval=setInterval(updateTimer,1000);
+  seconds = 0;
+  timerDisplay.textContent = "00:00";
+  recordingBox.style.display = "block";
+  timerInterval = setInterval(updateTimer, 1000);
 }
-function stopRecord(){
-  if(recorder) recorder.stop();
-  recordingBox.style.display="none";
+
+function stopRecord() {
+  if(recorder && recorder.state === "recording") recorder.stop();
+  recordingBox.style.display = "none";
   clearInterval(timerInterval);
-  timerInterval=null;
+  timerInterval = null;
 }
-micBtn.onmousedown=startRecord;
-micBtn.onmouseup=stopRecord;
-micBtn.ontouchstart=startRecord;
-micBtn.ontouchend=stopRecord;
+
+micBtn.addEventListener("mousedown", startRecord);
+micBtn.addEventListener("mouseup", stopRecord);
+micBtn.addEventListener("touchstart", startRecord);
+micBtn.addEventListener("touchend", stopRecord);
+
+});
 </script>
 </body>
 </html>
