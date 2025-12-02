@@ -1,518 +1,408 @@
 <!DOCTYPE html>
 <html lang="ar">
+
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Chat — Minimal Modern</title>
-<style>
-  :root{
-    --bg:#0b0b0b;
-    --card:#0f0f10;
-    --accent:#ffffff;
-    --muted:rgba(255,255,255,0.65);
-    --border: rgba(255,255,255,0.08);
-    --radius:12px;
-  }
-  *{box-sizing:border-box}
-  html,body{height:100%}
-  body{
-    margin:0;
-    background:var(--bg);
-    color:var(--accent);
-    font-family:Inter, "Tajawal", system-ui, Arial;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    padding:18px;
-  }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>دردشة أبيض وأسود</title>
+    <style>
+        /* إعدادات الجسم */
+        body {
+            margin: 0;
+            background: #000;
+            font-family: 'Tajawal', sans-serif;
+            color: #fff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden; /* منع التمرير الزائد في الصفحة */
+        }
 
-  /* Wrapper */
-  .app{
-    width:100%;
-    max-width:460px;
-    height:95vh;
-    background:linear-gradient(180deg,var(--card), #080808);
-    border-radius:16px;
-    display:flex;
-    flex-direction:column;
-    overflow:hidden;
-    border:1px solid var(--border);
-    box-shadow: 0 6px 30px rgba(0,0,0,0.6);
-  }
+        /* إعدادات حاوية الدردشة */
+        .chat-container {
+            width: 95%;
+            max-width: 450px;
+            height: 92vh;
+            background: #000;
+            border-radius: 16px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden; /* منع التمرير الزائد داخل الحاوية */
+            position: relative;
+            border: 2px solid #fff; /* إضافة حدود ثابتة للحاوية */
+        }
 
-  header.app-header{
-    padding:14px;
-    display:flex;
-    align-items:center;
-    gap:12px;
-    border-bottom:1px solid var(--border);
-  }
-  .title{
-    font-weight:600;
-    letter-spacing:0.2px;
-  }
-  .subtitle{
-    font-size:12px;
-    color:var(--muted);
-  }
+        /* إعدادات الرأس */
+        header.chat-header {
+            text-align: center;
+            padding: 15px;
+            font-weight: bold;
+            border-bottom: 1px solid #fff;
+        }
 
-  /* chat area */
-  .messages{
-    flex:1;
-    padding:12px;
-    overflow:auto;
-    display:flex;
-    flex-direction:column;
-    gap:12px;
-    background:
-      linear-gradient(0deg, rgba(255,255,255,0.01), transparent 40%);
-  }
+        /* إعدادات قائمة الرسائل */
+        .chat-messages {
+            flex: 1;
+            padding: 12px;
+            overflow-y: auto; /* يسمح بالتمرير الرأسي فقط */
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
 
-  .msg{
-    max-width:78%;
-    align-self:flex-end;
-    background:transparent;
-    border:1px solid var(--border);
-    border-radius:12px;
-    padding:10px;
-    display:flex;
-    flex-direction:column;
-    gap:8px;
-    position:relative;
-  }
-  .msg .msg-content{ color:var(--accent); font-size:15px; white-space:pre-wrap; word-break:break-word; }
-  .msg .meta{ font-size:11px; color:var(--muted); text-align:right; }
-  .msg img{ max-width:100%; border-radius:8px; display:block; }
+        /* إعدادات الرسالة */
+        .message {
+            background: #000;
+            color: #fff;
+            padding: 10px 14px;
+            max-width: 75%;
+            border-radius: 12px;
+            align-self: flex-end;
+            word-wrap: break-word;
+            border: 1px solid #fff;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            position: relative;
+        }
 
-  /* audio player minimal (use browser controls but small) */
-  .msg audio{
-    width:170px;
-    height:auto;
-    outline:none;
-    background:transparent;
-  }
+        /* إعدادات الحالة في أسفل الرسالة */
+        .status {
+            margin-top: 4px;
+            font-size: 11px;
+            opacity: .7;
+            text-align: right;
+        }
 
-  /* input area */
-  .composer{
-    padding:12px;
-    border-top:1px solid var(--border);
-    display:flex;
-    gap:8px;
-    align-items:center;
-    background:linear-gradient(180deg, rgba(255,255,255,0.01), transparent);
-  }
-  .attach-btn, .action-btn{
-    width:52px; height:44px;
-    border-radius:10px;
-    border:1px solid var(--border);
-    background:transparent;
-    color:var(--accent);
-    display:inline-flex;
-    align-items:center;
-    justify-content:center;
-    font-size:18px;
-  }
-  .text-input{
-    flex:1;
-    background:transparent;
-    border:1px solid var(--border);
-    padding:10px 12px;
-    border-radius:10px;
-    color:var(--accent);
-    font-size:15px;
-    outline:none;
-  }
+        /* إعدادات مربع التسجيل */
+        #recordingBox {
+            display: none;
+            background: #fff;
+            color: #000;
+            padding: 12px;
+            text-align: center;
+            font-weight: bold;
+            position: absolute;
+            bottom: 60px;
+            left: 0;
+            width: 100%;
+            border-radius: 8px;
+        }
 
-  /* attach bar sliding from bottom */
-  .attach-bar{
-    position:absolute;
-    left:0; right:0;
-    bottom:-120px;
-    margin:0 auto;
-    width:100%;
-    max-width:460px;
-    display:flex;
-    gap:10px;
-    justify-content:center;
-    padding:12px;
-    transition:bottom .28s ease;
-    pointer-events:auto;
-  }
-  .attach-bar.open{ bottom:84px; } /* seats above composer */
-  .attach-item{
-    min-width:84px;
-    border-radius:10px;
-    border:1px solid var(--border);
-    padding:10px;
-    display:flex;
-    flex-direction:column;
-    gap:6px;
-    align-items:center;
-    justify-content:center;
-    background:transparent;
-    color:var(--accent);
-    font-size:13px;
-  }
+        /* إعدادات الإدخال */
+        .chat-input {
+            padding: 10px;
+            background: #000;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            position: relative;
+        }
 
-  /* toolbar popup for message */
-  .toolbar{
-    position:absolute;
-    background:var(--accent);
-    color:#000;
-    padding:6px;
-    border-radius:10px;
-    display:flex;
-    gap:6px;
-    box-shadow:0 6px 18px rgba(0,0,0,0.4);
-    z-index:1200;
-  }
-  .toolbar button{
-    background:transparent;
-    border:none;
-    padding:6px 8px;
-    cursor:pointer;
-    font-weight:600;
-  }
+        /* إعدادات مربع النص */
+        .chat-input input {
+            flex: 1;
+            background: #000;
+            color: #fff;
+            padding: 12px;
+            border: 1px solid #fff;
+            border-radius: 10px;
+        }
 
-  /* small screens adjustments */
-  @media (max-width:420px){
-    .msg audio{ width:140px; }
-    .attach-item{ min-width:68px; font-size:12px; padding:8px; }
-  }
+        /* إعدادات أزرار */
+        .btn {
+            width: 60px;
+            height: 45px;
+            background: #000;
+            border-radius: 50%;
+            border: 1px solid #fff;
+            font-size: 20px;
+            color: #fff;
+        }
 
-</style>
+        /* إعدادات شريط المرفقات */
+        .attach-bar {
+            position: absolute;
+            bottom: -70px;
+            left: 0;
+            width: 100%;
+            background: #000;
+            border-top-left-radius: 12px;
+            border-top-right-radius: 12px;
+            padding: 10px;
+            display: flex;
+            justify-content: space-around;
+            transition: bottom 0.3s;
+        }
+
+        .attach-bar.show {
+            bottom: 60px;
+        }
+
+        .attach-bar button {
+            background: #000;
+            border: 1px solid #fff;
+            padding: 12px;
+            border-radius: 10px;
+            color: #fff;
+            font-size: 16px;
+        }
+
+        /* إعدادات شريط الأدوات للرسالة */
+        .msg-toolbar {
+            background: #fff;
+            color: #000;
+            border-radius: 8px;
+            padding: 4px;
+            display: flex;
+            gap: 6px;
+            position: absolute;
+            z-index: 1000;
+        }
+
+        .msg-toolbar button {
+            background: #fff;
+            border: 1px solid #000;
+            padding: 4px 6px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+    </style>
 </head>
+
 <body>
 
-<div class="app" role="application" aria-label="chat-app">
-  <header class="app-header">
-    <div>
-      <div class="title">Chat — Minimal</div>
-      <div class="subtitle">Ready · Modern · Single file</div>
+    <div class="chat-container">
+        <header class="chat-header">دردشة أبيض وأسود</header>
+
+        <div id="recordingBox">جاري التسجيل… <span id="timer">00:00</span></div>
+
+        <div class="chat-messages" id="chatMessages"></div>
+
+        <div class="chat-input">
+            <button class="btn" id="attachBtn">Attach</button>
+            <input type="text" id="msgInput" placeholder="اكتب رسالة...">
+            <button class="btn" id="micBtn">Mic</button>
+        </div>
+
+        <div class="attach-bar" id="attachBar">
+            <button id="fileBtn">File</button>
+            <button id="cameraBtn">Camera</button>
+            <button id="imageBtn">Image</button>
+            <button id="pollBtn">Poll</button>
+            <button id="locationBtn">Location</button>
+        </div>
+
+        <input type="file" id="cameraInput" accept="image/*" capture="camera" style="display:none;">
+        <input type="file" id="imageInput" accept="image/*" style="display:none;">
+        <input type="file" id="fileInput" style="display:none;">
     </div>
-  </header>
 
-  <main class="messages" id="messages"></main>
+    <script>
+        const chat = document.getElementById("chatMessages");
+        const attachBtn = document.getElementById("attachBtn");
+        const attachBar = document.getElementById("attachBar");
+        const cameraInput = document.getElementById("cameraInput");
+        const imageInput = document.getElementById("imageInput");
+        const fileInput = document.getElementById("fileInput");
+        const micBtn = document.getElementById("micBtn");
+        const msgInput = document.getElementById("msgInput");
+        const recordingBox = document.getElementById("recordingBox");
+        const timerDisplay = document.getElementById("timer");
 
-  <div class="composer">
-    <button class="attach-btn" id="attachBtn" title="Attach">📎</button>
-    <input id="input" class="text-input" placeholder="اكتب رسالة..." autocomplete="off" />
-    <button id="actionBtn" class="action-btn" title="Record or Send">🎤</button>
-  </div>
+        let recorder = null, stream = null, chunks = [], seconds = 0, timerInterval = null, isRecording = false;
 
-  <!-- sliding attach bar -->
-  <div class="attach-bar" id="attachBar" aria-hidden="true">
-    <div class="attach-item" id="attachFile">File</div>
-    <div class="attach-item" id="attachCamera">Camera</div>
-    <div class="attach-item" id="attachImage">Image</div>
-    <div class="attach-item" id="attachPoll">Poll</div>
-    <div class="attach-item" id="attachLocation">Location</div>
-  </div>
+        /* شريط المرفقات مع انزلاق سلس */
+        attachBtn.addEventListener("click", () => { attachBar.classList.toggle("show"); });
 
-  <!-- hidden inputs -->
-  <input id="fileInput" type="file" style="display:none" />
-  <input id="imageInput" type="file" accept="image/*" style="display:none" />
-  <input id="cameraInput" type="file" accept="image/*" capture="environment" style="display:none" />
-  <div id="recordingBox" style="display:none; position:fixed; left:50%; transform:translateX(-50%); bottom:100px; background:#fff; color:#000; padding:8px 12px; border-radius:8px;">Recording… <span id="timer">00:00</span></div>
-</div>
+        cameraInput.addEventListener("change", function () {
+            const file = this.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = () => addMessage(reader.result, "img");
+            reader.readAsDataURL(file);
+        });
 
-<script>
-/* Minimal Modern single-file chat */
-const messagesEl = document.getElementById('messages');
-const inputEl = document.getElementById('input');
-const actionBtn = document.getElementById('actionBtn');
-const attachBtn = document.getElementById('attachBtn');
-const attachBar = document.getElementById('attachBar');
-const fileInput = document.getElementById('fileInput');
-const imageInput = document.getElementById('imageInput');
-const cameraInput = document.getElementById('cameraInput');
-const attachFile = document.getElementById('attachFile');
-const attachImage = document.getElementById('attachImage');
-const attachCamera = document.getElementById('attachCamera');
-const attachPoll = document.getElementById('attachPoll');
-const attachLocation = document.getElementById('attachLocation');
-const recordingBox = document.getElementById('recordingBox');
-const timerDisplay = document.getElementById('timer');
+        imageInput.addEventListener("change", function () {
+            const file = this.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = () => addMessage(reader.result, "img");
+            reader.readAsDataURL(file);
+        });
 
-let isRecording = false;
-let recorder = null;
-let stream = null;
-let chunks = [];
-let seconds = 0, timerInterval = null;
+        fileInput.addEventListener("change", function () {
+            const file = this.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = () => addMessage(reader.result, "text");
+            reader.readAsDataURL(file);
+        });
 
-/* Utilities */
-function scrollToBottom(){ messagesEl.scrollTop = messagesEl.scrollHeight; }
+        document.getElementById("cameraBtn").addEventListener("click", () => cameraInput.click());
+        document.getElementById("imageBtn").addEventListener("click", () => imageInput.click());
+        document.getElementById("fileBtn").addEventListener("click", () => fileInput.click());
 
-/* addMessage: wraps content inside span.msg-content for all types */
-function addMessage(content, type = 'text'){
-  const msg = document.createElement('div');
-  msg.className = 'msg';
+        document.getElementById("pollBtn").addEventListener("click", () => {
+            const question = prompt("اكتب سؤال الاستطلاع:");
+            if (!question) return;
+            const option1 = prompt("الخيار الأول:");
+            const option2 = prompt("الخيار الثاني:");
+            if (option1 && option2) {
+                addMessage(`Poll: ${question}\n1: ${option1}\n2: ${option2}`, "text");
+            }
+        });
 
-  const container = document.createElement('span');
-  container.className = 'msg-content';
+        document.getElementById("locationBtn").addEventListener("click", () => {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(pos => {
+                    const lat = pos.coords.latitude;
+                    const lon = pos.coords.longitude;
+                    addMessage(`Location: https://www.google.com/maps?q=${lat},${lon}`, "text");
+                }, () => alert("تعذر الحصول على الموقع."));
+            } else alert("الموقع غير مدعوم.");
+        });
 
-  if(type === 'text'){
-    container.textContent = content;
-  } else if(type === 'img'){
-    const img = document.createElement('img');
-    img.src = content;
-    container.appendChild(img);
-  } else if(type === 'audio'){
-    const audio = document.createElement('audio');
-    audio.controls = true;
-    audio.src = content;
-    audio.preload = 'metadata';
-    audio.addEventListener('ended', ()=> {
-      // reset UI when ended (do not autoplay)
-      // if custom buttons were used, set them to "play" here
-      // ensure playbackRate not changed
-      // no auto replay
-      audio.currentTime = 0;
-    });
-    container.appendChild(audio);
-  } else { // fallback - show as text
-    container.textContent = String(content);
-  }
+        function addMessage(content, type = "text") {
+            const div = document.createElement("div");
+            div.className = "message";
 
-  const meta = document.createElement('div');
-  meta.className = 'meta';
-  meta.textContent = '✓✓ Read';
+            if (type === "img") div.innerHTML = `<img class="chat-img" src="${content}"><div class="status">Read</div>`;
+            else div.innerHTML = `<span class="msg-text">${content}</span><div class="status">Read</div>`;
 
-  msg.appendChild(container);
-  msg.appendChild(meta);
-  messagesEl.appendChild(msg);
-  scrollToBottom();
+            chat.appendChild(div);
+            chat.scrollTop = chat.scrollHeight;
 
-  attachMsgToolbar(msg);
-}
+            // Toolbar عند الضغط على الرسالة
+            div.addEventListener("click", (e) => {
+                const existingToolbar = document.querySelector(".msg-toolbar");
+                if (existingToolbar) existingToolbar.remove();
 
-/* Toolbar (Copy / Edit / Delete) - works for every message type
-   Copy: uses temporary textarea (works on mobile & desktop)
-   Edit: only for text messages (msg-content with no child elements)
-*/
-function attachMsgToolbar(msg){
-  msg.addEventListener('click', (ev)=>{
-    ev.stopPropagation(); // avoid body click
-    // remove existing toolbar
-    const old = document.querySelector('.toolbar');
-    if(old) old.remove();
+                const toolbar = document.createElement("div");
+                toolbar.className = "msg-toolbar";
 
-    const toolbar = document.createElement('div');
-    toolbar.className = 'toolbar';
+                toolbar.style.top = (div.getBoundingClientRect().top + window.scrollY - 40) + "px";
+                toolbar.style.left = (div.getBoundingClientRect().left) + "px";
 
-    const btnCopy = document.createElement('button'); btnCopy.textContent = 'Copy';
-    const btnEdit = document.createElement('button'); btnEdit.textContent = 'Edit';
-    const btnDel  = document.createElement('button'); btnDel.textContent = 'Delete';
+                const copyBtn = document.createElement("button");
+                copyBtn.textContent = "Copy";
+                const editBtn = document.createElement("button");
+                editBtn.textContent = "Edit";
+                const deleteBtn = document.createElement("button");
+                deleteBtn.textContent = "Delete";
 
-    toolbar.appendChild(btnCopy);
-    toolbar.appendChild(btnEdit);
-    toolbar.appendChild(btnDel);
-    document.body.appendChild(toolbar);
+                toolbar.appendChild(copyBtn);
+                toolbar.appendChild(editBtn);
+                toolbar.appendChild(deleteBtn);
+                document.body.appendChild(toolbar);
 
-    // place toolbar above message if possible
-    const r = msg.getBoundingClientRect();
-    let top = window.scrollY + r.top - toolbar.offsetHeight - 8;
-    if(top < 8) top = window.scrollY + r.bottom + 8; // if not enough space, place under
-    toolbar.style.top = top + 'px';
-    toolbar.style.left = Math.max(8, r.left) + 'px';
+                copyBtn.addEventListener("click", () => {
+                    const text = div.querySelector(".msg-text").textContent;
+                    navigator.clipboard.writeText(text);
+                    toolbar.remove();
+                });
+                editBtn.addEventListener("click", () => {
+                    const textSpan = div.querySelector(".msg-text");
+                    const newText = prompt("Edit message:", textSpan.textContent);
+                    if (newText !== null) textSpan.textContent = newText;
+                    toolbar.remove();
+                });
+                deleteBtn.addEventListener("click", () => {
+                    div.remove();
+                    toolbar.remove();
+                });
 
-    // COPY
-    btnCopy.onclick = ()=> {
-      const contentEl = msg.querySelector('.msg-content');
-      let textToCopy = '';
-      // for different types, decide what to copy
-      const audio = contentEl.querySelector('audio');
-      const img = contentEl.querySelector('img');
-      if(audio) textToCopy = audio.src || '';
-      else if(img) textToCopy = img.src || '';
-      else textToCopy = contentEl.innerText || contentEl.textContent || '';
-      // fallback: use textarea method
-      const ta = document.createElement('textarea');
-      ta.value = textToCopy;
-      document.body.appendChild(ta);
-      ta.select();
-      try{ document.execCommand('copy'); alert('Copied'); }
-      catch(e){ alert('Copy failed'); }
-      ta.remove();
-      toolbar.remove();
-    };
-
-    // EDIT (only for plain text messages)
-    btnEdit.onclick = ()=> {
-      const contentEl = msg.querySelector('.msg-content');
-      // allow edit only if contentEl has no child elements (pure text)
-      if(contentEl.children.length === 0){
-        const oldText = contentEl.textContent;
-        const n = prompt('Edit message:', oldText);
-        if(n !== null){
-          contentEl.textContent = n;
+                document.addEventListener("click", function hideToolbar(ev) {
+                    if (!div.contains(ev.target) && !toolbar.contains(ev.target)) {
+                        toolbar.remove();
+                        document.removeEventListener("click", hideToolbar);
+                    }
+                });
+            });
         }
-      } else {
-        alert('Editing supported for text messages only.');
-      }
-      toolbar.remove();
-    };
 
-    // DELETE
-    btnDel.onclick = ()=> {
-      msg.remove();
-      toolbar.remove();
-    };
+        /* تسجيل صوت */
+        function updateTimer() {
+            seconds++;
+            const m = String(Math.floor(seconds / 60)).padStart(2, "0");
+            const s = String(seconds % 60).padStart(2, "0");
+            timerDisplay.textContent = `${m}:${s}`;
+        }
 
-    // hide toolbar clicking outside
-    function hideListener(e){
-      if(!toolbar.contains(e.target) && !msg.contains(e.target)){
-        toolbar.remove();
-        document.removeEventListener('click', hideListener);
-      }
-    }
-    document.addEventListener('click', hideListener);
-  });
-}
+        async function startRecording() {
+            if (isRecording) return;
+            isRecording = true;
 
-/* Attach bar toggle */
-attachBtn.addEventListener('click', ()=> {
-  attachBar.classList.toggle('open');
-  attachBar.setAttribute('aria-hidden', String(!attachBar.classList.contains('open')));
-});
+            try {
+                if (stream) { stream.getTracks().forEach(t => t.stop()); stream = null; }
+                stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                recorder = new MediaRecorder(stream);
+                chunks = [];
 
-/* Attach actions */
-attachFile.addEventListener('click', ()=> fileInput.click());
-attachImage.addEventListener('click', ()=> imageInput.click());
-attachCamera.addEventListener('click', ()=> cameraInput.click());
+                recorder.ondataavailable = e => chunks.push(e.data);
 
-fileInput.addEventListener('change', (e)=>{
-  const f = e.target.files && e.target.files[0];
-  if(!f) return;
-  // read text/file as dataURL if image else show filename
-  if(f.type.startsWith('image/')) {
-    const fr = new FileReader();
-    fr.onload = ()=> addMessage(fr.result, 'img');
-    fr.readAsDataURL(f);
-  } else {
-    addMessage(`${f.name} (file)`, 'text');
-  }
-  fileInput.value = '';
-});
+                recorder.onstop = () => {
+                    if (chunks.length > 0) {
+                        const blob = new Blob(chunks, { type: "audio/mp3" });
+                        const url = URL.createObjectURL(blob);
+                        addMessage(url, "audio");
+                    }
 
-imageInput.addEventListener('change', (e)=>{
-  const f = e.target.files && e.target.files[0];
-  if(!f) return;
-  const fr = new FileReader();
-  fr.onload = ()=> addMessage(fr.result, 'img');
-  fr.readAsDataURL(f);
-  imageInput.value = '';
-});
+                    if (stream) { stream.getTracks().forEach(t => t.stop()); stream = null; }
+                    recorder = null;
+                    chunks = [];
+                    recordingBox.style.display = "none";
+                    clearInterval(timerInterval);
+                    timerInterval = null;
+                    seconds = 0;
+                    timerDisplay.textContent = "00:00";
+                    isRecording = false;
+                };
 
-cameraInput.addEventListener('change', (e)=>{
-  const f = e.target.files && e.target.files[0];
-  if(!f) return;
-  const fr = new FileReader();
-  fr.onload = ()=> addMessage(fr.result, 'img');
-  fr.readAsDataURL(f);
-  cameraInput.value = '';
-});
+                recorder.start();
+                seconds = 0;
+                timerDisplay.textContent = "00:00";
+                recordingBox.style.display = "block";
+                timerInterval = setInterval(updateTimer, 1000);
 
-attachPoll.addEventListener('click', ()=>{
-  const q = prompt('Poll question:');
-  if(!q) return;
-  const a1 = prompt('Option 1:'); if(!a1) return;
-  const a2 = prompt('Option 2:'); if(!a2) return;
-  addMessage(`Poll: ${q}\n1) ${a1}\n2) ${a2}`, 'text');
-});
+            } catch (e) {
+                alert("تعذر الوصول للميكروفون.");
+                console.error(e);
+                isRecording = false;
+            }
+        }
 
-attachLocation.addEventListener('click', ()=>{
-  if(!navigator.geolocation){ alert('Geolocation not supported'); return; }
-  navigator.geolocation.getCurrentPosition(pos=>{
-    const lat = pos.coords.latitude, lon = pos.coords.longitude;
-    addMessage(`Location: https://www.google.com/maps?q=${lat},${lon}`, 'text');
-  }, ()=> alert('Unable to get location'));
-});
+        function stopRecording() {
+            if (!isRecording) return;
+            isRecording = false;
 
-/* Recording logic: single button toggles record / stop
-   Using click (not touchstart) to avoid duplicate events on mobile.
-*/
-function updateTimer(){
-  seconds++;
-  const mm = String(Math.floor(seconds/60)).padStart(2,'0');
-  const ss = String(seconds % 60).padStart(2,'0');
-  timerDisplay.textContent = `${mm}:${ss}`;
-}
+            if (recorder && recorder.state === "recording") recorder.stop();
+            recordingBox.style.display = "none";
+            clearInterval(timerInterval);
+            timerInterval = null;
+            seconds = 0;
+            timerDisplay.textContent = "00:00";
+        }
 
-async function startRecord(){
-  if(isRecording) return;
-  try{
-    stream = await navigator.mediaDevices.getUserMedia({ audio:true });
-    recorder = new MediaRecorder(stream);
-    chunks = [];
-    recorder.ondataavailable = e => chunks.push(e.data);
-    recorder.onstop = ()=>{
-      if(chunks.length){
-        const blob = new Blob(chunks, { type: 'audio/webm' }); // webm widely supported; browser will play it
-        const url = URL.createObjectURL(blob);
-        addMessage(url, 'audio'); // << send as audio
-      }
-      // stop tracks & cleanup
-      if(stream){
-        stream.getTracks().forEach(t=>t.stop());
-        stream = null;
-      }
-      recorder = null;
-      chunks = [];
-      isRecording = false;
-      clearInterval(timerInterval);
-      timerInterval = null;
-      seconds = 0;
-      recordingBox.style.display = 'none';
-    };
-    recorder.start();
-    isRecording = true;
-    seconds = 0;
-    timerDisplay.textContent = '00:00';
-    recordingBox.style.display = 'block';
-    timerInterval = setInterval(updateTimer, 1000);
-  }catch(err){
-    alert('Microphone access denied or not available.');
-    isRecording = false;
-  }
-}
+        /* زر Mic يتحول لإرسال عند الكتابة */
+        msgInput.addEventListener("input", () => {
+            if (msgInput.value.trim().length > 0) micBtn.textContent = "Send";
+            else micBtn.textContent = "Mic";
+        });
 
-function stopRecord(){
-  if(!isRecording) return;
-  if(recorder && recorder.state === 'recording') recorder.stop();
-}
+        micBtn.addEventListener("click", () => {
+            if (msgInput.value.trim().length > 0) {
+                addMessage(msgInput.value, "text");
+                msgInput.value = "";
+                micBtn.textContent = "Mic";
+            } else {
+                if (!isRecording) startRecording();
+                else stopRecording();
+            }
+        });
+    </script>
 
-/* Action button behavior: if there's text -> send; else toggle record */
-inputEl = inputEl || inputEl; // noop
-inputEl = inputEl = null; // silence linter (not used)
-
-inputEl = inputEl; // keep
-
-inputEl = null; // keep
-
-// hook input element for changing icon text
-inputEl = document.getElementById('input');
-inputEl.addEventListener('input', ()=>{
-  const has = inputEl.value.trim().length > 0;
-  actionBtn.textContent = has ? '➡' : '🎤';
-});
-
-// main action
-actionBtn.addEventListener('click', ()=>{
-  const has = inputEl.value.trim().length > 0;
-  if(has){
-    addMessage(inputEl.value.trim(), 'text');
-    inputEl.value = '';
-    actionBtn.textContent = '🎤';
-  } else {
-    if(!isRecording) startRecord();
-    else stopRecord();
-  }
-});
-
-/* initial demo messages (optional) */
-// addMessage('مرحبا! هذه واجهة مُبسطة وعصرية', 'text');
-
-</script>
 </body>
-</html>
+
+  </html> 
