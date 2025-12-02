@@ -16,4 +16,108 @@ audio {width:100%;margin-top:5px;}
 .chat-input {padding:10px;background:#2c2c2c;display:flex;align-items:center;gap:8px;}
 .chat-input input {flex:1;background:#3c3c3c;padding:12px;border:none;color:white;border-radius:10px;}
 .btn {width:45px;height:45px;background:#0078ff;border-radius:50%;border:none;font-size:20px;color:white;}
-.attach-menu {display:none;position:absolute;bottom:70px;right:20px;background:#2c2c2c;border-radius:12px;padding:12px;flex-direction:column
+.attach-menu {display:none;position:absolute;bottom:70px;right:20px;background:#2c2c2c;border-radius:12px;padding:12px;flex-direction:column;gap:10px;}
+.attach-menu button {background:#3c3c3c;padding:10px;border-radius:8px;border:none;color:white;}
+#recordingBox {display:none;background:#b00020;padding:12px;text-align:center;font-weight:bold;position:absolute;bottom:60px;left:0;width:100%;animation:blink 1s infinite;}
+@keyframes blink {0%{opacity:1;}50%{opacity:.5;}100%{opacity:1;}}
+</style>
+</head>
+<body>
+<div class="chat-container">
+  <div class="chat-header">💬 دردشة</div>
+
+  <!-- إشعار التسجيل -->
+  <div id="recordingBox">🔴 جاري التسجيل… <span id="timer">00:00</span></div>
+
+  <div class="chat-messages" id="chatMessages"></div>
+
+  <!-- قائمة الدبوس -->
+  <div class="attach-menu" id="attachMenu">
+    <button onclick="openCamera()">📷 كاميرا</button>
+    <button onclick="openImage()">🖼 صورة</button>
+    <button onclick="openFile()">📎 ملف</button>
+  </div>
+
+  <div class="chat-input">
+    <button class="btn" id="attachBtn">📎</button>
+    <input type="text" id="msgInput" placeholder="اكتب رسالة...">
+    <button class="btn" id="micBtn">🎤</button>
+    <button class="btn" id="sendBtn" style="display:none;">✈️</button>
+  </div>
+
+  <!-- مدخلات الملفات مخفية -->
+  <input id="cameraInput" type="file" accept="image/*" capture="camera" style="display:none;">
+  <input id="imageInput" type="file" accept="image/*" style="display:none;">
+  <input id="fileInput" type="file" style="display:none;">
+</div>
+
+<script>
+let input = document.getElementById("msgInput");
+let micBtn = document.getElementById("micBtn");
+let sendBtn = document.getElementById("sendBtn");
+let chat = document.getElementById("chatMessages");
+let recordingBox = document.getElementById("recordingBox");
+let timerDisplay = document.getElementById("timer");
+
+/* زر مايك ↔ إرسال */
+input.addEventListener("input",()=>{if(input.value.trim()===""){micBtn.style.display="block";sendBtn.style.display="none";}else{micBtn.style.display="none";sendBtn.style.display="block";}});
+
+/* إرسال النص */
+sendBtn.onclick=()=>{let t=input.value.trim();if(!t)return;addMessage(t);input.value="";micBtn.style.display="block";sendBtn.style.display="none";}
+
+/* عرض الرسالة */
+function addMessage(content,type="text"){let div=document.createElement("div");div.className="message";if(type==="img"){div.innerHTML=`<img class="chat-img" src="${content}"><div class="status">✓✓ تمت القراءة</div>`}else if(type==="audio"){div.innerHTML=`<audio controls src="${content}"></audio><div class="status">✓✓ تمت القراءة</div>`}else{div.innerHTML=`${content}<div class="status">✓✓ تمت القراءة</div>`}chat.appendChild(div);chat.scrollTop=chat.scrollHeight;}
+
+/* قائمة الدبوس */
+document.getElementById("attachBtn").onclick=()=>{let menu=document.getElementById("attachMenu");menu.style.display=menu.style.display==="flex"?"none":"flex";}
+function openCamera(){document.getElementById("cameraInput").click();}
+function openImage(){document.getElementById("imageInput").click();}
+function openFile(){document.getElementById("fileInput").click();}
+
+/* رفع الصور */
+document.getElementById("imageInput").onchange=document.getElementById("cameraInput").onchange=function(){let file=this.files[0];let reader=new FileReader();reader.onload=()=>addMessage(reader.result,"img");reader.readAsDataURL(file);}
+
+/* رفع الملفات صوت / PDF / Word */
+document.getElementById("fileInput").onchange=function(){let file=this.files[0];let reader=new FileReader();reader.onload=()=>addMessage(reader.result,"audio");reader.readAsDataURL(file);}
+
+/* تسجيل الصوت */
+let recorder;
+let chunks=[];
+let seconds=0;
+let timerInterval=null;
+
+function updateTimer(){seconds++;let m=String(Math.floor(seconds/60)).padStart(2,"0");let s=String(seconds%60).padStart(2,"0");timerDisplay.textContent=`${m}:${s}`}
+
+async function startRecord(){
+  if(timerInterval) return; // منع تكرار التايمر
+  seconds=0;
+  timerDisplay.textContent="00:00";
+  let stream=await navigator.mediaDevices.getUserMedia({audio:true});
+  recorder=new MediaRecorder(stream);
+  recorder.ondataavailable=e=>chunks.push(e.data);
+  recorder.onstop=()=>{
+    let blob=new Blob(chunks,{type:"audio/mp3"});
+    chunks=[];
+    let url=URL.createObjectURL(blob);
+    addMessage(url,"audio");
+  }
+  recorder.start();
+  recordingBox.style.display="block";
+  timerInterval=setInterval(updateTimer,1000);
+}
+
+function stopRecord(){
+  if(recorder) recorder.stop();
+  recordingBox.style.display="none";
+  clearInterval(timerInterval);
+  timerInterval=null;
+}
+
+/* المايك يعمل باللمس والضغط */
+micBtn.onmousedown=startRecord;
+micBtn.onmouseup=stopRecord;
+micBtn.ontouchstart=startRecord;
+micBtn.ontouchend=stopRecord;
+</script>
+</body>
+</html>
