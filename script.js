@@ -1,4 +1,5 @@
 document.addEventListener("DOMContentLoaded", () => {
+
 const input = document.getElementById("msgInput");
 const micBtn = document.getElementById("micBtn");
 const sendBtn = document.getElementById("sendBtn");
@@ -111,7 +112,7 @@ async function startRecord() {
       const url = URL.createObjectURL(blob);
       addMessage(url, "audio");
 
-      // إغلاق الميكروفون بالكامل بعد التسجيل
+      // إغلاق الميكروفون بالكامل
       if(stream){
         stream.getTracks().forEach(track => track.stop());
         stream = null;
@@ -140,4 +141,5 @@ micBtn.addEventListener("mousedown", startRecord);
 micBtn.addEventListener("mouseup", stopRecord);
 micBtn.addEventListener("touchstart", startRecord);
 micBtn.addEventListener("touchend", stopRecord);
+
 });
