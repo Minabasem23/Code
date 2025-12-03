@@ -1,288 +1,91 @@
 <!DOCTYPE html>
 <html lang="ar">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Chat.BE</title>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>دردشة خاصة (Firebase)</title>
+
+<!-- Firebase compat libraries (سنستخدم النسخة compat لتبسيط) -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;700&display=swap">
 <style>
-body{
-  margin:0;
-  background:#000;
-  color:#fff;
-  font-family:'Tajawal',sans-serif;
-  display:flex;
-  justify-content:center;
-}
-.chat{
-  width:95%;
-  max-width:450px;
-  height:97vh;
-  background:#000;
-  border-left:1px solid #fff;
-  border-right:1px solid #fff;
-  display:flex;
-  flex-direction:column;
-  position:relative;
-}
-header{
-  text-align:center;
-  padding:12px;
-  border-bottom:1px solid #fff;
-}
-#chatBox{
-  flex:1;
-  overflow-y:auto;
-  padding:10px;
-  display:flex;
-  flex-direction:column;
-  gap:12px;
-}
-.message{
-  align-self:flex-end;
-  border:1px solid #fff;
-  border-radius:10px;
-  padding:10px;
-  max-width:75%;
-  position:relative;
-  display:flex;
-  flex-direction:column;
-  gap:6px;
-}
-.msg-text{
-  white-space:pre-wrap;
-  word-break:break-word;
-}
-.status{
-  font-size:11px;
-  opacity:.6;
-  text-align:right;
-}
-#inputArea{
-  display:flex;
-  padding:10px;
-  gap:8px;
-}
-#msgInput{
-  flex:1;
-  padding:10px;
-  border-radius:10px;
-  border:1px solid #fff;
-  background:#000;
-  color:#fff;
-}
-.btn{
-  width:55px;
-  height:45px;
-  border-radius:50%;
-  border:1px solid #fff;
-  background:#000;
-  color:#fff;
-  font-size:16px;
-}
-.msg-toolbar{
-  position:absolute;
-  background:#fff;
-  color:#000;
-  padding:5px;
-  border-radius:8px;
-  display:flex;
-  gap:6px;
-  z-index:1000;
-}
-.msg-toolbar button{
-  background:#fff;
-  border:1px solid #000;
-  border-radius:4px;
-  padding:4px 6px;
-}
-audio{
-  width:150px;
-}
-#recordingBox{
-  display:none;
-  background:#fff;
-  color:#000;
-  padding:12px;
-  text-align:center;
-  font-weight:bold;
-  position:absolute;
-  bottom:60px;
-  left:0;
-  width:100%;
-  border-radius:8px;
-}
-.attach-bar{
-  position:absolute;
-  bottom:-70px;
-  left:0;
-  width:100%;
-  background:#000;
-  border-top-left-radius:12px;
-  border-top-right-radius:12px;
-  padding:10px;
-  display:flex;
-  justify-content:space-around;
-  transition:bottom 0.3s;
-}
-.attach-bar.show{bottom:60px;}
-.attach-bar button{
-  background:#000;
-  border:1px solid #fff;
-  padding:12px;
-  border-radius:10px;
-  color:#fff;
-  font-size:14px;
-}
+  :root{ --bg:#000; --fg:#fff; --muted:rgba(255,255,255,0.65); --border:rgba(255,255,255,0.12) }
+  *{box-sizing:border-box}
+  body{margin:0;min-height:100vh;background:var(--bg);color:var(--fg);font-family:"Tajawal",sans-serif;display:flex;justify-content:center;align-items:center;padding:12px;}
+  .app{width:100%;max-width:480px;background:#070707;border-radius:12px;border:1px solid var(--border);overflow:hidden;display:flex;flex-direction:column;height:92vh;}
+  header{padding:12px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;}
+  header h1{margin:0;font-size:16px}
+  main{flex:1;display:flex;flex-direction:column;}
+  .messages{flex:1;padding:12px;overflow:auto;display:flex;flex-direction:column;gap:10px;background:linear-gradient(180deg, rgba(255,255,255,0.01), transparent);}
+  .msg{max-width:78%;padding:10px;border-radius:10px;border:1px solid var(--border);align-self:flex-end;background:transparent;}
+  .msg.other{align-self:flex-start;}
+  .meta{font-size:11px;color:var(--muted);margin-top:6px;text-align:right}
+  .composer{display:flex;gap:8px;padding:10px;border-top:1px solid var(--border);align-items:center}
+  .txt{flex:1;padding:10px;border-radius:10px;border:1px solid var(--border);background:transparent;color:var(--fg)}
+  .btn{padding:10px 12px;border-radius:10px;border:1px solid var(--border);background:transparent;color:var(--fg);cursor:pointer}
+  .small{padding:8px;border-radius:8px}
+  #loginPanel{padding:16px;display:flex;flex-direction:column;gap:8px}
+  input[type=file]{display:none}
+  .row{display:flex;gap:8px}
+  .center{display:flex;align-items:center;gap:8px}
+  .note{font-size:12px;color:var(--muted)}
+  .toolbar{position:fixed;right:16px;bottom:16px;display:flex;gap:8px}
+  audio{width:180px}
+  img.preview{max-width:180px;border-radius:8px}
+  .hidden{display:none}
 </style>
 </head>
 <body>
 
-<div class="chat">
+<div class="app" id="app">
 
-<header>Chat مع دبوس</header>
+  <!-- Header -->
+  <header>
+    <h1>دردشة خاصة (ID ↔ ID)</h1>
+    <div id="userInfo" class="note">غير مسجل</div>
+  </header>
 
-<div id="recordingBox">جاري التسجيل… <span id="timer">00:00</span></div>
+  <!-- Login / Chat areas -->
+  <main>
+    <!-- Login panel -->
+    <div id="loginPanel">
+      <div><strong>تسجيل الدخول</strong></div>
+      <input id="loginId" placeholder="ID (مثال: 1234567)" class="txt">
+      <input id="loginPass" placeholder="Password" type="password" class="txt">
+      <div class="row">
+        <button id="loginBtn" class="btn">دخول / تسجيل</button>
+        <button id="signOutBtn" class="btn hidden">خروج</button>
+      </div>
+      <div class="note">سيتم تحويل ID إلى بريد إلكتروني داخل التطبيق (على سبيل المثال id@chatapp.local)</div>
+    </div>
 
-<div id="chatBox"></div>
+    <!-- Chat area -->
+    <section id="chatPanel" class="hidden" style="display:flex;flex-direction:column;height:100%">
+      <div style="padding:10px;border-bottom:1px solid var(--border);display:flex;gap:8px;align-items:center">
+        <input id="chatWith" placeholder="ادخل ID الذي تريد الدردشة معه" class="txt" style="flex:1">
+        <button id="startChatBtn" class="btn">فتح محادثة</button>
+      </div>
 
-<div id="inputArea">
-  <button class="btn" id="attachBtn">📌</button>
-  <input type="text" id="msgInput" placeholder="اكتب...">
-  <button class="btn" id="micBtn">Mic</button>
+      <div id="messages" class="messages"></div>
+
+      <div class="composer">
+        <input id="messageInput" class="txt" placeholder="اكتب رسالة...">
+        <input type="file" id="imageInput" accept="image/*">
+        <input type="file" id="fileInput">
+        <button id="imgBtn" class="btn small">صورة</button>
+        <button id="fileBtn" class="btn small">ملف</button>
+        <button id="recordBtn" class="btn small">🎤</button>
+        <button id="sendBtn" class="btn">إرسال</button>
+      </div>
+    </section>
+  </main>
 </div>
 
-<div class="attach-bar" id="attachBar">
-  <button id="fileBtn">File</button>
-  <button id="cameraBtn">Camera</button>
-  <button id="imageBtn">Image</button>
-  <button id="pollBtn">Poll</button>
-  <button id="locationBtn">Location</button>
-</div>
-
-<input type="file" id="cameraInput" accept="image/*" capture="camera" style="display:none;">
-<input type="file" id="imageInput" accept="image/*" style="display:none;">
-<input type="file" id="fileInput" style="display:none;">
-
-</div>
-
-<script>
-const chatBox = document.getElementById("chatBox");
-const msgInput = document.getElementById("msgInput");
-const micBtn = document.getElementById("micBtn");
-const attachBtn = document.getElementById("attachBtn");
-const attachBar = document.getElementById("attachBar");
-const cameraInput = document.getElementById("cameraInput");
-const imageInput = document.getElementById("imageInput");
-const fileInput = document.getElementById("fileInput");
-const recordingBox = document.getElementById("recordingBox");
-const timerDisplay = document.getElementById("timer");
-
-let recorder=null, chunks=[], seconds=0, timerInterval=null, isRecording=false;
-
-/* Toggle Attach Bar */
-attachBtn.addEventListener("click", ()=>{ attachBar.classList.toggle("show"); });
-
-cameraInput.addEventListener("change", function(){ 
-  const file=this.files[0]; if(!file) return; 
-  const reader=new FileReader(); 
-  reader.onload=()=>addMessage(reader.result,"img"); 
-  reader.readAsDataURL(file); 
-});
-imageInput.addEventListener("change", function(){ 
-  const file=this.files[0]; if(!file) return; 
-  const reader=new FileReader(); 
-  reader.onload=()=>addMessage(reader.result,"img"); 
-  reader.readAsDataURL(file); 
-});
-fileInput.addEventListener("change", function(){ 
-  const file=this.files[0]; if(!file) return; 
-  const reader=new FileReader(); 
-  reader.onload=()=>addMessage(reader.result,"text"); 
-  reader.readAsDataURL(file); 
-});
-
-document.getElementById("cameraBtn").addEventListener("click",()=>cameraInput.click());
-document.getElementById("imageBtn").addEventListener("click",()=>imageInput.click());
-document.getElementById("fileBtn").addEventListener("click",()=>fileInput.click());
-
-document.getElementById("pollBtn").addEventListener("click", ()=>{
-  const question = prompt("اكتب سؤال الاستطلاع:");
-  if(!question) return;
-  const option1 = prompt("الخيار الأول:");
-  const option2 = prompt("الخيار الثاني:");
-  if(option1 && option2){ addMessage(`Poll: ${question}\n1: ${option1}\n2: ${option2}`,"text"); }
-});
-
-document.getElementById("locationBtn").addEventListener("click", ()=>{
-  if(navigator.geolocation){
-    navigator.geolocation.getCurrentPosition(pos=>{
-      const lat = pos.coords.latitude; const lon = pos.coords.longitude;
-      addMessage(`Location: https://www.google.com/maps?q=${lat},${lon}`,"text");
-    }, ()=>alert("تعذر الحصول على الموقع."));
-  } else alert("الموقع غير مدعوم.");
-});
-
-/* إضافة رسالة */
-function addMessage(content,type="text"){
-  const msg = document.createElement("div");
-  msg.className="message";
-
-  let inner = document.createElement("span");
-  inner.className="msg-text";
-
-  if(type==="text"){ inner.textContent = content; msg.appendChild(inner); }
-  else if(type==="img"){ inner.innerHTML=`<img src="${content}" style="max-width:100%; border-radius:8px;">`; msg.appendChild(inner); }
-  else if(type==="audio"){ inner.innerHTML=`<audio controls src="${content}"></audio>`; msg.appendChild(inner); }
-
-  let sts = document.createElement("div");
-  sts.className="status";
-  sts.textContent="Read";
-  msg.appendChild(sts);
-
-  chatBox.appendChild(msg);
-  chatBox.scrollTop = chatBox.scrollHeight;
-
-  /* Toolbar */
-  msg.addEventListener("click", ()=>{
-    const old = document.querySelector(".msg-toolbar"); if(old) old.remove();
-    const toolbar = document.createElement("div"); toolbar.className="msg-toolbar";
-    toolbar.style.top = (msg.getBoundingClientRect().top + window.scrollY - 40) + "px";
-    toolbar.style.left = msg.getBoundingClientRect().left + "px";
-    const copyBtn=document.createElement("button"); copyBtn.textContent="Copy";
-    const editBtn=document.createElement("button"); editBtn.textContent="Edit";
-    const delBtn=document.createElement("button"); delBtn.textContent="Delete";
-    toolbar.appendChild(copyBtn); toolbar.appendChild(editBtn); toolbar.appendChild(delBtn);
-    document.body.appendChild(toolbar);
-
-    copyBtn.onclick=()=>{ navigator.clipboard.writeText(msg.querySelector(".msg-text").innerText); toolbar.remove(); };
-    editBtn.onclick=()=>{ let t=msg.querySelector(".msg-text"); let nt=prompt("Edit:",t.innerText); if(nt!==null) t.innerText=nt; toolbar.remove(); };
-    delBtn.onclick=()=>{ msg.remove(); toolbar.remove(); };
-
-    document.addEventListener("click", function hide(ev){ if(!msg.contains(ev.target)&&!toolbar.contains(ev.target)){ toolbar.remove(); document.removeEventListener("click",hide);} });
-  });
-}
-
-/* تسجيل صوت */
-function updateTimer(){ seconds++; const m=String(Math.floor(seconds/60)).padStart(2,"0"); const s=String(seconds%60).padStart(2,"0"); timerDisplay.textContent=`${m}:${s}`; }
-async function startRecording(){ if(isRecording) return; isRecording=true;
-  const stream=await navigator.mediaDevices.getUserMedia({audio:true});
-  recorder=new MediaRecorder(stream); chunks=[];
-  recorder.ondataavailable=e=>chunks.push(e.data);
-  recorder.onstop=()=>{
-    if(chunks.length>0){ const blob=new Blob(chunks,{type:"audio/mp3"}); const url=URL.createObjectURL(blob); addMessage(url,"audio"); }
-    stream.getTracks().forEach(t=>t.stop()); recorder=null; chunks=[]; recordingBox.style.display="none"; clearInterval(timerInterval); timerInterval=null; seconds=0; timerDisplay.textContent="00:00"; isRecording=false;
-  };
-  recorder.start(); seconds=0; timerDisplay.textContent="00:00"; recordingBox.style.display="block"; timerInterval=setInterval(updateTimer,1000);
-}
-function stopRecording(){ if(!isRecording) return; if(recorder && recorder.state==="recording") recorder.stop(); recordingBox.style.display="none"; clearInterval(timerInterval); timerInterval=null; seconds=0; timerDisplay.textContent="00:00"; }
-
-/* زر Mic ↔ Send */
-msgInput.addEventListener("input", ()=>{ micBtn.textContent = msgInput.value.trim().length ? "Send":"Mic"; });
-micBtn.addEventListener("click", ()=>{
-  if(msgInput.value.trim().length){ addMessage(msgInput.value,"text"); msgInput.value=""; micBtn.textContent="Mic"; }
-  else{ if(!isRecording) startRecording(); else stopRecording(); }
-});
-</script>
-
+<!-- main.js -->
+<script src="main.js"></script>
 </body>
 </html>
