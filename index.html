@@ -3,39 +3,243 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>دردشة متكاملة مع Supabase</title>
-<link rel="stylesheet" href="style.css">
+<title>دردشة أبيض وأسود مع Supabase</title>
+<style>
+body{
+  margin:0;
+  background:#000;
+  color:#fff;
+  font-family:'Tajawal',sans-serif;
+  display:flex;
+  justify-content:center;
+}
+.chat{
+  width:95%;
+  max-width:450px;
+  height:97vh;
+  background:#000;
+  border-left:1px solid #fff;
+  border-right:1px solid #fff;
+  display:flex;
+  flex-direction:column;
+}
+header{
+  text-align:center;
+  padding:12px;
+  border-bottom:1px solid #fff;
+}
+#chatBox{
+  flex:1;
+  overflow-y:auto;
+  padding:10px;
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+}
+.message{
+  align-self:flex-end;
+  border:1px solid #fff;
+  border-radius:10px;
+  padding:10px;
+  max-width:75%;
+  position:relative;
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+}
+.msg-text{
+  white-space:pre-wrap;
+  word-break:break-word;
+}
+.status{
+  font-size:11px;
+  opacity:.6;
+  text-align:right;
+}
+#inputArea{
+  display:flex;
+  padding:10px;
+  gap:8px;
+}
+#msgInput{
+  flex:1;
+  padding:10px;
+  border-radius:10px;
+  border:1px solid #fff;
+  background:#000;
+  color:#fff;
+}
+.btn{
+  width:55px;
+  height:45px;
+  border-radius:50%;
+  border:1px solid #fff;
+  background:#000;
+  color:#fff;
+}
+#recordingBox{
+  display:none;
+  background:#fff;
+  color:#000;
+  padding:12px;
+  text-align:center;
+  font-weight:bold;
+}
+audio{
+  width:150px;
+}
+</style>
 </head>
 <body>
-<div id="loginPage">
-  <h2>تسجيل الدخول / إنشاء حساب</h2>
-  <input type="email" id="email" placeholder="البريد الإلكتروني">
-  <input type="password" id="password" placeholder="كلمة المرور">
-  <button id="loginBtn">تسجيل الدخول</button>
-  <button id="signupBtn">إنشاء حساب جديد</button>
+
+<div class="chat">
+<header>Chat</header>
+
+<div id="recordingBox">جاري التسجيل… <span id="timer">00:00</span></div>
+
+<div id="chatBox"></div>
+
+<div id="inputArea">
+  <input type="text" id="msgInput" placeholder="اكتب...">
+  <button class="btn" id="micBtn">Mic</button>
+</div>
 </div>
 
-<div id="chatContainer">
-  <div id="recordingBox">جاري التسجيل… <span id="timer">00:00</span></div>
-  <div class="chat-messages" id="chatMessages"></div>
-  <div class="chat-input">
-    <button class="btn" id="attachBtn">📎</button>
-    <input type="text" id="msgInput" placeholder="اكتب رسالة...">
-    <button class="btn" id="micBtn">🎤</button>
-  </div>
-  <div class="attach-bar" id="attachBar">
-    <button id="fileBtn">File</button>
-    <button id="cameraBtn">Camera</button>
-    <button id="imageBtn">Image</button>
-    <button id="pollBtn">Poll</button>
-    <button id="locationBtn">Location</button>
-  </div>
+<!-- Supabase JS CDN -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js/dist/supabase.min.js"></script>
 
-  <input type="file" id="cameraInput" accept="image/*" capture="camera" style="display:none;">
-  <input type="file" id="imageInput" accept="image/*" style="display:none;">
-  <input type="file" id="fileInput" style="display:none;">
-</div>
+<script>
+// --- إعداد Supabase ---
+const SUPABASE_URL = 'https://txmqopzwwzrplanrqvek.supabase.co'
+const SUPABASE_KEY = 'YOUR-ANON-KEY-HERE' // ضع المفتاح العام هنا
+const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY)
 
-<script type="module" src="chat.js"></script>
+let currentUserId = null; // إذا أردت تسجيل دخول لاحقاً يمكن إضافته
+
+// --- عناصر DOM ---
+const chatBox = document.getElementById("chatBox");
+const msgInput = document.getElementById("msgInput");
+const micBtn = document.getElementById("micBtn");
+const recordingBox = document.getElementById("recordingBox");
+const timerDisplay = document.getElementById("timer");
+
+// --- تسجيل الصوت ---
+let recorder=null, stream=null, chunks=[], seconds=0, timerInterval=null, isRecording=false;
+
+// --- Timer ---
+function updateTimer(){
+  seconds++;
+  const m = String(Math.floor(seconds/60)).padStart(2,"0");
+  const s = String(seconds%60).padStart(2,"0");
+  timerDisplay.textContent = `${m}:${s}`;
+}
+
+// --- بدء التسجيل ---
+async function startRecording(){
+  if(isRecording) return;
+  isRecording = true;
+
+  try{
+    stream = await navigator.mediaDevices.getUserMedia({audio:true});
+    recorder = new MediaRecorder(stream);
+    chunks = [];
+
+    recorder.ondataavailable = e => chunks.push(e.data);
+    recorder.onstop = async ()=>{
+      const blob = new Blob(chunks,{type:"audio/mp3"});
+      const fileName = `audio_${Date.now()}.mp3`;
+      
+      // رفع الصوت إلى Supabase Storage
+      const { data, error } = await supabase.storage.from('audios').upload(fileName, blob);
+      if(error){ console.error(error); alert("خطأ في رفع الصوت"); }
+      else{
+        const { publicURL } = supabase.storage.from('audios').getPublicUrl(fileName);
+        addMessage(publicURL,"audio");
+        
+        // تخزين الرسالة في جدول messages
+        await supabase.from('messages').insert([{user_id:currentUserId, content:publicURL, type:'audio'}]);
+      }
+
+      // إيقاف المايكروفون
+      stream.getTracks().forEach(t=>t.stop());
+      recorder=null; chunks=[]; recordingBox.style.display="none"; clearInterval(timerInterval); seconds=0; timerDisplay.textContent="00:00"; isRecording=false;
+    };
+
+    recorder.start();
+    seconds=0; timerDisplay.textContent="00:00"; recordingBox.style.display="block";
+    timerInterval = setInterval(updateTimer,1000);
+  }catch(e){ alert("تعذر الوصول للميكروفون"); console.error(e); isRecording=false; }
+}
+
+// --- إيقاف التسجيل ---
+function stopRecording(){
+  if(!isRecording) return;
+  if(recorder && recorder.state==="recording") recorder.stop();
+}
+
+// --- إضافة رسالة ---
+function addMessage(content,type="text"){
+  const msg = document.createElement("div");
+  msg.className="message";
+
+  let inner = document.createElement("span");
+  inner.className="msg-text";
+
+  if(type==="text") inner.textContent = content;
+  else if(type==="audio") inner.innerHTML = `<audio controls src="${content}"></audio>`;
+
+  msg.appendChild(inner);
+
+  let sts = document.createElement("div");
+  sts.className="status";
+  sts.textContent="Read";
+  msg.appendChild(sts);
+
+  chatBox.appendChild(msg);
+  chatBox.scrollTop = chatBox.scrollHeight;
+}
+
+// --- زر mic يتحول للإرسال عند الكتابة ---
+msgInput.addEventListener("input", ()=>{
+  micBtn.textContent = msgInput.value.trim().length ? "Send" : "Mic";
+});
+
+// --- إرسال رسالة أو بدء/إيقاف تسجيل ---
+micBtn.addEventListener("click", async ()=>{
+  if(msgInput.value.trim().length){
+    // إرسال نص
+    const text = msgInput.value;
+    addMessage(text,"text");
+    msgInput.value="";
+    micBtn.textContent="Mic";
+
+    // حفظ النص في Supabase
+    await supabase.from('messages').insert([{user_id:currentUserId, content:text, type:'text'}]);
+  }else{
+    if(!isRecording) startRecording();
+    else stopRecording();
+  }
+});
+
+// --- تحميل الرسائل السابقة ---
+async function loadMessages(){
+  const { data, error } = await supabase.from('messages').select('*').order('created_at',{ascending:true});
+  if(error){ console.error(error); return; }
+  data.forEach(msg=>{
+    addMessage(msg.content, msg.type);
+  });
+}
+
+// --- Real-time الاستماع لرسائل جديدة ---
+supabase.channel('public:messages')
+  .on('postgres_changes',{event:'INSERT',schema:'public',table:'messages'}, payload=>{
+    if(payload.new.user_id !== currentUserId) addMessage(payload.new.content, payload.new.type);
+  })
+  .subscribe();
+
+// تحميل الرسائل عند بداية التحميل
+loadMessages();
+
+</script>
 </body>
 </html>
