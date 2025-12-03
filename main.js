@@ -1,8 +1,9 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { 
-  getFirestore, collection, addDoc, doc, setDoc, updateDoc, query, orderBy, onSnapshot, serverTimestamp, deleteDoc
+  getFirestore, collection, addDoc, doc, setDoc, updateDoc, query, orderBy, onSnapshot, serverTimestamp, deleteDoc 
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
+// -------------------- Firebase --------------------
 const firebaseConfig = {
   apiKey: "AIzaSyDE5gTP0iw08VNtePyumzBfAFXY4e0Mh2w",
   authDomain: "chat-7f10e.firebaseapp.com",
@@ -12,104 +13,72 @@ const firebaseConfig = {
   appId: "1:1038789383884:web:f7fded882a72f9e878d469",
   measurementId: "G-BY21EVL7B2"
 };
-
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-// ------------------------
-// Elements
-// ------------------------
-const loginPage = document.getElementById("loginPage");
-const loginBtn = document.getElementById("loginBtn");
-const loginID = document.getElementById("loginID");
-const loginPassword = document.getElementById("loginPassword");
-
-const chatContainer = document.getElementById("chatContainer");
-const msgInput = document.getElementById("msgInput");
-const sendBtn = document.getElementById("sendBtn");
+// -------------------- Elements --------------------
 const chatBox = document.getElementById("chatBox");
-const usersList = document.getElementById("usersList");
+const msgInput = document.getElementById("msgInput");
 const micBtn = document.getElementById("micBtn");
 const imageBtn = document.getElementById("imageBtn");
 const imageInput = document.getElementById("imageInput");
+const usersList = document.getElementById("usersList");
 const recordingBox = document.getElementById("recordingBox");
 const timerDisplay = document.getElementById("timer");
 
-let userID, password, userRef;
-let recorder=null, stream=null, chunks=[], seconds=0, timerInterval=null, isRecording=false;
+// -------------------- حساب عشوائي --------------------
+function randomID(len=8){
+  let s='', chars='0123456789';
+  for(let i=0;i<len;i++) s+=chars.charAt(Math.floor(Math.random()*chars.length));
+  return s;
+}
 
-// ------------------------
-// Login
-// ------------------------
-loginBtn.addEventListener("click", async ()=>{
-  userID = loginID.value.trim();
-  password = loginPassword.value.trim();
+let userID = localStorage.getItem("chatUserID");
+let password = localStorage.getItem("chatPassword");
 
-  if(!userID || !password){
-    alert("أدخل ID و Password");
-    return;
-  }
+if(!userID){
+  userID = randomID(8);
+  password = randomID(6);
+  localStorage.setItem("chatUserID", userID);
+  localStorage.setItem("chatPassword", password);
+}
 
-  loginPage.style.display = "none";
-  chatContainer.style.display = "flex";
+const userRef = doc(db,"users",userID);
 
-  userRef = doc(db,"users",userID);
-  await setDoc(userRef,{
-    userID,
-    password,
-    online:true,
-    lastActive: serverTimestamp()
-  }, {merge:true});
-
-  // تحديث النشاط كل 25 ثانية
-  setInterval(()=>updateOnline(),25000);
-
-  window.addEventListener("beforeunload", setOffline);
-
-  loadUsers();
-  loadMessages();
-});
-
-// ------------------------
-// Online
-// ------------------------
-async function updateOnline(){
-  await setDoc(userRef,{
-    online:true,
-    lastActive: serverTimestamp()
-  }, {merge:true});
+// -------------------- Online + Last Seen --------------------
+async function setOnline(){
+  await setDoc(userRef,{userID,password,online:true,lastActive:serverTimestamp()},{merge:true});
 }
 async function setOffline(){
   await updateDoc(userRef,{online:false,lastActive:serverTimestamp()});
 }
+setOnline();
+setInterval(()=>setOnline(),25000);
+window.addEventListener("beforeunload",setOffline);
 
-// ------------------------
-// Load Users
-// ------------------------
+// -------------------- Load Users --------------------
 function loadUsers(){
-  onSnapshot(collection(db,"users"), snapshot=>{
+  onSnapshot(collection(db,"users"),snapshot=>{
     usersList.innerHTML="<h3>Users</h3>";
     snapshot.forEach(doc=>{
       let u=doc.data();
       let row=document.createElement("div");
       row.className="user";
-      row.innerHTML=`<span>${u.userID}</span>
-        <span class="${u.online?'onlineDot':'offlineDot'}"></span>`;
+      row.innerHTML=`<span>${u.userID}</span><span class="${u.online?'onlineDot':'offlineDot'}"></span>`;
       usersList.appendChild(row);
     });
   });
 }
+loadUsers();
 
-// ------------------------
-// Send Message
-// ------------------------
+// -------------------- Send Message --------------------
 async function sendMessage(type,text,targetID=null){
   await addDoc(collection(db,"messages"),{
     sender:userID,
     password:password,
     type,
     text,
-    targetID, // null = عام، ID = private
+    targetID,
     time: Date.now()
   });
 }
@@ -122,25 +91,21 @@ msgInput.addEventListener("keydown",e=>{
   }
 });
 
-// ------------------------
-// Load Messages
-// ------------------------
+// -------------------- Load Messages --------------------
 function loadMessages(){
   const q=query(collection(db,"messages"),orderBy("time","asc"));
   onSnapshot(q,snapshot=>{
     chatBox.innerHTML="";
     snapshot.forEach(doc=>{
       let d=doc.data();
-      // فقط للرسائل العامة أو الخاصة بين المستخدمين
       if(!d.targetID || d.targetID===userID || d.sender===userID){
         let div=document.createElement("div");
         div.className="message";
-
         if(d.type==="text") div.textContent=d.text;
         if(d.type==="img") div.innerHTML=`<img src="${d.text}">`;
         if(d.type==="audio") div.innerHTML=`<audio controls src="${d.text}"></audio>`;
 
-        // Toolbar delete
+        // Toolbar حذف
         div.addEventListener("click",()=>{
           const toolbar=document.createElement("div");
           toolbar.className="msg-toolbar";
@@ -155,6 +120,7 @@ function loadMessages(){
             await deleteDoc(doc(db,"messages",doc.id));
             toolbar.remove();
           };
+
           document.addEventListener("click",function hide(ev){
             if(!div.contains(ev.target)&&!toolbar.contains(ev.target)){
               toolbar.remove();
@@ -164,30 +130,32 @@ function loadMessages(){
         });
 
         chatBox.appendChild(div);
+
+        // إشعار
+        if(d.sender!==userID) new Audio('https://freesound.org/data/previews/522/522461_10688507-lq.mp3').play();
       }
     });
     chatBox.scrollTop=chatBox.scrollHeight;
   });
 }
+loadMessages();
 
-// ------------------------
-// Image
-// ------------------------
+// -------------------- الصور --------------------
 imageBtn.addEventListener("click",()=>imageInput.click());
-imageInput.addEventListener("change",async function(){
+imageInput.addEventListener("change",function(){
   const file=this.files[0]; if(!file) return;
   const reader=new FileReader();
   reader.onload=()=>sendMessage("img",reader.result);
   reader.readAsDataURL(file);
 });
 
-// ------------------------
-// Voice
-// ------------------------
+// -------------------- تسجيل الصوت --------------------
+let recorder=null, stream=null, chunks=[], seconds=0, timerInterval=null, isRecording=false;
+
 function updateTimer(){seconds++;timerDisplay.textContent=String(Math.floor(seconds/60)).padStart(2,"0")+":"+String(seconds%60).padStart(2,"0");}
-async function startRecording(){ if(isRecording) return; isRecording=true;
+async function startRecording(){if(isRecording) return; isRecording=true;
   try{
-    if(stream){stream.getTracks().forEach(t=>t.stop());stream=null;}
+    if(stream){stream.getTracks().forEach(t=>t.stop()); stream=null;}
     stream=await navigator.mediaDevices.getUserMedia({audio:true});
     recorder=new MediaRecorder(stream); chunks=[];
     recorder.ondataavailable=e=>chunks.push(e.data);
@@ -201,4 +169,5 @@ async function startRecording(){ if(isRecording) return; isRecording=true;
   }catch(e){alert("تعذر الوصول للميكروفون"); console.error(e); isRecording=false;}
 }
 function stopRecording(){if(!isRecording) return; if(recorder&&recorder.state==="recording") recorder.stop(); recordingBox.style.display="none"; clearInterval(timerInterval); timerInterval=null; seconds=0; timerDisplay.textContent="00:00"; isRecording=false;}
+
 micBtn.addEventListener("click",()=>{if(!isRecording) startRecording(); else stopRecording();});
