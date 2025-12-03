@@ -3,80 +3,39 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>WhatsApp Clone Firestore Chat</title>
-<link rel="stylesheet" href="">
-<style>
-body{
-  margin:0;background:#000;color:#fff;
-  font-family:'Tajawal',sans-serif;
-}
-/* ---- Login Page ---- */
-#loginPage{
-  display:flex;justify-content:center;align-items:center;height:100vh;flex-direction:column;
-}
-#loginPage input{margin:6px;padding:10px;width:200px;border-radius:6px;border:1px solid #fff;background:#000;color:#fff;}
-#loginPage button{margin-top:10px;padding:10px 20px;border-radius:6px;border:1px solid #fff;background:#000;color:#fff;cursor:pointer;}
-
-/* ---- Chat Container ---- */
-#chatContainer{display:none;width:100%;max-width:900px;height:100vh;display:flex;}
-#usersList{
-  width:30%;border-right:1px solid #fff;padding:10px;overflow-y:auto;
-}
-.user{padding:10px;border-bottom:1px solid #444;display:flex;justify-content:space-between;cursor:pointer;}
-.onlineDot{width:10px;height:10px;border-radius:50%;background:#0f0;}
-.offlineDot{width:10px;height:10px;border-radius:50%;background:#777;}
-.chat{flex:1;display:flex;flex-direction:column;}
-header{padding:12px;text-align:center;border-bottom:1px solid #fff;}
-#chatBox{flex:1;padding:10px;overflow-y:auto;display:flex;flex-direction:column;gap:12px;}
-.message{align-self:flex-end;border:1px solid #fff;border-radius:10px;padding:10px;max-width:75%;position:relative;}
-.message img{max-width:200px;border-radius:8px;}
-#inputArea{display:flex;padding:10px;gap:8px;align-items:center;}
-#msgInput{flex:1;padding:10px;border-radius:10px;border:1px solid #fff;background:#000;color:#fff;}
-.btn{width:45px;height:45px;border-radius:50%;border:1px solid #fff;background:#000;color:#fff;cursor:pointer;font-size:18px;}
-#recordingBox{display:none;background:#fff;color:#000;padding:10px;text-align:center;font-weight:bold;border-radius:8px;margin-bottom:8px;}
-.msg-toolbar{background:#fff;color:#000;border-radius:8px;padding:4px;display:flex;gap:6px;position:absolute;z-index:1000;}
-.msg-toolbar button{background:#fff;border:1px solid #000;padding:4px 6px;border-radius:4px;cursor:pointer;}
-</style>
+<title>دردشة متكاملة مع Supabase</title>
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
-
-<!-- Login Page -->
 <div id="loginPage">
-  <h2>تسجيل الدخول</h2>
-  <input type="text" id="loginID" placeholder="ID">
-  <input type="password" id="loginPassword" placeholder="Password">
-  <button id="loginBtn">دخول</button>
+  <h2>تسجيل الدخول / إنشاء حساب</h2>
+  <input type="email" id="email" placeholder="البريد الإلكتروني">
+  <input type="password" id="password" placeholder="كلمة المرور">
+  <button id="loginBtn">تسجيل الدخول</button>
+  <button id="signupBtn">إنشاء حساب جديد</button>
 </div>
 
-<!-- Chat Container -->
 <div id="chatContainer">
-
-  <!-- Users List -->
-  <div id="usersList">
-    <h3>Users</h3>
+  <div id="recordingBox">جاري التسجيل… <span id="timer">00:00</span></div>
+  <div class="chat-messages" id="chatMessages"></div>
+  <div class="chat-input">
+    <button class="btn" id="attachBtn">📎</button>
+    <input type="text" id="msgInput" placeholder="اكتب رسالة...">
+    <button class="btn" id="micBtn">🎤</button>
+  </div>
+  <div class="attach-bar" id="attachBar">
+    <button id="fileBtn">File</button>
+    <button id="cameraBtn">Camera</button>
+    <button id="imageBtn">Image</button>
+    <button id="pollBtn">Poll</button>
+    <button id="locationBtn">Location</button>
   </div>
 
-  <!-- Chat -->
-  <div class="chat">
-    <header>🔥 Firestore Chat</header>
-
-    <div id="recordingBox">جاري التسجيل… <span id="timer">00:00</span></div>
-
-    <div id="chatBox"></div>
-
-    <div id="inputArea">
-      <input type="text" id="msgInput" placeholder="اكتب رسالة...">
-      <button class="btn" id="micBtn">🎤</button>
-      <button class="btn" id="imageBtn">🖼️</button>
-    </div>
-
-    <!-- Hidden Inputs for image/audio -->
-    <input type="file" id="imageInput" accept="image/*" style="display:none;">
-  </div>
-
+  <input type="file" id="cameraInput" accept="image/*" capture="camera" style="display:none;">
+  <input type="file" id="imageInput" accept="image/*" style="display:none;">
+  <input type="file" id="fileInput" style="display:none;">
 </div>
 
-<script type="module" src="main.js"></script>
-
+<script type="module" src="chat.js"></script>
 </body>
 </html>
