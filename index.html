@@ -1,34 +1,33 @@
 <!DOCTYPE html>
 <html lang="ar">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Chat Supabase</title>
-<style>
-body{margin:0; background:#000; font-family:'Tajawal',sans-serif; color:#fff; display:flex; justify-content:center; align-items:center; height:100vh;}
-.chat-container{width:95%; max-width:450px; height:95vh; background:#000; display:flex; flex-direction:column; border:1px solid #fff; border-radius:12px;}
-header{padding:12px; text-align:center; border-bottom:1px solid #fff;}
-#chatBox{flex:1; padding:10px; overflow-y:auto; display:flex; flex-direction:column; gap:10px;}
-.message{border:1px solid #fff; border-radius:10px; padding:8px; max-width:75%; align-self:flex-end;}
-.msg-text{white-space:pre-wrap; word-break:break-word;}
-#inputArea{display:flex; gap:6px; padding:10px;}
-#msgInput{flex:1; padding:8px; border-radius:8px; border:1px solid #fff; background:#000; color:#fff;}
-.btn{width:50px; border-radius:50%; border:1px solid #fff; background:#000; color:#fff;}
-#recordingBox{display:none; background:#fff; color:#000; padding:8px; text-align:center;}
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>For King Gaming</title>
+  <style>
+    body {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background-color: #111;
+      color: white;
+    }
+    .emoji {
+      font-size: 150px;
+    }
+    .text {
+      margin-top: 20px;
+      font-size: 32px;
+      font-weight: bold;
+    }
+  </style>
 </head>
 <body>
-<div class="chat-container">
-<header>Chat</header>
-<div id="recordingBox">جاري التسجيل... <span id="timer">00:00</span></div>
-<div id="chatBox"></div>
-<div id="inputArea">
-<input type="text" id="msgInput" placeholder="اكتب رسالة...">
-<button class="btn" id="micBtn">Mic</button>
-</div>
-</div>
-
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js/dist/supabase.min.js"></script>
-<script src="script.js"></script>
+  <div class="emoji">🖕</div>
+  <div class="text">For King Gaming</div>
 </body>
 </html>
